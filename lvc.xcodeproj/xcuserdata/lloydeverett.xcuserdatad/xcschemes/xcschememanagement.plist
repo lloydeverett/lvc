@@ -4,15 +4,35 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>lexertest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>lvc.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>testingbuild.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>5727F1A51B07EBA500A6966F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>57334CE71B1078DF00085754</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>57334D041B12382B00085754</key>
 		<dict>
 			<key>primary</key>
 			<true/>

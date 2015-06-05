@@ -11,18 +11,23 @@
 #include "stringreader.h"
 #include "iissuereporter.h"
 #include "lexer.h"
+#include "lexerbuffer.h"
 
 class Parser {
 private:
-    Token currentToken;
-    void readNextToken();
+    std::queue<Token> tokenQueue;
     IIssueReporter &issueReporter;
     IReader &reader;
     Lexer lexer;
+    Token currentToken;
+    std::queue<Token> tokenPeekQueue;
+    void readToken();
+    Token peekAhead(unsigned int n);
     
 public:
     Parser(IReader &reader, IIssueReporter &issueReporter);
     Module parseModule();
     Function parseFunction();
     std::unique_ptr<IStmt> parseStatement();
+    std::unique_ptr<IExp> parseExpression();
 };

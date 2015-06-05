@@ -79,9 +79,12 @@ public:
     void setLength(charcount length) { this->length = length; }
     charcount getLength() { return this->length; }
     void setStr(const std::string &str) { this->str = str; }
-    std::string getStr() { return this->str; }
+    std::string getStr() { assert(isStrFilledForTokenKind(kind)); return this->str; }
     bool isTypenameKeyword() {
         return isTokenKindATypenameKeyword(this->kind);
+    }
+    bool isStrFilled() {
+        return isStrFilledForTokenKind(this->kind);
     }
     void dump() {
         std::cout << '(' << strFromTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();

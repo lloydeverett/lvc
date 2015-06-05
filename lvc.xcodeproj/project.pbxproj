@@ -105,6 +105,7 @@
 		57334D071B12382B00085754 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		578EFB741B20583700A3968C /* lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lexer.cpp; sourceTree = "<group>"; };
 		578EFB751B20583700A3968C /* lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexer.h; sourceTree = "<group>"; };
+		578EFB7A1B2239F200A3968C /* lexerbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerbuffer.h; sourceTree = "<group>"; };
 		57ADD1161B1B67A50031EB0F /* asttest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = asttest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57ADD1181B1B67A50031EB0F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		57ADD1291B1B68CF0031EB0F /* llvmplayground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = llvmplayground; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -280,9 +281,10 @@
 			children = (
 				57334CF71B10D23500085754 /* ireader.h */,
 				57334CFC1B10EBD700085754 /* stringreader.h */,
-				57DE87451B1F2A9300143D74 /* ilexer.h */,
 				578EFB741B20583700A3968C /* lexer.cpp */,
 				578EFB751B20583700A3968C /* lexer.h */,
+				57DE87451B1F2A9300143D74 /* ilexer.h */,
+				578EFB7A1B2239F200A3968C /* lexerbuffer.h */,
 			);
 			name = lexer;
 			sourceTree = "<group>";

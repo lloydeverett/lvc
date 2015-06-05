@@ -28,10 +28,6 @@ class FinishedLexingException : public std::exception {
 class ILexer {
 public:
     
-    // Should return true until lexToken is called for the first time,
-    // after which it should return false.
-    virtual bool isNewlyCreated() = 0;
-    
     // Returns true if there are no tokens left to produce.
     // (note that this doesn't always correspond with EOF due to dedent tokens).
     virtual bool isFinished() = 0;
@@ -41,10 +37,6 @@ public:
     // If the function fails and cannot find a substitution, it should throw a LexException.
     // Any issues that were encountered should additionally be reported to the issueReporter.
     virtual Token lexToken(IIssueReporter &issueReporter) = 0;
-    
-    // Indicates whether the last call to lexToken involved substituting an erroneous input
-    // with a (hopefully) valid token.
-    virtual bool didLastLexInvolveSubstitution() = 0;
     
     // Attempts to recover when the last call to lexToken resulted in an exception being thrown.
     virtual bool attemptToRecoverBySkippingLine() = 0;

@@ -18,6 +18,7 @@ enum TokenKind {
     CloseParenthesis,
     KeywordInt,
     KeywordReturn,
+    KeywordIf,
     Comment,
     Indent,
     Dedent,
@@ -27,17 +28,10 @@ enum TokenKind {
 };
 
 inline TokenKind getTokenKindOfIdentifierOrKeyword(const std::string &str) {
-    return str == "int"    ? KeywordInt :
-           str == "return" ? KeywordReturn :
-                             Identifier;
-}
-
-inline bool isTokenKindATypenameKeyword(TokenKind kind) {
-    return kind == KeywordInt;
-}
-
-inline bool isStrFilledForTokenKind(TokenKind kind) {
-    return kind == Identifier || kind == IntegerLiteral || kind == RealLiteral;
+    return str == "int"                ? KeywordInt :
+           str == "return"             ? KeywordReturn :
+           str == "if"                 ? KeywordIf :
+                                         Identifier;
 }
 
 inline const char* strFromTokenKind(TokenKind kind) {
@@ -47,12 +41,21 @@ inline const char* strFromTokenKind(TokenKind kind) {
            kind == CloseParenthesis    ? "CloseParenthesis" :
            kind == KeywordInt          ? "KeywordInt" :
            kind == KeywordReturn       ? "KeywordReturn" :
+           kind == KeywordIf           ? "If" :
            kind == Comment             ? "Comment" :
            kind == Indent              ? "Indent" :
            kind == Dedent              ? "Dedent" :
            kind == IntegerLiteral      ? "IntegerLiteral" :
            kind == RealLiteral         ? "RealLiteral" :
            (assert(false), "");
+}
+
+inline bool isTokenKindATypenameKeyword(TokenKind kind) {
+    return kind == KeywordInt;
+}
+
+inline bool isStrFilledForTokenKind(TokenKind kind) {
+    return kind == Identifier || kind == IntegerLiteral || kind == RealLiteral;
 }
 
 class Token {

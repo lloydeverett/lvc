@@ -8,22 +8,34 @@
 
 #include "parser.h"
 
-Parser::Parser(IIssueReporter &issueReporter) : issueReporter(issueReporter), lexer() {
+Parser::Parser(IReader &reader, IIssueReporter &issueReporter) :
+issueReporter(issueReporter), reader(reader), lexer(reader) {
     
 }
 
-Module parseModule() {
+void Parser::readNextToken() {
     
 }
 
-Function parseFunction() {
+Module Parser::parseModule() {
+    // This function parses at the module,
+    // and defers the work below this level to other functions.
+    // Thus we pretty much just need to identify global variables
+    // and functions, and hand them off to lower functions.
+    
     
 }
 
-std::unique_ptr<IStmt> parseStatement() {
+Function Parser::parseFunction() {
     
 }
 
-Module parseModule(ILexer &lexer, IIssueReporter &issueReporter) {
+std::unique_ptr<IStmt> Parser::parseStatement() {
+    
+}
+
+Module Parser::parseModule(ILexer &lexer, IIssueReporter &issueReporter) {
     return Module(std::vector<Function>());
 }
+
+#warning TODO: make static methods so using this is not so stupid

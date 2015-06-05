@@ -11,10 +11,17 @@
 #include "ireader.h"
 #include "iissuereporter.h"
 #include "ilexer.h"
+#include "lexer.h"
 
-#warning TODO: just work out what everything will look like, top down
-
-Function parseFunction(ILexer &lexer, Token firstToken);
-Module parseModule(ILexer &lexer, IIssueReporter &issueReporter);
-
-#warning TODO: try just parsing an expression maybe?
+class Parser {
+private:
+    Token currentToken;
+    IIssueReporter &issueReporter;
+    Lexer lexer;
+    
+public:
+    Parser(IIssueReporter &issueReporter);
+    Module parseModule();
+    Function parseFunction();
+    std::unique_ptr<IStmt> parseStatement();
+};

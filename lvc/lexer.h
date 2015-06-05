@@ -24,7 +24,6 @@ public:
 class Lexer : public ILexer {
 private:
     IReader &reader;
-    bool isNewlyCreatedBool;
     std::stack<colnumber> indentStack;
     std::queue<QueuedDedent> queuedDedents;
     
@@ -34,10 +33,8 @@ private:
     Token getTokenFromQueuedDedent(QueuedDedent q);
 public:
     Lexer(IReader &reader);
-    virtual bool isNewlyCreated() override;
     virtual bool isFinished() override;
     virtual Token lexToken(IIssueReporter &issueReporter) override;
-    virtual bool didLastLexInvolveSubstitution() override;
     virtual bool attemptToRecoverBySkippingLine() override;
     virtual bool attemptToRecoverBySkippingUntilValidIndentation() override;
 };

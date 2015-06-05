@@ -61,12 +61,8 @@ Token Lexer::makeIndentToken(colnumber col) {
     return t;
 }
 
-Lexer::Lexer(IReader &reader) : reader(reader), isNewlyCreatedBool(true) {
+Lexer::Lexer(IReader &reader) : reader(reader) {
     indentStack.push(0);
-}
-
-bool Lexer::isNewlyCreated() {
-    return isNewlyCreatedBool;
 }
 
 bool Lexer::isFinished() {
@@ -74,11 +70,8 @@ bool Lexer::isFinished() {
 }
 
 Token Lexer::lexToken(IIssueReporter &issueReporter) {
-    isNewlyCreatedBool = false;
-    bool substitution = false;
-#warning TODO: do substitutions etc.
     
-    // Return a queuedDedent if there are any.
+    // Return a queued dedent if there are any.
     // This should always get priority over other tokens
     // (and thus the code is run first).
     if (queuedDedents.size() > 0) {
@@ -201,16 +194,13 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
         t.setKind(IntegerLiteral);
         t.setLength(str.length());
+        t.setStr(str);
         return t;
     }
     
 #warning TODO: Throw exception on unrecognized tokens.
     assert("Unrecognized token");
     return Token();
-}
-
-bool Lexer::didLastLexInvolveSubstitution() {
-    return (assert(false), true);
 }
 
 bool Lexer::attemptToRecoverBySkippingLine() {

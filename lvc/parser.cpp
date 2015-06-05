@@ -8,6 +8,22 @@
 
 #include "parser.h"
 
+Parser::Parser(IIssueReporter &issueReporter) : issueReporter(issueReporter), lexer() {
+    
+}
+
+Module parseModule() {
+    
+}
+
+Function parseFunction() {
+    
+}
+
+std::unique_ptr<IStmt> parseStatement() {
+    
+}
+
 Module parseModule(ILexer &lexer, IIssueReporter &issueReporter) {
     return Module(std::vector<Function>());
 }

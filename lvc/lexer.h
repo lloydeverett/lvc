@@ -2,41 +2,42 @@
 //  lexer.h
 //  lvc
 //
-//  Created by Lloyd Everett on 2015/05/23.
+//  Created by Lloyd Everett on 2015/06/04.
 //  Copyright (c) 2015 Lloyd Everett. All rights reserved.
 //
 
 #pragma once
+#include "ilexer.h"
+#include "ireader.h"
 #include <stack>
 #include <queue>
 #include "integertypedefs.h"
-#include "issuereporter.h"
-#include "token.h"
-#include "ireader.h"
 
 class QueuedDedent {
-    colnumber startCol;
-    charcount length;
-    
 public:
-    QueuedDedent(colnumber startCol, charcount length) : startCol(startCol), length(length) {}
+    const colnumber startCol;
+    const charcount length;
     
-    colnumber getStartCol() { return startCol; }
-    charcount getLength() { return length; }
+    QueuedDedent(colnumber startCol, charcount length) : startCol(startCol), length(length) {}
 };
 
-class Lexer {
+class Lexer : public ILexer {
 private:
-    std::stack<colnumber> indentationStack;
-    std::queue<QueuedDedent> queuedDedents;
-    const IssueReporter &issueReporter;
     IReader &reader;
+    bool isNewlyCreatedBool;
+    std::stack<colnumber> indentStack;
+    std::queue<QueuedDedent> queuedDedents;
+    
     bool addDedentsToQueueUntilColnumberIsReached(colnumber col);
-    void popQueuedDedent(Token &tok);
-    
+    Token makeIndentToken(colnumber col);
+    Token popQueuedDedent();
+    Token getTokenFromQueuedDedent(QueuedDedent q);
 public:
-    Lexer(IReader &reader, const IssueReporter &issueReporter);
-    bool readNextToken(Token &tok);
-    bool isFinished();
-    
+    Lexer(IReader &reader);
+    virtual bool isNewlyCreated() override;
+    virtual bool isFinished() override;
+    virtual Token lexToken(IIssueReporter &issueReporter) override;
+    virtual bool didLastLexInvolveSubstitution() override;
+    virtual bool attemptToRecoverBySkippingLine() override;
+    virtual bool attemptToRecoverBySkippingUntilValidIndentation() override;
 };

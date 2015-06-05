@@ -2,11 +2,12 @@
 //  lexer.cpp
 //  lvc
 //
-//  Created by Lloyd Everett on 2015/05/23.
+//  Created by Lloyd Everett on 2015/06/04.
 //  Copyright (c) 2015 Lloyd Everett. All rights reserved.
 //
 
 #include "lexer.h"
+#include "integertypedefs.h"
 #include <cassert>
 
 bool isAlpha(char c) {
@@ -17,252 +18,205 @@ bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
 
-bool isAlphaOrDigit(char c) {
-    return isAlpha(c) || isDigit(c);
-}
-
-bool isWhitespace(char c) {
-    return c == ' ' || c == '\t';
-}
-
-int spacesPerWhitespaceChar(char c) {
-    return (c == ' ') ? 1 : 4;
-}
-
-bool isValidUnescapedCharLiteralChar(char cc) {
-    unsigned char c = (unsigned char)cc;
-    return (c >= 32  && c <= 126)   // Basic ascii (space to ~)
-        || (c >= 128 && c <= 254);  // Extended Ascii set without non-breaking space (Ç to ■)
-}
-
-charcount consumeWhitespace(IReader &reader) {
-    int numWhitespaceChars = 0;
-    while (isWhitespace(reader.peekChar())) {
-        char c = reader.readChar();
-        numWhitespaceChars += spacesPerWhitespaceChar(c);
-    }
-    return numWhitespaceChars;
-}
-
-Lexer::Lexer(IReader &reader, const IssueReporter &issueReporter) : reader(reader), issueReporter(issueReporter) {
-    indentationStack.push(0);
-}
-
-void Lexer::popQueuedDedent(Token &tok) {
-    assert(queuedDedents.size() > 0);
-    
-    QueuedDedent q = queuedDedents.front();
-    queuedDedents.pop();
-    tok.setKind(Dedent);
-    tok.setRow(reader.getRow());
-    tok.setStartCol(q.getStartCol());
-    tok.setLength(q.getLength());
+Token Lexer::getTokenFromQueuedDedent(QueuedDedent q) {
+    Token t;
+    t.setKind(Dedent);
+    t.setStartCol(q.startCol);
+    t.setLength(q.length);
+    t.setRow(reader.getRow());
+    return t;
 }
 
 bool Lexer::addDedentsToQueueUntilColnumberIsReached(colnumber col) {
-    assert(col < indentationStack.top());
+    assert(indentStack.top() > col);
     
     colnumber currentCol;
     do {
-        colnumber prevCol = indentationStack.top();
-        indentationStack.pop();
-        currentCol = indentationStack.top();
+        colnumber prevCol = indentStack.top();
+        indentStack.pop();
+        currentCol = indentStack.top();
         
         colnumber dedentStartCol = currentCol;
         colnumber dedentEndCol = prevCol;
         queuedDedents.emplace(dedentStartCol, dedentEndCol - dedentStartCol);
     } while (currentCol > col);
     
-    if (col != currentCol) {
-        issueReporter.error(reader.getRow(), reader.getCol(), LexerErrorInvalidIndentation);
+    if (col != indentStack.top()) {
         return false;
     }
     
     return true;
 }
 
-bool Lexer::readNextToken(Token &tok) {
+Token Lexer::makeIndentToken(colnumber col) {
+    assert(col > indentStack.top());
     
-    if (queuedDedents.size() > 0) {
-        popQueuedDedent(tok);
-        return true;
-    }
-    
-    bool atStartOfRowBeforeConsumingWhitespace = reader.atStartOfRow();
-    
-    charcount consumedWhitespace = consumeWhitespace(reader);
-    
-    if (atStartOfRowBeforeConsumingWhitespace) {
-        charcount indentationLength = consumedWhitespace;
-        
-        if (indentationLength > indentationStack.top()) {
-            colnumber oldIndent = indentationStack.top();
-            indentationStack.push(indentationLength);
-            colnumber newIndent = indentationStack.top();
-            
-            tok.setRow(reader.getRow());
-            tok.setStartCol(oldIndent);
-            tok.setLength(newIndent - oldIndent);
-            tok.setKind(Indent);
-            return true;
-        }
-        else if (indentationLength < indentationStack.top()) {
-            bool success = addDedentsToQueueUntilColnumberIsReached(indentationLength);
-            if (success) {
-                popQueuedDedent(tok);
-                return true;
-            }
-            return false;
-        }
-        
-        // Indentation didn't change; continue to lexing tok
-    }
-    
-    // We've dealt with whitespace now; we can consume a char
-    rownumber rowOfC = reader.getRow();
-    colnumber colOfC = reader.getCol();
-    char c = reader.readChar();
-    
-    if (c == -1) {
-        // Generate dedents at EOF
-        if (indentationStack.top() > 0) {
-            bool success = addDedentsToQueueUntilColnumberIsReached(0);
-            assert(success);
-            popQueuedDedent(tok);
-            return true;
-        }
-        return false;
-    }
-    
-    // We can actually lex a token now!
-    
-    tok.setRow(rowOfC);
-    tok.setStartCol(colOfC);
-    tok.setLength(1);
-    
-    /////////////////////
-    // Simple, single char tokens
-    
-    if (c == '\n') {
-        tok.setKind(Newline);
-        return true;
-    }
-    if (c == '(') {
-        tok.setKind(OpenParenthesis);
-        return true;
-    }
-    if (c == ')') {
-        tok.setKind(CloseParenthesis);
-        return true;
-    }
-    
-    /////////////////////
-    // Other tokens
-    
-    // Line Comment
-    if (c == '/' && reader.peekChar() == '/') {
-        reader.readChar();
-        
-        charcount length = 2;
-        while (!reader.eof() && reader.peekChar() != '\n' && reader.peekChar() != '\r') {
-            // We use peekChar because we don't want to actually consume the newline
-            // We do this because the we want the parser to acknowledge it
-            // (after all, if there were no comment, it would've seen the newline)
-            // Also, eof is a valid way to end the line comment
-            
-            reader.readChar();
-            length++;
-        }
-            
-        tok.setKind(Comment);
-        tok.setLength(length);
-        return true;
-    }
-    
-    // Block Comment
-    if (c == '/' && reader.peekChar() == '*') {
-        reader.readChar();
-        charcount length = 2;
-        
-        while (!reader.eof()) {
-            char tempc = reader.readChar();
-            length++;
-            if (tempc == '*') {
-                if (reader.peekChar() == '/') {
-                    reader.readChar();
-                    length++;
-                    
-                    tok.setKind(Comment);
-                    tok.setLength(length);
-                    return true;
-                }
-            }
-        }
-        
-        issueReporter.fatalError(rowOfC, colOfC, LexerFatalErrorUnterminatedBlockComment);
-        return false;
-    }
-    
-    // Carriage Return Newline
-    if (c == '\r') {
-        if (reader.peekChar() != '\n') {
-            issueReporter.error(rowOfC, colOfC, LexerErrorInvalidNewline);
-            return false;
-        }
-        
-        reader.readChar(); // read the \n char
-        
-        tok.setKind(Newline);
-        tok.setLength(2);
-        return true;
-    }
-    
-    // Identifier or Keyword
-    if (isAlpha(c)) {
-        std::string str = std::string() + c;
-        while (isAlphaOrDigit(reader.peekChar())) {
-            str += reader.readChar();
-        }
-        
-        tok.setLength(str.length());
-        
-        tok.setKind(getTokenKindOfIdentifierOrKeyword(str));
-        
-        if (tok.is(Identifier)) {
-            tok.setStr(str);
-        }
-        
-        return true;
-    }
-    
-    // Number Literal
-    if (isDigit(c)) {
-        std::string str = std::string() + c;
-        unsigned int decimalPoints = 0;
-        while (isDigit(reader.peekChar() || reader.peekChar() == '.')) {
-            if (reader.peekChar() == '.')
-                decimalPoints++;
-            str += reader.readChar();
-        }
-        
-        if (decimalPoints > 1) {
-            issueReporter.error(rowOfC, colOfC, LexerErrorInvalidNumberLiteral);
-        }
-        
-        tok.setKind(decimalPoints == 0 ? IntegerLiteral : RealLiteral);
-        tok.setLength(str.length());
-        tok.setStr(str);
-        return true;
-    }
-    
-    tok.setKind((TokenKind)100);
-    return false;
-    
-#warning TODO: char literals, etc
-    
-    return false;
+    colnumber origIndent = indentStack.top();
+    indentStack.push(col);
+    Token t;
+    t.setKind(Indent);
+    t.setRow(reader.getRow());
+    t.setStartCol(origIndent);
+    t.setLength(col - origIndent);
+    return t;
+}
+
+Lexer::Lexer(IReader &reader) : reader(reader), isNewlyCreatedBool(true) {
+    indentStack.push(0);
+}
+
+bool Lexer::isNewlyCreated() {
+    return isNewlyCreatedBool;
 }
 
 bool Lexer::isFinished() {
-    return reader.eof() && indentationStack.top() == 0 && queuedDedents.empty();
+    return reader.eof() && indentStack.top() == 0 && queuedDedents.size() == 0;
+}
+
+Token Lexer::lexToken(IIssueReporter &issueReporter) {
+    isNewlyCreatedBool = false;
+    bool substitution = false;
+#warning TODO: do substitutions etc.
+    
+    // Return a queuedDedent if there are any.
+    // This should always get priority over other tokens
+    // (and thus the code is run first).
+    if (queuedDedents.size() > 0) {
+        QueuedDedent q = queuedDedents.front();
+        queuedDedents.pop();
+        return getTokenFromQueuedDedent(q);
+    }
+    
+    bool atStartOfRowBeforeConsumingWhitespace = reader.atStartOfRow();
+    charcount whitespaceCount = reader.consumeWhitespace();
+    
+    if (atStartOfRowBeforeConsumingWhitespace) {
+        if (whitespaceCount > indentStack.top()) {
+            return makeIndentToken(whitespaceCount);
+        }
+        else if (whitespaceCount < indentStack.top()) {
+            bool success = addDedentsToQueueUntilColnumberIsReached(whitespaceCount);
+            if (!success) {
+                issueReporter.report(reader.getRow(), reader.getCol(), LexerErrorInvalidDedent);
+                throw LexerException(LexerErrorInvalidDedent);
+            }
+            // Pop one off the queue
+            QueuedDedent q = queuedDedents.front();
+            queuedDedents.pop();
+            return getTokenFromQueuedDedent(q);
+        }
+    }
+    
+    if (reader.eof()) {
+        if (indentStack.top() > 0) {
+            bool success = addDedentsToQueueUntilColnumberIsReached(0);
+            assert(success); // should never fail
+            // Pop one off the queue
+            QueuedDedent q = queuedDedents.front();
+            queuedDedents.pop();
+            return getTokenFromQueuedDedent(q);
+        }
+        else {
+            throw FinishedLexingException();
+        }
+    }
+    
+    const colnumber colOfC = reader.getCol();
+    const colnumber rowOfC = reader.getRow();
+    const char c = reader.readChar();
+    
+    Token t;
+    t.setStartCol(colOfC);
+    t.setRow(rowOfC);
+    
+    if (c == '/' && reader.peekChar() == '/') {
+        reader.readChar();
+        charcount len = 2;
+        len += reader.consumeUntilPositionAtNewlineOrEof();
+        t.setKind(Comment);
+        t.setLength(len);
+        return t;
+    }
+    
+#warning TODO: Block Comments (string literals must be acknowledged).
+//  if (c == '/' && reader.peekChar() == '*') {
+//      reader.readChar();
+//      charcount len = 2;
+//
+//  }
+    
+    if (c == '\n') {
+        t.setKind(Newline);
+        t.setLength(1);
+        return t;
+    }
+    
+    if (c == '\r') {
+        charcount len = 1;
+        if (reader.peekChar() == '\n') {
+            reader.readChar();
+            len = 2;
+        }
+        t.setKind(Newline);
+        t.setLength(len);
+        return t;
+    }
+    
+    if (c == '(') {
+        t.setKind(OpenParenthesis);
+        t.setLength(1);
+        return t;
+    }
+    
+    if (c == ')') {
+        t.setKind(CloseParenthesis);
+        t.setLength(1);
+        return t;
+    }
+    
+    if (isAlpha(c)) {
+        std::string str;
+        str += c;
+        while (isAlpha(reader.peekChar()) || isDigit(reader.peekChar())) {
+            str += reader.readChar();
+        }
+        
+        t.setKind(getTokenKindOfIdentifierOrKeyword(str));
+        if (t.is(Identifier)) {
+            t.setStr(str);
+        }
+        t.setLength(str.length());
+        return t;
+    }
+    
+    if (isDigit(c)) {
+        std::string str;
+        str += c;
+        while (isDigit(reader.peekChar())) {
+            str += reader.readChar();
+        }
+        if (isAlpha(reader.peekChar())) {
+            issueReporter.report(reader.getRow(), reader.getCol(), LexerErrorInvalidNumberLiteral);
+            throw LexerException(LexerErrorInvalidNumberLiteral);
+        }
+        t.setKind(IntegerLiteral);
+        t.setLength(str.length());
+        return t;
+    }
+    
+#warning TODO: Throw exception on unrecognized tokens.
+    assert("Unrecognized token");
+    return Token();
+}
+
+bool Lexer::didLastLexInvolveSubstitution() {
+    return (assert(false), true);
+}
+
+bool Lexer::attemptToRecoverBySkippingLine() {
+    return (assert(false), true);
+}
+
+bool Lexer::attemptToRecoverBySkippingUntilValidIndentation() {
+    return (assert(false), true);
 }

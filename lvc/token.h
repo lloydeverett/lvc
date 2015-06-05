@@ -8,6 +8,7 @@
 
 #pragma once
 #include <iostream>
+#include <cassert>
 #include "integertypedefs.h"
 
 enum TokenKind {
@@ -15,18 +16,24 @@ enum TokenKind {
     Identifier,
     OpenParenthesis,
     CloseParenthesis,
-    Int,
+    KeywordInt,
+    KeywordReturn,
     Comment,
-    Return,
     Indent,
     Dedent,
     IntegerLiteral,
     RealLiteral,
+    INVALID_KIND,
 };
 
 inline TokenKind getTokenKindOfIdentifierOrKeyword(const std::string &str) {
-    return str == "return" ? Return :
+    return str == "int"    ? KeywordInt :
+           str == "return" ? KeywordReturn :
                              Identifier;
+}
+
+inline bool isTokenKindATypenameKeyword(TokenKind kind) {
+    return kind == KeywordInt;
 }
 
 inline bool isStrFilledForTokenKind(TokenKind kind) {
@@ -38,14 +45,14 @@ inline const char* strFromTokenKind(TokenKind kind) {
            kind == Identifier          ? "Identifier" :
            kind == OpenParenthesis     ? "OpenParenthesis" :
            kind == CloseParenthesis    ? "CloseParenthesis" :
-           kind == Int                 ? "Int" :
+           kind == KeywordInt          ? "KeywordInt" :
+           kind == KeywordReturn       ? "KeywordReturn" :
            kind == Comment             ? "Comment" :
-           kind == Return              ? "Return" :
            kind == Indent              ? "Indent" :
            kind == Dedent              ? "Dedent" :
            kind == IntegerLiteral      ? "IntegerLiteral" :
            kind == RealLiteral         ? "RealLiteral" :
-           (assert(false), "invalid token kind");
+           (assert(false), "");
 }
 
 class Token {
@@ -57,7 +64,9 @@ private:
     std::string str;
     
 public:
+    Token() { this->kind = INVALID_KIND; }
     bool is(TokenKind kind) const { return this->kind == kind; }
+    bool isNot(TokenKind kind) const { return this->kind != kind; }
     void setKind(TokenKind kind) { this->kind = kind; }
     TokenKind getKind() const { return this->kind; }
     void setRow(rownumber row) { this->row = row; }
@@ -68,12 +77,13 @@ public:
     charcount getLength() { return this->length; }
     void setStr(const std::string &str) { this->str = str; }
     std::string getStr() { return this->str; }
+    bool isTypenameKeyword() {
+        return isTokenKindATypenameKeyword(this->kind);
+    }
     void dump() {
-        std::cerr << '(' << strFromTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
-        
+        std::cout << '(' << strFromTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
         if (isStrFilledForTokenKind(kind))
-            std::cerr << " str: " << getStr();
-        
-        std::cerr << std::endl;
+            std::cout << " str: " << getStr();
+        std::cout << std::endl;
     }
 };

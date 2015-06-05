@@ -7,10 +7,3 @@ int getZero()
 
 int main()
     return getZero()
-
-/*
-/
-/  A block comment!
-/  Who would've expected that!?
-/
-*/

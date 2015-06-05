@@ -6,8 +6,7 @@
 inline std::string getFileContents(const char *filename)
 {
     std::ifstream in(filename, std::ios::in | std::ios::binary);
-    if (in)
-    {
+    if (in) {
         std::string contents;
         in.seekg(0, std::ios::end);
         contents.resize(in.tellg());

@@ -11,8 +11,11 @@
 
 class IReader {
 public:
+    virtual bool atWhitespace() = 0;
     virtual int readChar() = 0; // returns -1 if EOF
     virtual int peekChar() = 0; // returns -1 if EOF
+    virtual charcount consumeWhitespace() = 0;
+    virtual charcount consumeUntilPositionAtNewlineOrEof() = 0;
     virtual bool eof() = 0;
     virtual rownumber getRow() = 0;
     virtual colnumber getCol() = 0;

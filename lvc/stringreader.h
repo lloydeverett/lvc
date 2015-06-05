@@ -22,6 +22,14 @@ private:
 public:
     StringReader(const std::string &str) : str(str), position(0), positionAfterLastNewline(0), row(0) {}
     
+    static bool isWhitespace(char c) {
+        return c == ' ' || c == '\t';
+    }
+    
+    virtual bool atWhitespace() override {
+        return isWhitespace(peekChar());
+    }
+    
     virtual int readChar() override {
         if (eof()) return -1;
         
@@ -36,6 +44,24 @@ public:
     virtual int peekChar() override {
         if (eof()) return -1;
         else return str[position];
+    }
+    
+    virtual charcount consumeWhitespace() override {
+        charcount count = 0;
+        while (!eof() && isWhitespace(str[position])) {
+            position++;
+            count++;
+        }
+        return count;
+    }
+    
+    virtual charcount consumeUntilPositionAtNewlineOrEof() override {
+        charcount count = 0;
+        while (!eof() && str[position] != '\n') {
+            position++;
+            count++;
+        }
+        return count;
     }
     
     virtual bool eof() override {

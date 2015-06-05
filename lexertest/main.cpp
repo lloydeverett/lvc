@@ -11,6 +11,7 @@
 #include "lexer.h"
 #include "getfilecontents.h"
 #include "stringreader.h"
+#include "cerrissuereporter.h"
 
 int main(int argc, const char * argv[]) {
     std::string vfilesDir = std::string(VFILES_DIR);
@@ -18,18 +19,35 @@ int main(int argc, const char * argv[]) {
     std::string fileStr = getFileContents(filePath.c_str());
     
     StringReader reader(fileStr);
-    IssueReporter issueReporter(filePath);
-    Lexer lexer(reader, issueReporter);
+    CerrIssueReporter issueReporter(fileStr);
+    Lexer lexer(reader);
     
     Token tok;
+    charcount indent = 0;
     while (!lexer.isFinished()) {
-        bool result = lexer.readNextToken(tok);
+        Token t;
         
-        if (result) {
-            tok.dump();
+        try {
+            t = lexer.lexToken(issueReporter);
         }
-        else {
-            std::cout << "ERROR_TOK" << std::endl;
+        catch (LexerException &e) {
+            // already printed by issuereporter
+            continue;
+        }
+        catch (FinishedLexingException &e) {
+            return 0;
+        }
+        
+        if (t.is(Indent)) {
+            indent += 4;
+        }
+        
+        std::cout << std::string(indent, ' ');
+        t.dump();
+        
+        if (t.is(Dedent)) {
+            assert(indent >= 4);
+            indent -= 4;
         }
     }
     return 0;

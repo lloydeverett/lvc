@@ -4,15 +4,30 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>asttest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
 		<key>lexertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>2</integer>
 		</dict>
+		<key>llvmplayground.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
 		<key>lvc.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>testaggregate.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
 		</dict>
 		<key>testingbuild.xcscheme</key>
 		<dict>
@@ -33,6 +48,21 @@
 			<true/>
 		</dict>
 		<key>57334D041B12382B00085754</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>57ADD1151B1B67A50031EB0F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>57ADD11D1B1B68180031EB0F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>57ADD1281B1B68CF0031EB0F</key>
 		<dict>
 			<key>primary</key>
 			<true/>

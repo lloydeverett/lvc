@@ -17,13 +17,14 @@ enum TokenKind {
     OpenParenthesis,
     CloseParenthesis,
     KeywordInt,
+    KeywordVoid,
     KeywordReturn,
     KeywordIf,
-    Comment,
     Indent,
     Dedent,
     IntegerLiteral,
     RealLiteral,
+    Equals,
     INVALID_KIND,
 };
 
@@ -40,18 +41,19 @@ inline const char* strFromTokenKind(TokenKind kind) {
            kind == OpenParenthesis     ? "OpenParenthesis" :
            kind == CloseParenthesis    ? "CloseParenthesis" :
            kind == KeywordInt          ? "KeywordInt" :
+           kind == KeywordVoid         ? "KeywordVoid" :
            kind == KeywordReturn       ? "KeywordReturn" :
            kind == KeywordIf           ? "If" :
-           kind == Comment             ? "Comment" :
            kind == Indent              ? "Indent" :
            kind == Dedent              ? "Dedent" :
            kind == IntegerLiteral      ? "IntegerLiteral" :
            kind == RealLiteral         ? "RealLiteral" :
+           kind == Equals              ? "Equals" :
            (assert(false), "");
 }
 
 inline bool isTokenKindATypenameKeyword(TokenKind kind) {
-    return kind == KeywordInt;
+    return kind == KeywordInt || kind == KeywordVoid;
 }
 
 inline bool isStrFilledForTokenKind(TokenKind kind) {

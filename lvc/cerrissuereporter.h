@@ -21,4 +21,8 @@ public:
         std::cerr << filename << ":" << row << ":" << col << ": error:" << getMessageForLexerError(lexerError) << " (lex error)" << std::endl;
     }
     
+    virtual void report(rownumber row, colnumber col, ParserError parserError) override {
+        std::cerr << filename << ":" << row << ":" << col << ": error:" << getMessageForParserError(parserError) << " (parse error)" << std::endl;
+    }
+    
 };

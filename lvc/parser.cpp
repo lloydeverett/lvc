@@ -9,43 +9,52 @@
 #include "parser.h"
 
 Parser::Parser(IReader &reader, IIssueReporter &issueReporter) :
-issueReporter(issueReporter), reader(reader), lexer(reader) {
+issueReporter(issueReporter), lexerBuffer(issueReporter, reader) {
     
-}
-
-Token Parser::peekAhead(unsigned int n) {
-    while (n < tokenQueue.size()) {
-        tokenQueue.emplace(lexer.lexToken(issueReporter));
-    }
-    return tokenQueue.back();
-}
-
-// The contents of currentToken should ONLY be changed
-// through this method
-void Parser::readNextToken() {
-    if (tokenQueue.size() > 0) {
-        currentToken = tokenQueue.front();
-        tokenQueue.pop();
-        return;
-    }
-    
-    currentToken = lexer.lexToken(issueReporter);
 }
 
 Module Parser::parseModule() {
-    // This function parses at the module,
+    // This function parses at the module level
     // and defers the work below this level to other functions.
     // Thus we pretty much just need to identify global variables
     // and functions, and hand them off to lower functions.
     
-    try {
-        readNextToken();
-        if (currentToken.isTypenameKeyword()) {
+    std::vector<Function> functions;
+    
+    while (!lexerBuffer.isFinished()) {
+        try {
+            currentToken = lexerBuffer.readToken();
             
+            if (currentToken.isTypenameKeyword()) {
+                if (lexerBuffer.peekAhead(2).is(OpenParenthesis)) {
+                    functions.push_back(parseFunction());
+                    continue;
+                }
+                else {
+                    
+                }
+            }
         }
     }
     
+    
+    try {
+        currentToken = lexerBuffer.readToken();
+        
+        if (currentToken.isTypenameKeyword()) {
+            if (lexerBuffer.peekAhead(2).is(OpenParenthesis)) {
+                parseFunction();
+            }
+        }
+    }
+    catch (LexerException &e) {
+    }
+    catch (FinishedLexingException &e) {
+        
+    }
 }
+
+
 
 Function Parser::parseFunction() {
     

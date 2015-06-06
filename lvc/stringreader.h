@@ -27,7 +27,7 @@ public:
     }
     
     virtual bool atWhitespace() override {
-        return isWhitespace(peekChar());
+        return isWhitespace(peekChar(0));
     }
     
     virtual int readChar() override {
@@ -41,9 +41,9 @@ public:
         return c;
     }
     
-    virtual int peekChar() override {
-        if (eof()) return -1;
-        else return str[position];
+    virtual int peekChar(charcount n) override {
+        if (position + n >= str.length()) return -1;
+        else return str[position + n];
     }
     
     virtual charcount consumeWhitespace() override {

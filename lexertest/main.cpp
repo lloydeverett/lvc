@@ -19,7 +19,7 @@ int main(int argc, const char * argv[]) {
     std::string fileStr = getFileContents(filePath.c_str());
     
     StringReader reader(fileStr);
-    CerrIssueReporter issueReporter(fileStr);
+    CerrIssueReporter issueReporter(filePath);
     Lexer lexer(reader);
     
     Token tok;

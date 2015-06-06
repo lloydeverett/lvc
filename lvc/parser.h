@@ -17,12 +17,8 @@ class Parser {
 private:
     std::queue<Token> tokenQueue;
     IIssueReporter &issueReporter;
-    IReader &reader;
-    Lexer lexer;
+    LexerBuffer lexerBuffer;
     Token currentToken;
-    std::queue<Token> tokenPeekQueue;
-    void readToken();
-    Token peekAhead(unsigned int n);
     
 public:
     Parser(IReader &reader, IIssueReporter &issueReporter);

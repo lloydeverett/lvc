@@ -8,21 +8,21 @@
 
 #pragma once
 #include <queue>
-#include "ilexer.h"
+#include "lexer.h"
 #include "iissuereporter.h"
 
 class LexerBuffer {
 private:
     std::queue<Token> queue;
-    ILexer &lexer;
+    Lexer lexer;
     IIssueReporter &issueReporter;
     
 public:
-    LexerBuffer(IIssueReporter &issueReporter, ILexer &lexer) : issueReporter(issueReporter), lexer(lexer) {
+    LexerBuffer(IIssueReporter &issueReporter, IReader &reader) : issueReporter(issueReporter), lexer(reader) {
         
     }
     
-    Token nextToken() {
+    Token readToken() {
         if (queue.size() > 0) {
             Token t = queue.front();
             queue.pop();
@@ -38,5 +38,9 @@ public:
         }
         
         return queue.back();
+    }
+    
+    bool isFinished() {
+        return queue.size() == 0 && lexer.isFinished();
     }
 };

@@ -114,6 +114,7 @@
 		57ADD1361B1DFB7E0031EB0F /* cerrissuereporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cerrissuereporter.h; sourceTree = "<group>"; };
 		57ADD13A1B1E06E50031EB0F /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parser.cpp; sourceTree = "<group>"; };
 		57ADD13B1B1E06E50031EB0F /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		57D426BB1B231DE0005B5D61 /* testutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testutil.h; sourceTree = "<group>"; };
 		57D8FFE61B089E8300630274 /* ast.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ast.h; sourceTree = "<group>"; };
 		57D8FFEA1B08A19400630274 /* token.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = token.h; sourceTree = "<group>"; };
 		57D8FFED1B0B91E400630274 /* libLLVMCore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMCore.a; path = ../../../llvm/install/lib/libLLVMCore.a; sourceTree = "<group>"; };
@@ -269,6 +270,7 @@
 		57D8FFDF1B0893B000630274 /* tests */ = {
 			isa = PBXGroup;
 			children = (
+				57D426BB1B231DE0005B5D61 /* testutil.h */,
 				57ADD1171B1B67A50031EB0F /* asttest */,
 				57334D061B12382B00085754 /* lexertest */,
 			);

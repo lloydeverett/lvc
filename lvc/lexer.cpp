@@ -100,6 +100,18 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
     }
     
+    // Skip comments
+    if (reader.peekChar(0) == '/' && reader.peekChar(1) == '/') {
+        reader.consumeUntilPositionAtNewlineOrEof();
+    }
+    
+#warning TODO: Block Comments (string literals must be acknowledged, and take whitespace into account after comment).
+    //  if (c == '/' && reader.peekChar() == '*') {
+    //      reader.readChar();
+    //      charcount len = 2;
+    //
+    //  }
+    
     if (reader.eof()) {
         if (indentStack.top() > 0) {
             bool success = addDedentsToQueueUntilColnumberIsReached(0);
@@ -114,29 +126,13 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
     }
     
-    const colnumber colOfC = reader.getCol();
-    const colnumber rowOfC = reader.getRow();
-    const char c = reader.readChar();
+    colnumber colOfC = reader.getCol();
+    colnumber rowOfC = reader.getRow();
+    char c = reader.readChar();
     
     Token t;
     t.setStartCol(colOfC);
     t.setRow(rowOfC);
-    
-    if (c == '/' && reader.peekChar() == '/') {
-        reader.readChar();
-        charcount len = 2;
-        len += reader.consumeUntilPositionAtNewlineOrEof();
-        t.setKind(Comment);
-        t.setLength(len);
-        return t;
-    }
-    
-#warning TODO: Block Comments (string literals must be acknowledged).
-//  if (c == '/' && reader.peekChar() == '*') {
-//      reader.readChar();
-//      charcount len = 2;
-//
-//  }
     
     if (c == '\n') {
         t.setKind(Newline);
@@ -163,6 +159,12 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
     
     if (c == ')') {
         t.setKind(CloseParenthesis);
+        t.setLength(1);
+        return t;
+    }
+    
+    if (c == '=') {
+        t.setKind(Equals);
         t.setLength(1);
         return t;
     }
@@ -199,7 +201,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
     }
     
 #warning TODO: Throw exception on unrecognized tokens.
-    assert("Unrecognized token");
+    assert(false);
     return Token();
 }
 

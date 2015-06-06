@@ -13,7 +13,7 @@ class IReader {
 public:
     virtual bool atWhitespace() = 0;
     virtual int readChar() = 0; // returns -1 if EOF
-    virtual int peekChar() = 0; // returns -1 if EOF
+    virtual int peekChar(charcount n = 0) = 0; // returns -1 if EOF
     virtual charcount consumeWhitespace() = 0;
     virtual charcount consumeUntilPositionAtNewlineOrEof() = 0;
     virtual bool eof() = 0;

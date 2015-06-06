@@ -29,15 +29,18 @@ inline const char* getMessageForLexerError(LexerError lexerError) {
 enum ParserError {
     ParserErrorUnexpectedIdentifier,
     ParserErrorExpectedIdentifier,
+    ParserErrorUnexpectedIndent,
 };
 
 inline const char* getMessageForParserError(ParserError parserError) {
     return parserError == ParserErrorUnexpectedIdentifier    ? "Did not expect identifer." :
            parserError == ParserErrorExpectedIdentifier      ? "Expected identifier." :
+           parserError == ParserErrorUnexpectedIndent        ? "Did not expect indent." :
            (assert(false), "");
 }
 
 class IIssueReporter {
 public:
     virtual void report(rownumber row, colnumber col, LexerError lexerError) = 0;
+    virtual void report(rownumber row, colnumber col, ParserError parserError) = 0;
 };

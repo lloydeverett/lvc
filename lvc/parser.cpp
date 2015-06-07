@@ -57,6 +57,7 @@ Module Parser::parseModule() {
 Function Parser::parseFunction() {
     assert(currentToken.canRepresentAType());
     issueReporter.log("Parsing function");
+    std::string returnTypeStr;
     
     //FunctionDecl(<#std::unique_ptr<IType> returnType#>, <#std::string identifier#>, <#std::vector<std::unique_ptr<ArgumentDecl> > arguments#>)
     currentToken = lexerBuffer.readToken();
@@ -77,6 +78,8 @@ Function Parser::parseFunction() {
    // } while (currentToken.isNot(CloseParenthesis));
     currentToken =  lexerBuffer.readToken();
     assert(currentToken.is(CloseParenthesis));
+    
+    FunctionDecl decl(
     
     currentToken = lexerBuffer.readToken();
     if (currentToken.isNot(Indent)) {

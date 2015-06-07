@@ -9,6 +9,7 @@
 #pragma once
 #include <iostream>
 #include <cassert>
+#include "primitivetypename.h"
 #include "integertypedefs.h"
 
 enum TokenKind {
@@ -16,8 +17,6 @@ enum TokenKind {
     Identifier,
     OpenParenthesis,
     CloseParenthesis,
-    KeywordInt,
-    KeywordVoid,
     KeywordReturn,
     KeywordIf,
     Indent,
@@ -25,43 +24,31 @@ enum TokenKind {
     IntegerLiteral,
     RealLiteral,
     Equals,
-    INVALID_KIND,
+    PrimitiveTypenameKind,
+    INVALID_TOKENKIND,
 };
 
-inline TokenKind getTokenKindOfIdentifierOrKeyword(const std::string &str) {
-    return str == "int"                ? KeywordInt :
-           str == "return"             ? KeywordReturn :
-           str == "if"                 ? KeywordIf :
-                                         Identifier;
-}
-
-inline const char* strFromTokenKind(TokenKind kind) {
-    return kind == Newline             ? "Newline" :
-           kind == Identifier          ? "Identifier" :
-           kind == OpenParenthesis     ? "OpenParenthesis" :
-           kind == CloseParenthesis    ? "CloseParenthesis" :
-           kind == KeywordInt          ? "KeywordInt" :
-           kind == KeywordVoid         ? "KeywordVoid" :
-           kind == KeywordReturn       ? "KeywordReturn" :
-           kind == KeywordIf           ? "If" :
-           kind == Indent              ? "Indent" :
-           kind == Dedent              ? "Dedent" :
-           kind == IntegerLiteral      ? "IntegerLiteral" :
-           kind == RealLiteral         ? "RealLiteral" :
-           kind == Equals              ? "Equals" :
+inline const char* getLogStrForTokenKind(TokenKind kind) {
+    return kind == Newline               ? "Newline" :
+           kind == Identifier            ? "Identifier" :
+           kind == OpenParenthesis       ? "OpenParenthesis" :
+           kind == CloseParenthesis      ? "CloseParenthesis" :
+           kind == KeywordReturn         ? "KeywordReturn" :
+           kind == KeywordIf             ? "If" :
+           kind == Indent                ? "Indent" :
+           kind == Dedent                ? "Dedent" :
+           kind == IntegerLiteral        ? "IntegerLiteral" :
+           kind == RealLiteral           ? "RealLiteral" :
+           kind == Equals                ? "Equals" :
+           kind == PrimitiveTypenameKind ? "PrimitiveTypenameKind" :
+           kind == INVALID_TOKENKIND     ? "INVALID_TOKENKIND" :
            (assert(false), "");
 }
 
-inline bool isTokenKindATypenameKeyword(TokenKind kind) {
-    return kind == KeywordInt || kind == KeywordVoid;
-}
-
-inline bool canTokenKindRepresentAType(TokenKind kind) {
-    return isTokenKindATypenameKeyword(kind) || kind == Identifier;
-}
-
-inline bool isStrFilledForTokenKind(TokenKind kind) {
-    return kind == Identifier || kind == IntegerLiteral || kind == RealLiteral;
+inline TokenKind getKeywordTokenKindFromStr(const std::string &str) {
+    return str == "return"               ? KeywordReturn :
+           str == "if"                   ? KeywordIf :
+                                           INVALID_TOKENKIND;
 }
 
 class Token {
@@ -70,10 +57,21 @@ private:
     rownumber row;
     colnumber startCol;
     charcount length;
+    PrimitiveTypename primitiveTypename;
     std::string str;
+    // Str contains the contents of a literal (whether it be a number literal or a string literal), OR,
+    // if the token is an identifier, it contains the identifer.
     
 public:
-    Token() { this->kind = INVALID_KIND; }
+    Token() { clean(); }
+    void clean() {
+        kind = INVALID_TOKENKIND;
+        row = 99999;
+        startCol = 99999;
+        length = 99999;
+        primitiveTypename = INVALID_PRIMITIVETYPENAME;
+        str = "";
+    }
     bool is(TokenKind kind) const { return this->kind == kind; }
     bool isNot(TokenKind kind) const { return this->kind != kind; }
     void setKind(TokenKind kind) { this->kind = kind; }
@@ -85,25 +83,13 @@ public:
     void setLength(charcount length) { this->length = length; }
     charcount getLength() { return this->length; }
     void setStr(const std::string &str) { this->str = str; }
-    std::string getStr() { assert(isStrFilledForTokenKind(kind)); return this->str; }
-    bool isTypenameKeyword() {
-        return isTokenKindATypenameKeyword(this->kind);
-    }
-    bool isStrFilled() {
-        return isStrFilledForTokenKind(this->kind);
-    }
+    std::string getStr() { return this->str; }
+    void setPrimitiveTypename(PrimitiveTypename p) { primitiveTypename = p; }
+    PrimitiveTypename getPrimitiveTypename() { return primitiveTypename; }
     void dump() {
-        if (this->kind == INVALID_KIND) {
-            std::cout << "INVALID TOKEN" << std::endl;
-            return;
-        }
-        
-        std::cout << '(' << strFromTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
-        if (isStrFilledForTokenKind(kind))
+        std::cout << '(' << getLogStrForTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
+        if (str.length() > 0)
             std::cout << " str: " << getStr();
         std::cout << std::endl;
-    }
-    bool canRepresentAType() {
-        return canTokenKindRepresentAType(kind);
     }
 };

@@ -69,6 +69,30 @@ bool Lexer::isFinished() {
     return reader.eof() && indentStack.top() == 0 && queuedDedents.size() == 0;
 }
 
+Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::string &str) {
+    Token t;
+    t.setRow(row);
+    t.setStartCol(startCol);
+    t.setLength(str.length());
+    
+    TokenKind k = getKeywordTokenKindFromStr(str);
+    if (k != INVALID_TOKENKIND) {
+        t.setKind(k);
+        return t;
+    }
+    
+    PrimitiveTypename pt = primitiveTypenameFromStrInSource(str);
+    if (pt != INVALID_PRIMITIVETYPENAME) {
+        t.setKind(PrimitiveTypenameKind);
+        t.setPrimitiveTypename(pt);
+        return t;
+    }
+    
+    t.setKind(Identifier);
+    t.setStr(str);
+    return t;
+}
+
 Token Lexer::lexToken(IIssueReporter &issueReporter) {
     
     // Return a queued dedent if there are any.
@@ -104,7 +128,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         reader.consumeUntilPositionAtNewlineOrEof();
     }
     
-#warning TODO: Block Comments (string literals must be acknowledged, and take whitespace into account after comment).
+#warning TODO: Block Comments (string literals must be acknowledged, and take whitespace into account after comment (and they should probably nest)).
     //  if (c == '/' && reader.peekChar() == '*') {
     //      reader.readChar();
     //      charcount len = 2;
@@ -125,13 +149,13 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
     }
     
-    colnumber colOfC = reader.getCol();
     colnumber rowOfC = reader.getRow();
+    colnumber colOfC = reader.getCol();
     char c = reader.readChar();
     
     Token t;
-    t.setStartCol(colOfC);
     t.setRow(rowOfC);
+    t.setStartCol(colOfC);
     
     if (c == '\n') {
         t.setKind(Newline);
@@ -175,12 +199,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
             str += reader.readChar();
         }
         
-        t.setKind(getTokenKindOfIdentifierOrKeyword(str));
-        if (t.is(Identifier)) {
-            t.setStr(str);
-        }
-        t.setLength(str.length());
-        return t;
+        return lexStrBeginningWithAlpha(str);
     }
     
     if (isDigit(c)) {

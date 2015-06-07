@@ -49,22 +49,11 @@ protected:
 ///////////////////////////////
 
 class PrimitiveType : public IType {
-    enum PrimitiveTypeEnum {
-        Int,
-        Uint,
-        Int16,
-        Uint16,
-        Int32,
-        Uint32,
-        Int64,
-        Uint64,
-        Bool,
-        Float,
-        Double,
-    } typeEnum;
+private:
+    PrimitiveTypename name;
 public:
-    PrimitiveType(PrimitiveTypeEnum typeEnum) :
-    typeEnum(typeEnum) {}
+    PrimitiveType(PrimitiveTypename name) :
+    name(name) {}
 };
 
 class VariableDecl : public IDecl {

@@ -8,14 +8,12 @@
 
 #pragma once
 #include "ast.h"
-#include "stringreader.h"
+#include "ireader.h"
 #include "iissuereporter.h"
-#include "lexer.h"
 #include "lexerbuffer.h"
 
 class Parser {
 private:
-    std::queue<Token> tokenQueue;
     IIssueReporter &issueReporter;
     LexerBuffer lexerBuffer;
     Token currentToken;

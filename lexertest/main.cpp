@@ -7,15 +7,10 @@
 //
 
 #include <iostream>
-#include "stringreader.h"
-#include "lexer.h"
-#include "getfilecontents.h"
-#include "stringreader.h"
-#include "cerrissuereporter.h"
+#include "testutil.h"
 
 int main(int argc, const char * argv[]) {
-    std::string vfilesDir = std::string(VFILES_DIR);
-    std::string filePath = vfilesDir + "/verysimple.v";
+    std::string filePath = getPathForVFile("verysimple.v");
     std::string fileStr = getFileContents(filePath.c_str());
     
     StringReader reader(fileStr);
@@ -33,9 +28,6 @@ int main(int argc, const char * argv[]) {
         catch (LexerException &e) {
             // already printed by issuereporter
             continue;
-        }
-        catch (FinishedLexingException &e) {
-            return 0;
         }
         
         if (t.is(Indent)) {

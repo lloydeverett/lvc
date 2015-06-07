@@ -48,6 +48,25 @@ protected:
 
 ///////////////////////////////
 
+class PrimitiveType : public IType {
+    enum PrimitiveTypeEnum {
+        Int,
+        Uint,
+        Int16,
+        Uint16,
+        Int32,
+        Uint32,
+        Int64,
+        Uint64,
+        Bool,
+        Float,
+        Double,
+    } typeEnum;
+public:
+    PrimitiveType(PrimitiveTypeEnum typeEnum) :
+    typeEnum(typeEnum) {}
+};
+
 class VariableDecl : public IDecl {
     std::unique_ptr<IType> type;
     std::string identifier;

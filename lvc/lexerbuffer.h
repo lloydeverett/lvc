@@ -13,34 +13,56 @@
 
 class LexerBuffer {
 private:
-    std::queue<Token> queue;
+    Token next;
+    Token nextNext;
+    unsigned int aheadBy; // aheadBy can be from 0 (next is not filled) to 2 (nextNext is filled)
     Lexer lexer;
     IIssueReporter &issueReporter;
     
+    Token popNext() {
+        assert(aheadBy > 0);
+        Token t = next;
+        next = nextNext;
+        aheadBy--;
+        return t;
+    }
 public:
     LexerBuffer(IIssueReporter &issueReporter, IReader &reader) : issueReporter(issueReporter), lexer(reader) {
-        
+        aheadBy = 0;
     }
     
     Token readToken() {
-        if (queue.size() > 0) {
-            Token t = queue.front();
-            queue.pop();
-            return t;
+        if (aheadBy == 0) {
+            return lexer.lexToken(issueReporter);
         }
-        
-        return lexer.lexToken(issueReporter);
+        else {
+            return popNext();
+        }
     }
     
-    Token peekAhead(unsigned int n) {
-        while (n < queue.size()) {
-            queue.push(lexer.lexToken(issueReporter));
+    Token peekOneAhead() {
+        if (aheadBy >= 1) return next;
+        else {
+            next = lexer.lexToken(issueReporter);
+            aheadBy++;
+            return next;
         }
-        
-        return queue.back();
+    }
+    
+    Token peekTwoAhead() {
+        if (aheadBy >= 2) return nextNext;
+        else {
+            if (aheadBy == 0) {
+                next = lexer.lexToken(issueReporter);
+                aheadBy++;
+            }
+            nextNext = lexer.lexToken(issueReporter);
+            aheadBy++;
+            return nextNext;
+        }
     }
     
     bool isFinished() {
-        return queue.size() == 0 && lexer.isFinished();
+        return aheadBy == 0 && lexer.isFinished();
     }
 };

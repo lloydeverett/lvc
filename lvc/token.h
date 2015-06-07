@@ -56,6 +56,10 @@ inline bool isTokenKindATypenameKeyword(TokenKind kind) {
     return kind == KeywordInt || kind == KeywordVoid;
 }
 
+inline bool canTokenKindRepresentAType(TokenKind kind) {
+    return isTokenKindATypenameKeyword(kind) || kind == Identifier;
+}
+
 inline bool isStrFilledForTokenKind(TokenKind kind) {
     return kind == Identifier || kind == IntegerLiteral || kind == RealLiteral;
 }
@@ -89,9 +93,17 @@ public:
         return isStrFilledForTokenKind(this->kind);
     }
     void dump() {
+        if (this->kind == INVALID_KIND) {
+            std::cout << "INVALID TOKEN" << std::endl;
+            return;
+        }
+        
         std::cout << '(' << strFromTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
         if (isStrFilledForTokenKind(kind))
             std::cout << " str: " << getStr();
         std::cout << std::endl;
+    }
+    bool canRepresentAType() {
+        return canTokenKindRepresentAType(kind);
     }
 };

@@ -35,7 +35,7 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
     
-#warning TODO: IMPLEMENT
+#warning IMPLEMENT
     
     return 0;
 }

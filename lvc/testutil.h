@@ -9,8 +9,15 @@
 #pragma once
 #include <string>
 
-inline std::string getStrForVFile(std::string s) {
+// Test includes
+#include "getfilecontents.h"
+#include "stringreader.h"
+#include "lexer.h"
+#include "stringreader.h"
+#include "cerrissuereporter.h"
+#include "parser.h"
+
+inline std::string getPathForVFile(std::string s) {
     std::string vfilesDir = std::string(VFILES_DIR);
-    std::string filePath = vfilesDir + "/" + s;
-    std::string fileStr = getFileContents(filePath.c_str());
+    return vfilesDir + "/" + s;
 }

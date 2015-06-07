@@ -12,17 +12,23 @@
 
 class CerrIssueReporter : public IIssueReporter {
 private:
-    std::string filename;
+    std::string path;
     
 public:
-    CerrIssueReporter(std::string filename) : filename(filename) {}
+    CerrIssueReporter(std::string path) : path(path) {}
     
-    virtual void report(rownumber row, colnumber col, LexerError lexerError) override {
-        std::cerr << filename << ":" << row << ":" << col << ": error:" << getMessageForLexerError(lexerError) << " (lex error)" << std::endl;
+    virtual ReportedLexerError report(rownumber row, colnumber col, LexerError lexerError) override {
+        std::cerr << path << ":" << row << ":" << col << ": error:" << getMessageForLexerError(lexerError) << " (lex error)" << std::endl;
+        return makeReportedError(lexerError);
     }
     
-    virtual void report(rownumber row, colnumber col, ParserError parserError) override {
-        std::cerr << filename << ":" << row << ":" << col << ": error:" << getMessageForParserError(parserError) << " (parse error)" << std::endl;
+    virtual ReportedParserError report(rownumber row, colnumber col, ParserError parserError) override {
+        std::cerr << path << ":" << row << ":" << col << ": error:" << getMessageForParserError(parserError) << " (parse error)" << std::endl;
+        return makeReportedError(parserError);
+    }
+        
+    virtual void log(std::string s) override {
+        std::cout << "LOG: " << s << std::endl;
     }
     
 };

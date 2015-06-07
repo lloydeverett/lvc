@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>3</integer>
 		</dict>
+		<key>lexerbuffertest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>7</integer>
+		</dict>
 		<key>lexertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -23,6 +28,11 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>parsertest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
 		</dict>
 		<key>testaggregate.xcscheme</key>
 		<dict>
@@ -48,6 +58,16 @@
 			<true/>
 		</dict>
 		<key>57334D041B12382B00085754</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5752E2C21B2320A70087DD1E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5752E2D11B2487930087DD1E</key>
 		<dict>
 			<key>primary</key>
 			<true/>

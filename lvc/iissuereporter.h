@@ -30,17 +30,43 @@ enum ParserError {
     ParserErrorUnexpectedIdentifier,
     ParserErrorExpectedIdentifier,
     ParserErrorUnexpectedIndent,
+    ParserErrorExpectedIndent,
 };
 
 inline const char* getMessageForParserError(ParserError parserError) {
     return parserError == ParserErrorUnexpectedIdentifier    ? "Did not expect identifer." :
            parserError == ParserErrorExpectedIdentifier      ? "Expected identifier." :
            parserError == ParserErrorUnexpectedIndent        ? "Did not expect indent." :
+           parserError == ParserErrorExpectedIndent          ? "Expected indent." :
            (assert(false), "");
 }
 
-class IIssueReporter {
+class ReportedLexerError {
+    friend class IIssueReporter;
+protected:
+    ReportedLexerError(LexerError error) : error(error) {}
 public:
-    virtual void report(rownumber row, colnumber col, LexerError lexerError) = 0;
-    virtual void report(rownumber row, colnumber col, ParserError parserError) = 0;
+    const LexerError error;
+};
+
+class ReportedParserError {
+    friend class IIssueReporter;
+protected:
+    ReportedParserError(ParserError error) : error(error) {}
+public:
+    const ParserError error;
+};
+
+class IIssueReporter {
+protected:
+    static ReportedLexerError makeReportedError(LexerError lexerError) {
+        return ReportedLexerError(lexerError);
+    }
+    static ReportedParserError makeReportedError(ParserError parserError) {
+        return ReportedParserError(parserError);
+    }
+public:
+    virtual ReportedLexerError report(rownumber row, colnumber col, LexerError lexerError) = 0;
+    virtual ReportedParserError report(rownumber row, colnumber col, ParserError parserError) = 0;
+    virtual void log(std::string s) = 0;
 };

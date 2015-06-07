@@ -9,21 +9,7 @@
 #pragma once
 #include "token.h"
 #include "iissuereporter.h"
-
-class LexerException : public std::exception {
-private:
-    const LexerError associatedError;
-    
-public:
-    LexerException(LexerError associatedError) : associatedError(associatedError) {}
-    LexerError getAssociatedError() { return associatedError; }
-    
-};
-
-class FinishedLexingException : public std::exception {
-    
-};
-
+#include "lexerexception.h"
 
 class ILexer {
 public:

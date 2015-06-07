@@ -90,8 +90,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         else if (whitespaceCount < indentStack.top()) {
             bool success = addDedentsToQueueUntilColnumberIsReached(whitespaceCount);
             if (!success) {
-                issueReporter.report(reader.getRow(), reader.getCol(), LexerErrorInvalidDedent);
-                throw LexerException(LexerErrorInvalidDedent);
+                throw LexerException(issueReporter.report(reader.getRow(), reader.getCol(), LexerErrorInvalidDedent));
             }
             // Pop one off the queue
             QueuedDedent q = queuedDedents.front();
@@ -191,8 +190,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
             str += reader.readChar();
         }
         if (isAlpha(reader.peekChar())) {
-            issueReporter.report(reader.getRow(), reader.getCol(), LexerErrorInvalidNumberLiteral);
-            throw LexerException(LexerErrorInvalidNumberLiteral);
+            throw LexerException(issueReporter.report(reader.getRow(), reader.getCol(), LexerErrorInvalidNumberLiteral));
         }
         t.setKind(IntegerLiteral);
         t.setLength(str.length());

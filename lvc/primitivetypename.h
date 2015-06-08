@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include <string>
 
 enum PrimitiveTypename  {
     Int,

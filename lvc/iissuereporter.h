@@ -32,6 +32,7 @@ enum ParserError {
     ParserErrorUnexpectedIndent,
     ParserErrorExpectedIndent,
     ParserErrorExpectedParenthesis,
+    ParserErrorExpectedType,
 };
 
 inline const char* getMessageForParserError(ParserError parserError) {
@@ -40,6 +41,7 @@ inline const char* getMessageForParserError(ParserError parserError) {
            parserError == ParserErrorUnexpectedIndent        ? "Did not expect indent." :
            parserError == ParserErrorExpectedIndent          ? "Expected indent." :
            parserError == ParserErrorExpectedParenthesis     ? "Expected parenthesis." :
+           parserError == ParserErrorExpectedType            ? "Expected type." :
     (assert(false), "");
 }
 

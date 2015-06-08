@@ -14,13 +14,13 @@
 
 class StringReader : public IReader {
 private:
-    const std::string &str;
+    std::string const &str;
     sourceposition position;
     sourceposition positionAfterLastNewline;
     unsigned int row;
     
 public:
-    StringReader(const std::string &str) : str(str), position(0), positionAfterLastNewline(0), row(0) {}
+    StringReader(std::string const &str) : str(str), position(0), positionAfterLastNewline(0), row(0) {}
     
     virtual bool atWhitespace() override {
         return peekChar(0) == ' ';

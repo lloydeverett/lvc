@@ -18,10 +18,13 @@ private:
     LexerBuffer lexerBuffer;
     Token currentToken;
     
-public:
-    Parser(IReader &reader, IIssueReporter &issueReporter);
-    Module parseModule();
+    FunctionDecl parseFunctionDecl();
+    ReportedParserError reportOnCurrentTok(ParserError er);
     Function parseFunction();
     std::unique_ptr<IStmt> parseStatement();
     std::unique_ptr<IExp> parseExpression();
+    std::unique_ptr<IType> parseType();
+public:
+    Parser(IReader &reader, IIssueReporter &issueReporter);
+    Module parseModule();
 };

@@ -14,6 +14,10 @@ issueReporter(issueReporter), lexerBuffer(issueReporter, reader) {
     
 }
 
+ReportedParserError Parser::reportOnCurrentTok(ParserError er) {
+    return issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), er);
+}
+
 Module Parser::parseModule() {
     // This function parses at the module level
     // and defers the work below this level to other functions.
@@ -49,24 +53,31 @@ Module Parser::parseModule() {
     return Module(functions);
 }
 
-ReportedParserError Parser::reportOnCurrentTok(ParserError er) {
-    return issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), er);
-}
-
+// This function assumes we are at the first token of the function
+// (the return type). When it's finished, currentToken should be at the
+// final dedent token of the function.
 Function Parser::parseFunction() {
     issueReporter.log("Parsing function");
     
-    // Parse FunctionDecl.
-    // We assume currentToken is the first token of the
-    // function (the return type).
+    FunctionDecl decl(parseFunctionDecl());
     
-    std::unique_ptr<IType> returnType;
-    if (currentToken.is(PrimitiveTypenameKind)) {
-        returnType = std::make_unique<PrimitiveType>(currentToken.getPrimitiveTypename());
+    currentToken = lexerBuffer.readToken();
+    if (currentToken.isNot(Indent)) {
+        throw ParserException(issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), ParserErrorExpectedIndent));
     }
-    else {
-        assert(false);
+    
+    while (currentToken.isNot(Dedent)) {
+        parseStatement();
     }
+}
+
+// This function assumes we are at the first token of the function (the typename).
+// After this function is called, currentToken will be the token of the
+// closing ) parenthesis for the argument list (the next token should be an indent).
+FunctionDecl Parser::parseFunctionDecl() {
+    issueReporter.log("Parsing function decl");
+    
+    std::unique_ptr<IType> returnType(parseType());
     
     currentToken = lexerBuffer.readToken();
     if (currentToken.isNot(Identifier)) {
@@ -79,42 +90,40 @@ Function Parser::parseFunction() {
         throw ParserException(reportOnCurrentTok(ParserErrorExpectedParenthesis));
     }
     
-    std::vector<A
-    
-    //FunctionDecl(<#std::unique_ptr<IType> returnType#>, <#std::string identifier#>, <#std::vector<std::unique_ptr<ArgumentDecl> > arguments#>)
-    currentToken = lexerBuffer.readToken();
-    if(currentToken.isNot(Identifier)) {
-        throw ParserException(issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), ParserErrorExpectedIdentifier));
-    }
-    std::string identifier = currentToken.getStr();
+    std::vector<ArgumentDecl> arguments;
+    #warning TODO: Parse arguments; we'll just leave them empty for now.
     
     currentToken = lexerBuffer.readToken();
-    assert(currentToken.is(OpenParenthesis));
-    
-    std::vector<std::unique_ptr<ArgumentDecl>> arguments;
-    // Parse argument list
-#warning TODO: parse argument list (right now we just expect ')')
-    //do {
-      //  currentToken = lexerBuffer.readToken();
-     //
-   // } while (currentToken.isNot(CloseParenthesis));
-    currentToken =  lexerBuffer.readToken();
-    assert(currentToken.is(CloseParenthesis));
-    
-    FunctionDecl decl(
-    
-    currentToken = lexerBuffer.readToken();
-    if (currentToken.isNot(Indent)) {
-        throw ParserException(issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), ParserErrorExpectedIndent));
+    if (currentToken.isNot(CloseParenthesis)) {
+        throw ParserException(reportOnCurrentTok(ParserErrorExpectedParenthesis));
     }
     
-    while (currentToken.isNot(Dedent)) {
-        parseStatement();
+    return FunctionDecl(std::move(returnType), identifier, std::move(arguments));
+}
+
+std::unique_ptr<IType> Parser::parseType() {
+    issueReporter.log("Parsing type");
+    
+    if (currentToken.is(PrimitiveTypenameKind)) {
+        return std::make_unique<PrimitiveType>(currentToken.getPrimitiveTypename());
+    }
+    else if (currentToken.is(Identifier)) {
+        #warning TODO: this
+        assert(false);
+    }
+    else {
+        throw ParserException(reportOnCurrentTok(ParserErrorExpectedType));
     }
 }
 
 std::unique_ptr<IStmt> Parser::parseStatement() {
     issueReporter.log("Parsing statement");
+    
+    
+}
+
+std::unique_ptr<IExp> Parser::parseExpression() {
+    
 }
 
 #warning TODO: make static methods so using this is not so stupid

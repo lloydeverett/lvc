@@ -30,14 +30,11 @@ Module Parser::parseModule() {
             
             if (currentToken.is(Newline)) continue;
             
-            if (currentToken.canRepresentAType()) {
-                if (lexerBuffer.peekTwoAhead().is(OpenParenthesis)) {
-                    functions.push_back(parseFunction());
-                    continue;
-                }
-                else {
-#warning TODO: parse global variable
-                }
+            if (lexerBuffer.peekTwoAhead().is(OpenParenthesis)) {
+                functions.push_back(parseFunction());
+            }
+            else {
+                
             }
         }
         catch (LexerException &e) {
@@ -52,12 +49,37 @@ Module Parser::parseModule() {
     return Module(functions);
 }
 
-
+ReportedParserError Parser::reportOnCurrentTok(ParserError er) {
+    return issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), er);
+}
 
 Function Parser::parseFunction() {
-    assert(currentToken.canRepresentAType());
     issueReporter.log("Parsing function");
-    std::string returnTypeStr;
+    
+    // Parse FunctionDecl.
+    // We assume currentToken is the first token of the
+    // function (the return type).
+    
+    std::unique_ptr<IType> returnType;
+    if (currentToken.is(PrimitiveTypenameKind)) {
+        returnType = std::make_unique<PrimitiveType>(currentToken.getPrimitiveTypename());
+    }
+    else {
+        assert(false);
+    }
+    
+    currentToken = lexerBuffer.readToken();
+    if (currentToken.isNot(Identifier)) {
+        throw ParserException(reportOnCurrentTok(ParserErrorExpectedIdentifier));
+    }
+    std::string identifier(currentToken.getStr());
+    
+    currentToken = lexerBuffer.readToken();
+    if (currentToken.isNot(OpenParenthesis)) {
+        throw ParserException(reportOnCurrentTok(ParserErrorExpectedParenthesis));
+    }
+    
+    std::vector<A
     
     //FunctionDecl(<#std::unique_ptr<IType> returnType#>, <#std::string identifier#>, <#std::vector<std::unique_ptr<ArgumentDecl> > arguments#>)
     currentToken = lexerBuffer.readToken();

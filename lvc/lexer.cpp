@@ -199,7 +199,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
             str += reader.readChar();
         }
         
-        return lexStrBeginningWithAlpha(str);
+        return lexStrBegginningWithAlpha(rowOfC, colOfC, str);
     }
     
     if (isDigit(c)) {

@@ -13,6 +13,7 @@
 class ParserException : public std::exception {
 private:
     const ParserError error;
+    ReportedParserError reportOnCurrentTok(ParserError er);
 public:
     ParserException(ReportedParserError reportedError) : error(reportedError.error) {}
     ParserError getAssociatedError() { return error; }

@@ -23,7 +23,7 @@ enum PrimitiveTypename  {
     INVALID_PRIMITIVETYPENAME,
 };
 
-PrimitiveTypename primitiveTypenameFromStrInSource(const std::string &str) {
+inline PrimitiveTypename primitiveTypenameFromStrInSource(const std::string &str) {
     if (str == "int")     return Int;
     if (str == "uint")    return Uint;
     if (str == "int16")   return Int16;

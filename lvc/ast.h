@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include "primitivetypename.h"
 #include <cstdint>
 #include <vector>
 #include <memory>
@@ -82,9 +83,9 @@ public:
 class FunctionDecl : public IDecl {
     std::unique_ptr<IType> returnType;
     std::string identifier;
-    std::vector<std::unique_ptr<ArgumentDecl>> arguments;
+    std::vector<ArgumentDecl> arguments;
 public:
-    FunctionDecl(std::unique_ptr<IType> returnType, std::string identifier, std::vector<std::unique_ptr<ArgumentDecl>> arguments) :
+    FunctionDecl(std::unique_ptr<IType> returnType, std::string identifier, std::vector<ArgumentDecl> arguments) :
     returnType(std::move(returnType)), identifier(identifier), arguments(std::move(arguments)) {}
 };
 

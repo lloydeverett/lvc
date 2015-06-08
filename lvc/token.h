@@ -90,6 +90,8 @@ public:
         std::cout << '(' << getLogStrForTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
         if (str.length() > 0)
             std::cout << " str: " << getStr();
+        if (primitiveTypename != INVALID_PRIMITIVETYPENAME)
+            std::cout << " primitiveTypename: " << getPrimitiveTypename();
         std::cout << std::endl;
     }
 };

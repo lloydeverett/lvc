@@ -23,7 +23,7 @@ inline const char* getMessageForLexerError(LexerError lexerError) {
            lexerError == LexerErrorInvalidNumberLiteral      ? "Could not lex number literal." :
            lexerError == LexerErrorUnterminatedBlockComment  ? "Block comment was not terminated." :
            lexerError == LexerErrorInvalidNewline            ? "Invalid newline. Newlines should be CRLF or LF." :
-           (assert(false), "");
+    (assert(false), "");
 }
 
 enum ParserError {
@@ -31,6 +31,7 @@ enum ParserError {
     ParserErrorExpectedIdentifier,
     ParserErrorUnexpectedIndent,
     ParserErrorExpectedIndent,
+    ParserErrorExpectedParenthesis,
 };
 
 inline const char* getMessageForParserError(ParserError parserError) {
@@ -38,7 +39,8 @@ inline const char* getMessageForParserError(ParserError parserError) {
            parserError == ParserErrorExpectedIdentifier      ? "Expected identifier." :
            parserError == ParserErrorUnexpectedIndent        ? "Did not expect indent." :
            parserError == ParserErrorExpectedIndent          ? "Expected indent." :
-           (assert(false), "");
+           parserError == ParserErrorExpectedParenthesis     ? "Expected parenthesis." :
+    (assert(false), "");
 }
 
 class ReportedLexerError {

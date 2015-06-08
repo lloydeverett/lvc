@@ -15,7 +15,9 @@ private:
     std::string path;
     
 public:
-    CerrIssueReporter(std::string path) : path(path) {}
+    CerrIssueReporter(std::string path) : path(path) {
+        
+    }
     
     virtual ReportedLexerError report(rownumber row, colnumber col, LexerError lexerError) override {
         std::cerr << path << ":" << row << ":" << col << ": error:" << getMessageForLexerError(lexerError) << " (lex error)" << std::endl;

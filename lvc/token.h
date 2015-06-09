@@ -34,7 +34,7 @@ inline const char* getLogStrForTokenKind(TokenKind kind) {
            kind == OpenParenthesis       ? "OpenParenthesis" :
            kind == CloseParenthesis      ? "CloseParenthesis" :
            kind == KeywordReturn         ? "KeywordReturn" :
-           kind == KeywordIf             ? "If" :
+           kind == KeywordIf             ? "KeywordIf" :
            kind == Indent                ? "Indent" :
            kind == Dedent                ? "Dedent" :
            kind == IntegerLiteral        ? "IntegerLiteral" :

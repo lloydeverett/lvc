@@ -18,6 +18,7 @@ ReportedParserError Parser::reportOnCurrentTok(ParserError er) {
     return issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), er);
 }
 
+#warning TODO: redesign this
 Module Parser::parseModule() {
     // This function parses at the module level
     // and defers the work below this level to other functions.
@@ -28,7 +29,7 @@ Module Parser::parseModule() {
     
     while (!lexerBuffer.isFinished()) {
         
-        // On each iteration, we attempt to parse a function or global.
+        // On each iteration, we attempt to parse a function or global (unless empty line).
         try {
             currentToken = lexerBuffer.readToken();
             
@@ -50,7 +51,7 @@ Module Parser::parseModule() {
         
     }
     
-    return Module(functions);
+    return Module(std::move(functions));
 }
 
 // This function assumes we are at the first token of the function
@@ -66,14 +67,21 @@ Function Parser::parseFunction() {
         throw ParserException(issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), ParserErrorExpectedIndent));
     }
     
+    currentToken = lexerBuffer.readToken();
+    std::vector<std::unique_ptr<IStmt>> statements;
     while (currentToken.isNot(Dedent)) {
-        parseStatement();
+        currentToken = lexerBuffer.readToken();
+        if (currentToken.isNot(Dedent)) {
+            statements.push_back(parseStatement());
+        }
     }
+    
+    return Function(std::move(decl), std::move(statements));
 }
 
-// This function assumes we are at the first token of the function (the typename).
+// This function assumes currentToken is the first token of the function (the typename).
 // After this function is called, currentToken will be the token of the
-// closing ) parenthesis for the argument list (the next token should be an indent).
+// closing ) parenthesis for the argument list (which precedes an indent if the function is well-formed).
 FunctionDecl Parser::parseFunctionDecl() {
     issueReporter.log("Parsing function decl");
     
@@ -116,10 +124,20 @@ std::unique_ptr<IType> Parser::parseType() {
     }
 }
 
+// This function assumes currentToken is the first token of the statement.
+// When finished, currentToekn is the last token of the statement (incl. newlines if any)
 std::unique_ptr<IStmt> Parser::parseStatement() {
     issueReporter.log("Parsing statement");
     
+    #warning TODO: make this recursive when dealing with if statements etc.
     
+    if (currentToken.is(KeywordReturn)) {
+        currentToken = lexerBuffer.readToken();
+        std::unique_ptr<IExp> exp(parseExpression());
+        return std::make_unique<ReturnStmt>(exp);
+    }
+    
+    assert(false);
 }
 
 std::unique_ptr<IExp> Parser::parseExpression() {

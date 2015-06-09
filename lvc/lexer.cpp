@@ -128,7 +128,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         reader.consumeUntilPositionAtNewlineOrEof();
     }
     
-#warning TODO: Block Comments (string literals must be acknowledged, and take whitespace into account after comment (and they should probably nest)).
+    #warning TODO: Block Comments (string literals must be acknowledged, and take whitespace into account after comment (and they should probably nest)).
     //  if (c == '/' && reader.peekChar() == '*') {
     //      reader.readChar();
     //      charcount len = 2;

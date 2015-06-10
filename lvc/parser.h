@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include <map>
 #include "ast.h"
 #include "ireader.h"
 #include "iissuereporter.h"
@@ -18,6 +19,8 @@ private:
     LexerBuffer lexerBuffer;
     Token currentToken;
     
+    std::map<std::string, IDecl&> moduleLevelSymbols;
+    std::map<std::string, IDecl&> functionLevelSymbols;
     FunctionDecl parseFunctionDecl();
     ReportedParserError reportOnCurrentTok(ParserError er);
     Function parseFunction();
@@ -26,5 +29,5 @@ private:
     std::unique_ptr<IType> parseType();
 public:
     Parser(IReader &reader, IIssueReporter &issueReporter);
-    Module parseModule();
+    Module parse();
 };

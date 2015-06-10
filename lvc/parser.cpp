@@ -18,8 +18,7 @@ ReportedParserError Parser::reportOnCurrentTok(ParserError er) {
     return issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), er);
 }
 
-#warning TODO: redesign this
-Module Parser::parseModule() {
+Module Parser::parse() {
     // This function parses at the module level
     // and defers the work below this level to other functions.
     // Thus we pretty much just need to identify global variables
@@ -43,10 +42,10 @@ Module Parser::parseModule() {
             }
         }
         catch (LexerException &e) {
-            
+            assert(false);
         }
         catch (FinishedLexingException &e) {
-            
+            assert(false);
         }
         
     }
@@ -63,17 +62,20 @@ Function Parser::parseFunction() {
     FunctionDecl decl(parseFunctionDecl());
     
     currentToken = lexerBuffer.readToken();
+    if (currentToken.isNot(Newline)) {
+        throw ParserException(reportOnCurrentTok(ParserErrorExpectedNewline));
+    }
+    currentToken = lexerBuffer.readToken();
     if (currentToken.isNot(Indent)) {
-        throw ParserException(issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), ParserErrorExpectedIndent));
+        throw ParserException(reportOnCurrentTok(ParserErrorExpectedIndent));
     }
     
-    currentToken = lexerBuffer.readToken();
     std::vector<std::unique_ptr<IStmt>> statements;
-    while (currentToken.isNot(Dedent)) {
+    while (true) {
         currentToken = lexerBuffer.readToken();
-        if (currentToken.isNot(Dedent)) {
-            statements.push_back(parseStatement());
-        }
+        if (currentToken.is(Newline)) continue;
+        if (currentToken.is(Dedent)) break;
+        statements.push_back(parseStatement());
     }
     
     return Function(std::move(decl), std::move(statements));
@@ -125,7 +127,7 @@ std::unique_ptr<IType> Parser::parseType() {
 }
 
 // This function assumes currentToken is the first token of the statement.
-// When finished, currentToekn is the last token of the statement (incl. newlines if any)
+// When finished, currentToken is the last token of the statement (incl. newline tokens)
 std::unique_ptr<IStmt> Parser::parseStatement() {
     issueReporter.log("Parsing statement");
     
@@ -134,14 +136,14 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
     if (currentToken.is(KeywordReturn)) {
         currentToken = lexerBuffer.readToken();
         std::unique_ptr<IExp> exp(parseExpression());
-        return std::make_unique<ReturnStmt>(exp);
+        return std::make_unique<ReturnStmt>(std::move(exp));
     }
     
     assert(false);
 }
 
 std::unique_ptr<IExp> Parser::parseExpression() {
-    
+    return std::make_unique<IntegerLiteralExp>("0");
 }
 
 #warning TODO: make static methods so using this is not so stupid

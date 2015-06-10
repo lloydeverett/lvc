@@ -244,6 +244,7 @@
 				57ADD1341B1DBC7A0031EB0F /* issuereporter */,
 				57D8FFE01B0893BB00630274 /* lexer */,
 				57ADD1301B1CBB070031EB0F /* parser */,
+				57C2A0221B28705E0013F2DD /* irgen */,
 				5727F1A91B07EBA500A6966F /* main.cpp */,
 			);
 			path = lvc;
@@ -319,6 +320,13 @@
 				57ADD1361B1DFB7E0031EB0F /* cerrissuereporter.h */,
 			);
 			name = issuereporter;
+			sourceTree = "<group>";
+		};
+		57C2A0221B28705E0013F2DD /* irgen */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = irgen;
 			sourceTree = "<group>";
 		};
 		57D8FFDF1B0893B000630274 /* tests */ = {
@@ -846,6 +854,7 @@
 				5752E2C81B2320A70087DD1E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5752E2D61B2487930087DD1E /* Build configuration list for PBXNativeTarget "lexerbuffertest" */ = {
 			isa = XCConfigurationList;
@@ -854,6 +863,7 @@
 				5752E2D81B2487930087DD1E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		57ADD11A1B1B67A50031EB0F /* Build configuration list for PBXNativeTarget "asttest" */ = {
 			isa = XCConfigurationList;

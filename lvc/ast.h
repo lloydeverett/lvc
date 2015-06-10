@@ -50,63 +50,80 @@ protected:
 ///////////////////////////////
 
 class PrimitiveType : public IType {
-private:
-    PrimitiveTypename name;
 public:
+    PrimitiveTypename name;
+    
     PrimitiveType(PrimitiveTypename name) :
     name(name) {}
 };
 
 class VariableDecl : public IDecl {
-    std::unique_ptr<IType> type;
-    std::string identifier;
+    std::unique_ptr<IType> type_ptr;
 public:
-    VariableDecl(std::unique_ptr<IType> type, std::string identifier) :
-    type(std::move(type)), identifier(identifier) {}
+    std::string identifier;
+    IType &type;
+    
+    VariableDecl(std::unique_ptr<IType> type_ptr, std::string identifier) :
+    type_ptr(std::move(type_ptr)),
+    type(*type_ptr.get()), identifier(identifier) {}
 };
 
 class VariableExp : public IExp {
-    const VariableDecl &decl;
 public:
+    VariableDecl &decl;
+    
     VariableExp(VariableDecl &decl) :
     decl(decl) {}
 };
 
 class ArgumentDecl : public IDecl {
-    VariableDecl variableDecl;
-    std::unique_ptr<IExp> defaultValue;
+    std::unique_ptr<IType> type_ptr;
+    std::unique_ptr<IExp> defaultValue_ptr;
 public:
-    ArgumentDecl(VariableDecl variableDecl, std::unique_ptr<IExp> defaultValue) :
-    variableDecl(std::move(variableDecl)), defaultValue(std::move(defaultValue)) {}
+    IType &type;
+    std::string identifier;
+    IExp &defaultValue;
+    
+    ArgumentDecl(std::unique_ptr<IType> type_ptr, std::string identifier, std::unique_ptr<IExp> defaultValue) :
+    type_ptr(std::move(type_ptr)), defaultValue_ptr(std::move(defaultValue_ptr)),
+    type(*type_ptr.get()), identifier(identifier), defaultValue(*defaultValue_ptr.get()) {}
 };
 
 class FunctionDecl : public IDecl {
-    std::unique_ptr<IType> returnType;
+    std::unique_ptr<IType> returnType_ptr;
+public:
     std::string identifier;
     std::vector<ArgumentDecl> arguments;
-public:
-    FunctionDecl(std::unique_ptr<IType> returnType, std::string identifier, std::vector<ArgumentDecl> arguments) :
-    returnType(std::move(returnType)), identifier(identifier), arguments(std::move(arguments)) {}
+    IType &returnType;
+    
+    FunctionDecl(std::unique_ptr<IType> returnType_ptr, std::string identifier, std::vector<ArgumentDecl> arguments) :
+    returnType_ptr(std::move(returnType_ptr)),
+    identifier(identifier), arguments(std::move(arguments)), returnType(*returnType_ptr.get()) {}
 };
 
 class VariableDeclStmt : public IStmt {
-    VariableDecl variableDecl;
-    std::unique_ptr<IExp> initialValue;
+    std::unique_ptr<IExp> initialValue_ptr;
 public:
-    VariableDeclStmt(VariableDecl variableDecl, std::unique_ptr<IExp> initialValue) :
-    variableDecl(std::move(variableDecl)), initialValue(std::move(initialValue)) {}
+    VariableDecl decl;
+    IExp &initialValue;
+    
+    VariableDeclStmt(VariableDecl decl, std::unique_ptr<IExp> initialValue_ptr) :
+    initialValue_ptr(std::move(initialValue_ptr)),
+    initialValue(*initialValue_ptr.get()), decl(std::move(decl))  {}
 };
 
 class ReturnStmt : public IStmt {
-    std::unique_ptr<IExp> returnedExpression;
+    std::unique_ptr<IExp> returnedExpression_ptr;
 public:
-    ReturnStmt(std::unique_ptr<IExp> returnedExpression) :
-    returnedExpression(std::move(returnedExpression)) {}
+    IExp &returnedExpression;
+    
+    ReturnStmt(std::unique_ptr<IExp> returnedExpression_ptr) :
+    returnedExpression_ptr(std::move(returnedExpression_ptr)),
+    returnedExpression(*returnedExpression_ptr.get()) {}
 };
 
 class IntegerLiteralExp : public IExp {
     std::string value;
-    
 public:
     IntegerLiteralExp(std::string value) :
     value(value) {}
@@ -127,6 +144,12 @@ class FunctionCallExp : public IExp {
 public:
     FunctionCallExp(const FunctionDecl &calleeDeclRef, std::vector<std::unique_ptr<IExp>> passedArguments) :
     calleeDeclRef(calleeDeclRef), passedArguments(std::move(passedArguments)) {}
+    
+    std::string toString() {
+        std::string s;
+        s+= "FunctionCall: ";
+        
+    }
 };
 
 class FunctionCallStmt : public IStmt {
@@ -134,21 +157,52 @@ class FunctionCallStmt : public IStmt {
 public:
     FunctionCallStmt(FunctionCallExp functionCallExp) :
     functionCallExp(std::move(functionCallExp)) {}
+    
+    std::string toString() {
+        std::string s;
+        s += "FunctionCallExpStmt ";
+        s += functionCallExp.toString();
+        return s;
+    }
 };
 
 ///////////////////////////////
 
 class Function : public INode {
-    FunctionDecl functionDecl;
+    FunctionDecl decl;
     std::vector<std::unique_ptr<IStmt>> statements;
 public:
-    Function(FunctionDecl functionDecl, std::vector<std::unique_ptr<IStmt>> statements) :
-    functionDecl(std::move(functionDecl)), statements(std::move(statements)) {}
+    Function(FunctionDecl decl, std::vector<std::unique_ptr<IStmt>> statements) :
+    decl(std::move(decl)), statements(std::move(statements)) {}
+    
+    std::string toString() {
+        std::string s;
+        s += decl.toString() + "\n";
+        for (std::unique_ptr<IStmt> &statement_ptr : statements)
+            s += "    " + statement_ptr.get()->toString() + "\n";
+        return s;
+    }
+    
+    IStmt &getStatement(size_t index) {
+        return *statements.at(index).get();
+    }
+    
+    size_t numStatements() {
+        return statements.size();
+    }
 };
 
 class Module : public INode {
-    std::vector<Function> functions;
 public:
+    std::vector<Function> functions;
+    
     Module(std::vector<Function> functions) :
     functions(std::move(functions)) {}
+    
+    std::string toString() {
+        std::string s;
+        for (Function &f : functions) s += f.toString() + "\n";
+        return s;
+    }
+    
 };

@@ -6,4 +6,4 @@ int getZero()
     return 0
 
 int main()
-    return getZero()
+    return 0

@@ -17,7 +17,7 @@ int main(int argc, const char * argv[]) {
     CerrIssueReporter c(filePath);
     Parser parser(s, c);
     
-    parser.parseModule();
+    parser.parse();
     
     return 0;
 }

@@ -81,10 +81,10 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
         return t;
     }
     
-    PrimitiveTypename pt = primitiveTypenameFromStrInSource(str);
-    if (pt != INVALID_PRIMITIVETYPENAME) {
+    PrimitiveTypeEnum pt = primitiveTypeEnumFromStrInSource(str);
+    if (pt != INVALID_PRIMITIVETYPEENUM) {
         t.setKind(PrimitiveTypenameKind);
-        t.setPrimitiveTypename(pt);
+        t.setPrimitiveTypeEnum(pt);
         return t;
     }
     

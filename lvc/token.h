@@ -9,7 +9,7 @@
 #pragma once
 #include <iostream>
 #include <cassert>
-#include "primitivetypename.h"
+#include "primitivetypeenum.h"
 #include "integertypedefs.h"
 
 enum TokenKind {
@@ -24,6 +24,10 @@ enum TokenKind {
     IntegerLiteral,
     RealLiteral,
     Equals,
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
     PrimitiveTypenameKind,
     INVALID_TOKENKIND,
 };
@@ -40,6 +44,10 @@ inline const char* getLogStrForTokenKind(TokenKind kind) {
            kind == IntegerLiteral        ? "IntegerLiteral" :
            kind == RealLiteral           ? "RealLiteral" :
            kind == Equals                ? "Equals" :
+           kind == Plus                  ? "Plus" :
+           kind == Minus                 ? "Minus" :
+           kind == Multiply              ? "Multiply" :
+           kind == Divide                ? "Divide" :
            kind == PrimitiveTypenameKind ? "PrimitiveTypenameKind" :
            kind == INVALID_TOKENKIND     ? "INVALID_TOKENKIND" :
            (assert(false), "");
@@ -57,7 +65,7 @@ private:
     rownumber row;
     colnumber startCol;
     charcount length;
-    PrimitiveTypename primitiveTypename;
+    PrimitiveTypeEnum primitiveTypeEnum;
     std::string str;
     // Str contains the contents of a literal (whether it be a number literal or a string literal), OR,
     // if the token is an identifier, it contains the identifer.
@@ -69,7 +77,7 @@ public:
         row = 99999;
         startCol = 99999;
         length = 99999;
-        primitiveTypename = INVALID_PRIMITIVETYPENAME;
+        primitiveTypeEnum = INVALID_PRIMITIVETYPEENUM;
         str = "";
     }
     bool is(TokenKind kind) const { return this->kind == kind; }
@@ -84,14 +92,14 @@ public:
     charcount getLength() { return this->length; }
     void setStr(const std::string &str) { this->str = str; }
     std::string getStr() { return this->str; }
-    void setPrimitiveTypename(PrimitiveTypename p) { primitiveTypename = p; }
-    PrimitiveTypename getPrimitiveTypename() { return primitiveTypename; }
+    void setPrimitiveTypeEnum(PrimitiveTypeEnum p) { primitiveTypeEnum = p; }
+    PrimitiveTypeEnum getPrimitiveTypeEnum() { return primitiveTypeEnum; }
     void dump() {
         std::cout << '(' << getLogStrForTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
         if (str.length() > 0)
             std::cout << " str: " << getStr();
-        if (primitiveTypename != INVALID_PRIMITIVETYPENAME)
-            std::cout << " primitiveTypename: " << getPrimitiveTypename();
+        if (primitiveTypeEnum != INVALID_PRIMITIVETYPEENUM)
+            std::cout << " primitiveTypename: " << stringFromPrimitiveTypeEnum(getPrimitiveTypeEnum());
         std::cout << std::endl;
     }
 };

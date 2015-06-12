@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include "parser.h"
 #include "testutil.h"
 
 int main(int argc, const char * argv[]) {
@@ -17,7 +18,9 @@ int main(int argc, const char * argv[]) {
     CerrIssueReporter c(filePath);
     Parser parser(s, c);
     
-    parser.parse();
+    Module m = parser.parse();
+    
+    std::cout << std::endl << m.toString();
     
     return 0;
 }

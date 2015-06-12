@@ -115,7 +115,7 @@ std::unique_ptr<IType> Parser::parseType() {
     issueReporter.log("Parsing type");
     
     if (currentToken.is(PrimitiveTypenameKind)) {
-        return std::make_unique<PrimitiveType>(currentToken.getPrimitiveTypename());
+        return std::make_unique<PrimitiveType>(currentToken.getPrimitiveTypeEnum());
     }
     else if (currentToken.is(Identifier)) {
         #warning TODO: this

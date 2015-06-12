@@ -36,6 +36,7 @@
 		57ADD13C1B1E06E50031EB0F /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57ADD13A1B1E06E50031EB0F /* parser.cpp */; };
 		57ADD13D1B1E0CB80031EB0F /* libLLVMSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFF11B0B923100630274 /* libLLVMSupport.a */; };
 		57ADD13E1B1E0CBA0031EB0F /* libLLVMCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFED1B0B91E400630274 /* libLLVMCore.a */; };
+		57C7F4031B2B52A9006A9E74 /* irgenvisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57C7F4011B2B52A9006A9E74 /* irgenvisitor.cpp */; };
 		57D8FFEE1B0B91E400630274 /* libLLVMCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFED1B0B91E400630274 /* libLLVMCore.a */; };
 		57D8FFF21B0B923100630274 /* libLLVMSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFF11B0B923100630274 /* libLLVMSupport.a */; };
 /* End PBXBuildFile section */
@@ -130,7 +131,7 @@
 		5752E2CD1B233A980087DD1E /* lexerexception.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerexception.h; sourceTree = "<group>"; };
 		5752E2D21B2487930087DD1E /* lexerbuffertest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lexerbuffertest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5752E2D41B2487930087DD1E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		5752E2DA1B248AAB0087DD1E /* primitivetypename.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = primitivetypename.h; sourceTree = "<group>"; };
+		5752E2DA1B248AAB0087DD1E /* primitivetypeenum.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = primitivetypeenum.h; sourceTree = "<group>"; };
 		5752E2DB1B25C4BE0087DD1E /* iissuereporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iissuereporter.h; sourceTree = "<group>"; };
 		578EFB741B20583700A3968C /* lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lexer.cpp; sourceTree = "<group>"; };
 		578EFB751B20583700A3968C /* lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexer.h; sourceTree = "<group>"; };
@@ -142,6 +143,8 @@
 		57ADD1361B1DFB7E0031EB0F /* cerrissuereporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cerrissuereporter.h; sourceTree = "<group>"; };
 		57ADD13A1B1E06E50031EB0F /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parser.cpp; sourceTree = "<group>"; };
 		57ADD13B1B1E06E50031EB0F /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		57C7F4011B2B52A9006A9E74 /* irgenvisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = irgenvisitor.cpp; sourceTree = "<group>"; };
+		57C7F4021B2B52A9006A9E74 /* irgenvisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = irgenvisitor.h; sourceTree = "<group>"; };
 		57D426BB1B231DE0005B5D61 /* testutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testutil.h; sourceTree = "<group>"; };
 		57D8FFE61B089E8300630274 /* ast.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ast.h; sourceTree = "<group>"; };
 		57D8FFEA1B08A19400630274 /* token.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = token.h; sourceTree = "<group>"; };
@@ -237,7 +240,7 @@
 		5727F1A81B07EBA500A6966F /* lvc */ = {
 			isa = PBXGroup;
 			children = (
-				5752E2DA1B248AAB0087DD1E /* primitivetypename.h */,
+				5752E2DA1B248AAB0087DD1E /* primitivetypeenum.h */,
 				57D8FFEA1B08A19400630274 /* token.h */,
 				57D8FFE61B089E8300630274 /* ast.h */,
 				57334CE01B1076E300085754 /* util */,
@@ -325,6 +328,8 @@
 		57C2A0221B28705E0013F2DD /* irgen */ = {
 			isa = PBXGroup;
 			children = (
+				57C7F4011B2B52A9006A9E74 /* irgenvisitor.cpp */,
+				57C7F4021B2B52A9006A9E74 /* irgenvisitor.h */,
 			);
 			name = irgen;
 			sourceTree = "<group>";
@@ -523,6 +528,7 @@
 			files = (
 				57ADD13C1B1E06E50031EB0F /* parser.cpp in Sources */,
 				5727F1AA1B07EBA500A6966F /* main.cpp in Sources */,
+				57C7F4031B2B52A9006A9E74 /* irgenvisitor.cpp in Sources */,
 				578EFB761B20583700A3968C /* lexer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -10,12 +10,18 @@
 #include <iostream>
 #include "iissuereporter.h"
 
+enum LoggingSetting {
+    LoggingEnabled,
+    LoggingDisabled,
+};
+
 class CerrIssueReporter : public IIssueReporter {
 private:
     std::string path;
+    LoggingSetting loggingSetting;
     
 public:
-    CerrIssueReporter(std::string path) : path(path) {
+    CerrIssueReporter(std::string path, LoggingSetting s = LoggingDisabled) : path(path), loggingSetting(s) {
         
     }
     
@@ -30,7 +36,8 @@ public:
     }
         
     virtual void log(std::string s) override {
-        std::cout << "LOG: " << s << std::endl;
+        if (loggingSetting == LoggingEnabled)
+            std::cout << "LOG: " << s << std::endl;
     }
     
 };

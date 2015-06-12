@@ -183,9 +183,9 @@ struct BinOpExp : public IExp {
     virtual std::string toString() const {
         std::string s;
         s += "(";
-        s += lhs.get()->toString();
+        s += lhs->toString();
         s += ")(";
-        s += rhs.get()->toString();
+        s += rhs->toString();
         s += ")";
         s += op;
         return s;
@@ -204,9 +204,9 @@ struct FunctionCallExp : public IExp {
         s += "(";
         if (passedArguments.size() > 0) {
             for (int i = 0; i < passedArguments.size() - 1; i++) {
-                s += passedArguments[i].get()->toString() + ", ";
+                s += passedArguments[i]->toString() + ", ";
             }
-            s += passedArguments[passedArguments.size() - 1].get()->toString();
+            s += passedArguments[passedArguments.size() - 1]->toString();
         }
         s += ")";
         return s;
@@ -239,12 +239,12 @@ struct Function : public INode {
         s += "(Function)\n";
         s += decl.toString() + "\n";
         for (const std::unique_ptr<IStmt> &statement_ptr : statements)
-            s += "    " + statement_ptr.get()->toString() + "\n";
+            s += "    " + statement_ptr->toString() + "\n";
         return s;
     }
     
     IStmt& getStatement(size_t index) {
-        return *statements.at(index).get();
+        return *statements.at(index);
     }
     
     size_t numStatements() const {

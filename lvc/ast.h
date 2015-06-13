@@ -8,14 +8,13 @@
 
 #pragma once
 #include "primitivetypeenum.h"
-#include <cstdint>
 #include <vector>
 #include <memory>
 #include <string>
 
-class INodeVisitor {
-    
-};
+class INodeVisitor;
+
+namespace ast {
 
 class INode {
 protected:
@@ -25,6 +24,8 @@ protected:
     
 public:
     virtual std::string toString() const = 0;
+    virtual void accept(INodeVisitor &visitor) = 0;
+    
     // Making the virtual destructor public allows the derived classes
     // to be destructed polymorphically (i.e. through their base class)
     virtual ~INode() {}
@@ -62,6 +63,8 @@ struct PrimitiveType : public IType {
     virtual std::string toString() const {
         return stringFromPrimitiveTypeEnum(name);
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct VariableDecl : public IDecl {
@@ -78,6 +81,8 @@ struct VariableDecl : public IDecl {
         s += identifier;
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct VariableExp : public IExp {
@@ -91,6 +96,8 @@ struct VariableExp : public IExp {
         s += decl.toString();
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct ArgumentDecl : public IDecl {
@@ -108,6 +115,8 @@ struct ArgumentDecl : public IDecl {
         s += " "; s += identifier;
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct FunctionDecl : public IDecl {
@@ -134,6 +143,8 @@ struct FunctionDecl : public IDecl {
         s += ")";
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct VariableDeclStmt : public IStmt {
@@ -151,6 +162,8 @@ struct VariableDeclStmt : public IStmt {
         s += initialValue_ptr->toString();
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct ReturnStmt : public IStmt {
@@ -161,6 +174,8 @@ struct ReturnStmt : public IStmt {
     virtual std::string toString() const {
         return "return " + returnedExpression_ptr->toString();
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct IntegerLiteralExp : public IExp {
@@ -171,6 +186,8 @@ struct IntegerLiteralExp : public IExp {
     virtual std::string toString() const {
         return value;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct BinOpExp : public IExp {
@@ -190,6 +207,8 @@ struct BinOpExp : public IExp {
         s += op;
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct FunctionCallExp : public IExp {
@@ -211,6 +230,8 @@ struct FunctionCallExp : public IExp {
         s += ")";
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 struct FunctionCallStmt : public IStmt {
@@ -224,6 +245,8 @@ struct FunctionCallStmt : public IStmt {
         s += functionCallExp.toString();
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
 
 ///////////////////////////////
@@ -243,13 +266,7 @@ struct Function : public INode {
         return s;
     }
     
-    IStmt& getStatement(size_t index) {
-        return *statements.at(index);
-    }
-    
-    size_t numStatements() const {
-        return statements.size();
-    }
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct Module : public INode {
@@ -262,4 +279,8 @@ struct Module : public INode {
         for (const Function &f : functions) s += f.toString() + "\n";
         return s;
     }
+    
+    virtual void accept(INodeVisitor &visitor);
 };
+    
+}

@@ -8,6 +8,9 @@
 
 #include "parser.h"
 #include "parserexception.h"
+#include <memory>
+
+using namespace ast;
 
 Parser::Parser(IReader &reader, IIssueReporter &issueReporter) :
 issueReporter(issueReporter), lexerBuffer(issueReporter, reader) {

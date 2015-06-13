@@ -11,9 +11,9 @@
 #include "ast.h"
 
 void createAndDestoryALotOfReturnsStmts() {
-    std::vector<ReturnStmt> returnStmts;
+    std::vector<ast::ReturnStmt> returnStmts;
     for (int i = 0; i < 10000; i++) {
-        returnStmts.emplace_back(std::unique_ptr<IExp>(new IntegerLiteralExp("3")));
+        returnStmts.emplace_back(std::unique_ptr<ast::IExp>(new ast::IntegerLiteralExp("3")));
     }
 }
 

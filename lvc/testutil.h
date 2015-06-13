@@ -12,8 +12,6 @@
 // Test includes
 #include "getfilecontents.h"
 #include "stringreader.h"
-#include "lexer.h"
-#include "stringreader.h"
 #include "cerrissuereporter.h"
 
 inline std::string getPathForVFile(std::string s) {

@@ -19,15 +19,15 @@ private:
     LexerBuffer lexerBuffer;
     Token currentToken;
     
-    std::map<std::string, IDecl&> moduleLevelSymbols;
-    std::map<std::string, IDecl&> functionLevelSymbols;
-    FunctionDecl parseFunctionDecl();
+    std::map<std::string, ast::IDecl&> moduleLevelSymbols;
+    std::map<std::string, ast::IDecl&> functionLevelSymbols;
+    ast::FunctionDecl parseFunctionDecl();
     ReportedParserError reportOnCurrentTok(ParserError er);
-    Function parseFunction();
-    std::unique_ptr<IStmt> parseStatement();
-    std::unique_ptr<IExp> parseExpression();
-    std::unique_ptr<IType> parseType();
+    ast::Function parseFunction();
+    std::unique_ptr<ast::IStmt> parseStatement();
+    std::unique_ptr<ast::IExp> parseExpression();
+    std::unique_ptr<ast::IType> parseType();
 public:
     Parser(IReader &reader, IIssueReporter &issueReporter);
-    Module parse();
+    ast::Module parse();
 };

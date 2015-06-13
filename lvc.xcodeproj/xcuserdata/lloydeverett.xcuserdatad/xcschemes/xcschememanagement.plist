@@ -9,6 +9,16 @@
 			<key>orderHint</key>
 			<integer>3</integer>
 		</dict>
+		<key>irgentest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
+		</dict>
+		<key>irtest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>9</integer>
+		</dict>
 		<key>lexerbuffertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -62,6 +72,11 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>573AAA071B2C3CA100E84844</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>5752E2C21B2320A70087DD1E</key>
 		<dict>
 			<key>primary</key>
@@ -83,6 +98,11 @@
 			<true/>
 		</dict>
 		<key>57ADD1281B1B68CF0031EB0F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>57CD4CB31B2C371F00EF9490</key>
 		<dict>
 			<key>primary</key>
 			<true/>

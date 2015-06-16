@@ -74,6 +74,7 @@ public:
         startCol = 99999;
         length = 99999;
         primitiveTypeEnum = INVALID_PRIMITIVETYPEENUM;
+        operatorChar = '\0';
         str = "";
     }
     
@@ -83,6 +84,8 @@ public:
             std::cout << " str: " << getStr();
         if (primitiveTypeEnum != INVALID_PRIMITIVETYPEENUM)
             std::cout << " primitiveTypename: " << stringFromPrimitiveTypeEnum(getPrimitiveTypeEnum());
+        if (operatorChar != '\0')
+            std::cout << " operatorChar: " << operatorChar;
         std::cout << std::endl;
     }
     

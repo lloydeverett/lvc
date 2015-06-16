@@ -13,16 +13,16 @@
 #include <queue>
 #include "integertypedefs.h"
 
-class QueuedDedent {
-public:
-    const colnumber startCol;
-    const charcount length;
-    
-    QueuedDedent(colnumber startCol, charcount length) : startCol(startCol), length(length) {}
-};
-
 class Lexer : public ILexer {
 private:
+    class QueuedDedent {
+    public:
+        const colnumber startCol;
+        const charcount length;
+        
+        QueuedDedent(colnumber startCol, charcount length) : startCol(startCol), length(length) {}
+    };
+    
     IReader &reader;
     std::stack<colnumber> indentStack;
     std::queue<QueuedDedent> queuedDedents;

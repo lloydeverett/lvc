@@ -14,39 +14,51 @@ using namespace ast;
 void Function::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void ArgumentDecl::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void FunctionDecl::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void VariableDecl::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void BinOpExp::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void FunctionCallExp::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void IntegerLiteralExp::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void VariableExp::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void FunctionCallStmt::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void ReturnStmt::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void VariableDeclStmt::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void PrimitiveType::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
 void Module::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }

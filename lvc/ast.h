@@ -11,6 +11,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <iostream>
 
 class INodeVisitor;
 
@@ -23,13 +24,15 @@ protected:
     INode() {}
     
 public:
-    virtual std::string toString() const = 0;
+    virtual std::ostream& dump(std::ostream& o) const = 0;
     virtual void accept(INodeVisitor &visitor) = 0;
     
     // Making the virtual destructor public allows the derived classes
     // to be destructed polymorphically (i.e. through their base class)
     virtual ~INode() {}
 };
+    
+inline std::ostream& operator<<(std::ostream& o, const INode& n) { return n.dump(o); }
 
 ///////////////////////////////
 
@@ -60,11 +63,11 @@ struct PrimitiveType : public IType {
     PrimitiveType(PrimitiveTypeEnum name) :
     name(name) {}
     
-    virtual std::string toString() const {
-        return stringFromPrimitiveTypeEnum(name);
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << std::string(stringFromPrimitiveTypeEnum(name)) << "wtf";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct VariableDecl : public IDecl {
@@ -74,15 +77,11 @@ struct VariableDecl : public IDecl {
     type_ptr(std::move(type_ptr)),
     identifier(identifier) {}
     
-    virtual std::string toString() const {
-        std::string s;
-        s += "(VariableDecl) ";
-        s += type_ptr->toString();
-        s += identifier;
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(VariableDecl: " << *type_ptr << " " << identifier << ")";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct VariableExp : public IExp {
@@ -90,14 +89,11 @@ struct VariableExp : public IExp {
     VariableExp(VariableDecl &decl) :
     decl(decl) {}
     
-    virtual std::string toString() const {
-        std::string s;
-        s += "(VariableExp) ";
-        s += decl.toString();
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(VariableExp: " << decl << ")";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct ArgumentDecl : public IDecl {
@@ -108,15 +104,11 @@ struct ArgumentDecl : public IDecl {
     type_ptr(std::move(type_ptr)), defaultValue_ptr(std::move(defaultValue_ptr)),
     identifier(identifier) {}
     
-    virtual std::string toString() const {
-        std::string s;
-        s += "(ArgumentDecl) ";
-        s += type_ptr->toString();
-        s += " "; s += identifier;
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(ArgumentDecl: " << *type_ptr << ", " << identifier << ")";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct FunctionDecl : public IDecl {
@@ -127,24 +119,16 @@ struct FunctionDecl : public IDecl {
     returnType_ptr(std::move(returnType_ptr)),
     identifier(identifier), arguments(std::move(arguments)) {}
     
-    virtual std::string toString() const {
-        std::string s;
-        s += returnType_ptr->toString();
-        s += " ";
-        s += identifier;
-        s += "(";
-        if (arguments.size() > 0) {
-            for (size_t i = 0; i < arguments.size() - 1; i++) {
-                s += arguments[i].toString();
-                s += ", ";
-            }
-            s += arguments[arguments.size() - 1].toString();
+    virtual std::ostream& dump(std::ostream& o) const {
+        o << "(FunctionDecl: " << *returnType_ptr << ", " << identifier << ", (Arguments: " ;
+        for (const ArgumentDecl &decl : arguments) {
+            o << decl;
         }
-        s += ")";
-        return s;
+        o << "))";
+        return o;
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct VariableDeclStmt : public IStmt {
@@ -155,15 +139,11 @@ struct VariableDeclStmt : public IStmt {
     initialValue_ptr(std::move(initialValue_ptr)),
     decl(std::move(decl))  {}
     
-    virtual std::string toString() const {
-        std::string s;
-        s += "(VariableDeclStmt) ";
-        s += decl.toString() + " = ";
-        s += initialValue_ptr->toString();
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(VariableDeclStmt: " << decl << ", " << *initialValue_ptr << ")";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct ReturnStmt : public IStmt {
@@ -171,11 +151,11 @@ struct ReturnStmt : public IStmt {
     ReturnStmt(std::unique_ptr<IExp> returnedExpression_ptr) :
     returnedExpression_ptr(std::move(returnedExpression_ptr)) {}
     
-    virtual std::string toString() const {
-        return "return " + returnedExpression_ptr->toString();
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(ReturnStmt: " << *returnedExpression_ptr << ")";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct IntegerLiteralExp : public IExp {
@@ -183,11 +163,15 @@ struct IntegerLiteralExp : public IExp {
     IntegerLiteralExp(std::string value) :
     value(value) {}
     
-    virtual std::string toString() const {
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(IntegerLiteralExp: " << value << ")";
+    }
+    
+    virtual std::string dump() const {
         return value;
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct BinOpExp : public IExp {
@@ -197,18 +181,11 @@ struct BinOpExp : public IExp {
     BinOpExp(char op, std::unique_ptr<IExp> lhs, std::unique_ptr<IExp> rhs) :
     op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
     
-    virtual std::string toString() const {
-        std::string s;
-        s += "(";
-        s += lhs->toString();
-        s += ")(";
-        s += rhs->toString();
-        s += ")";
-        s += op;
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(BinOpExp: " << *lhs << ", " << *rhs << ")";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct FunctionCallExp : public IExp {
@@ -217,21 +194,16 @@ struct FunctionCallExp : public IExp {
     FunctionCallExp(const FunctionDecl &calleeDeclRef, std::vector<std::unique_ptr<IExp>> passedArguments) :
     calleeDeclRef(calleeDeclRef), passedArguments(std::move(passedArguments)) {}
     
-    std::string toString() const {
-        std::string s;
-        s += calleeDeclRef.toString();
-        s += "(";
-        if (passedArguments.size() > 0) {
-            for (int i = 0; i < passedArguments.size() - 1; i++) {
-                s += passedArguments[i]->toString() + ", ";
-            }
-            s += passedArguments[passedArguments.size() - 1]->toString();
+    virtual std::ostream& dump(std::ostream& o) const {
+        o << "(FunctionCallExp: )" << calleeDeclRef << ", (Arguments: ";
+        for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
+            o << *exp_ptr;
         }
-        s += ")";
-        return s;
+        o << "))";
+        return o;
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct FunctionCallStmt : public IStmt {
@@ -239,14 +211,11 @@ struct FunctionCallStmt : public IStmt {
     FunctionCallStmt(FunctionCallExp functionCallExp) :
     functionCallExp(std::move(functionCallExp)) {}
     
-    std::string toString() const {
-        std::string s;
-        s += "(FunctionCallExpStmt) ";
-        s += functionCallExp.toString();
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        return o << "(FunctionCallStmt: " << functionCallExp << ")";
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
 
 ///////////////////////////////
@@ -257,30 +226,33 @@ struct Function : public INode {
     Function(FunctionDecl decl, std::vector<std::unique_ptr<IStmt>> statements) :
     decl(std::move(decl)), statements(std::move(statements)) {}
     
-    std::string toString() const {
-        std::string s;
-        s += "(Function)\n";
-        s += decl.toString() + "\n";
-        for (const std::unique_ptr<IStmt> &statement_ptr : statements)
-            s += "    " + statement_ptr->toString() + "\n";
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        o << "Function" << std::endl;
+        o << decl << std::endl;
+        for (const std::unique_ptr<IStmt>& statement_ptr : statements) {
+            o << *statement_ptr << std::endl;
+        }
+        return o;
     }
     
     virtual void accept(INodeVisitor &visitor) override;
 };
 
 struct Module : public INode {
+    std::string moduleName;
     std::vector<Function> functions;
-    Module(std::vector<Function> functions) :
-    functions(std::move(functions)) {}
+    Module(std::string moduleName, std::vector<Function> functions) :
+    moduleName(moduleName), functions(std::move(functions)) {}
     
-    std::string toString() const {
-        std::string s;
-        for (const Function &f : functions) s += f.toString() + "\n";
-        return s;
+    virtual std::ostream& dump(std::ostream& o) const {
+        o << "Module " << moduleName << std::endl;
+        for (const Function& function : functions) {
+            o << function;
+        }
+        return o;
     }
     
-    virtual void accept(INodeVisitor &visitor);
+    virtual void accept(INodeVisitor &visitor) override;
 };
     
 }

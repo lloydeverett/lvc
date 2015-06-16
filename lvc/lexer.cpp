@@ -128,6 +128,8 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         reader.consumeUntilPositionAtNewlineOrEof();
     }
     
+    #warning TODO: skip whitespace *after* comments. (and before)
+    
     #warning TODO: Block Comments (string literals must be acknowledged, and take whitespace into account after comment (and they should probably nest)).
     //  if (c == '/' && reader.peekChar() == '*') {
     //      reader.readChar();
@@ -156,13 +158,12 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
     Token t;
     t.setRow(rowOfC);
     t.setStartCol(colOfC);
+    t.setLength(1);
     
     if (c == '\n') {
         t.setKind(Newline);
-        t.setLength(1);
         return t;
     }
-    
     if (c == '\r') {
         charcount len = 1;
         if (reader.peekChar() == '\n') {
@@ -173,22 +174,17 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         t.setLength(len);
         return t;
     }
-    
     if (c == '(') {
         t.setKind(OpenParenthesis);
-        t.setLength(1);
         return t;
     }
-    
     if (c == ')') {
         t.setKind(CloseParenthesis);
-        t.setLength(1);
         return t;
     }
-    
-    if (c == '=') {
-        t.setKind(Equals);
-        t.setLength(1);
+    if (c == '+' || c == '-' || c == '/' || c == '*' || c == '=') {
+        t.setKind(Operator);
+        t.setOperatorChar(c);
         return t;
     }
     

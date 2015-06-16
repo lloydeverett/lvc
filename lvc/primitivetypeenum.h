@@ -12,6 +12,8 @@
 enum PrimitiveTypeEnum  {
     Int,
     Uint,
+    Int8,
+    Uint8,
     Int16,
     Uint16,
     Int32,
@@ -27,6 +29,8 @@ enum PrimitiveTypeEnum  {
 inline PrimitiveTypeEnum primitiveTypeEnumFromStrInSource(const std::string &str) {
     if (str == "int")     return Int;
     if (str == "uint")    return Uint;
+    if (str == "int8")    return Int8;
+    if (str == "uint8")   return Uint8;
     if (str == "int16")   return Int16;
     if (str == "uint16")  return Uint16;
     if (str == "int32")   return Int32;
@@ -42,6 +46,8 @@ inline PrimitiveTypeEnum primitiveTypeEnumFromStrInSource(const std::string &str
 inline const char* stringFromPrimitiveTypeEnum(PrimitiveTypeEnum e) {
     if (e == Int)         return "int";
     if (e == Uint)        return "uint";
+    if (e == Int8)        return "int8";
+    if (e == Uint8)       return "uint8";
     if (e == Int16)       return "int16";
     if (e == Uint16)      return "uint16";
     if (e == Int32)       return "int32";

@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "testutil.h"
+#include "lexer.h"
 
 int main(int argc, const char * argv[]) {
     std::string filePath = getPathForVFile("verysimple.v");

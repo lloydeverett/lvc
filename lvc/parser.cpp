@@ -21,11 +21,7 @@ ReportedParserError Parser::reportOnCurrentTok(ParserError er) {
     return issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), er);
 }
 
-Module Parser::parse() {
-    // This function parses at the module level
-    // and defers the work below this level to other functions.
-    // Thus we pretty much just need to identify global variables
-    // and functions, and hand them off to lower functions.
+Module Parser::parse(std::string nameOfModule) {
     
     std::vector<Function> functions;
     
@@ -53,11 +49,12 @@ Module Parser::parse() {
         
     }
     
-    return Module(std::move(functions));
+    return Module(nameOfModule, std::move(functions));
+    
 }
 
 // This function assumes we are at the first token of the function
-// (the return type). When it's finished, currentToken should be at the
+// (the return type). When it's finished, currentToken should be the
 // final dedent token of the function.
 Function Parser::parseFunction() {
     issueReporter.log("Parsing function");
@@ -86,7 +83,7 @@ Function Parser::parseFunction() {
 
 // This function assumes currentToken is the first token of the function (the typename).
 // After this function is called, currentToken will be the token of the
-// closing ) parenthesis for the argument list (which precedes an indent if the function is well-formed).
+// closing ) parenthesis for the argument list (which precedes an indent if the function is well-formed and not empty).
 FunctionDecl Parser::parseFunctionDecl() {
     issueReporter.log("Parsing function decl");
     
@@ -130,7 +127,7 @@ std::unique_ptr<IType> Parser::parseType() {
 }
 
 // This function assumes currentToken is the first token of the statement.
-// When finished, currentToken is the last token of the statement (incl. newline tokens)
+// When finished, currentToken is the last token of the statement
 std::unique_ptr<IStmt> Parser::parseStatement() {
     issueReporter.log("Parsing statement");
     
@@ -145,6 +142,8 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
     assert(false);
 }
 
+// This function expects currentToken to be the first token of an expression.
+// After calling this function, currentToken should be the last token of the expression.
 std::unique_ptr<IExp> Parser::parseExpression() {
     return std::make_unique<IntegerLiteralExp>("0");
 }

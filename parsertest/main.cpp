@@ -20,7 +20,7 @@ int main(int argc, const char * argv[]) {
     
     ast::Module m = parser.parse();
     
-    std::cout << std::endl << m.toString();
+    std::cout << std::endl << m;
     
     return 0;
 }

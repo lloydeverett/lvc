@@ -29,5 +29,5 @@ private:
     std::unique_ptr<ast::IType> parseType();
 public:
     Parser(IReader &reader, IIssueReporter &issueReporter);
-    ast::Module parse();
+    ast::Module parse(std::string nameOfModule);
 };

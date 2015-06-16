@@ -26,6 +26,16 @@ int main(int argc, const char * argv[]) {
     Value* v = builder.CreateAdd(Constant::getAllOnesValue(Type::getInt32Ty(context)), Constant::getNullValue(Type::getInt32Ty(context)));
     builder.CreateMul(v, ConstantInt::get(Type::getInt32Ty(context), 30));
     builder.CreateRet(v);
+    
+    std::vector<Type*> t;
+    ArrayRef<Type*> arref(t.data(), t.size());
+    
+    FunctionType *otherT = FunctionType::get(builder.getInt32Ty(), arref, false);
+    Function *other = Function::Create(otherT, llvm::GlobalValue::LinkageTypes::ExternalLinkage, "", &module);
+    BasicBlock *otherb = BasicBlock::Create(getGlobalContext(), "entry", other);
+    builder.SetInsertPoint(otherb);
+    builder.CreateRet(builder.getInt32(40));
+    
     module.dump();
     return 0;
 }

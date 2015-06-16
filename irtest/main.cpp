@@ -16,7 +16,13 @@ int main(int argc, const char * argv[]) {
     CerrIssueReporter cr(path);
     StringReader s(getFileContents(path.c_str()));
     Parser p(s, cr);
-    ast::Module m = p.parse();
-    std::cout << std::endl << m.toString();
+    ast::Module m = p.parse("verysimple");
+    IRGenConfig config;
+    config.bitsUsedByBooleanType = 8;
+    config.bitsUsedByIntsWithUnspecifiedBitWidth = 32;
+    llvm::Module llvmm("helloworld", llvm::getGlobalContext());
+    IRGenVisitor v(&llvmm, config);
+    m.accept(v);
+    llvmm.dump();
     return 0;
 }

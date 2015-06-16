@@ -20,7 +20,7 @@ public:
     
     // If lexToken successfully lexes a token OR finds a valid substitution for the token, it should return that token.
     // If the function fails and cannot find a substitution, it should throw a LexException.
-    // Any issues that were encountered (including substitutionts) should be reported to the issueReporter.
+    // Any issues that were encountered (including substitutions) should be reported to the issueReporter.
     virtual Token lexToken(IIssueReporter &issueReporter) = 0;
     
     // Attempts to recover when the last call to lexToken resulted in an exception being thrown.

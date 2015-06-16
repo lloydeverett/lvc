@@ -23,11 +23,7 @@ enum TokenKind {
     Dedent,
     IntegerLiteral,
     RealLiteral,
-    Equals,
-    Plus,
-    Minus,
-    Multiply,
-    Divide,
+    Operator,
     PrimitiveTypenameKind,
     INVALID_TOKENKIND,
 };
@@ -43,11 +39,7 @@ inline const char* getLogStrForTokenKind(TokenKind kind) {
            kind == Dedent                ? "Dedent" :
            kind == IntegerLiteral        ? "IntegerLiteral" :
            kind == RealLiteral           ? "RealLiteral" :
-           kind == Equals                ? "Equals" :
-           kind == Plus                  ? "Plus" :
-           kind == Minus                 ? "Minus" :
-           kind == Multiply              ? "Multiply" :
-           kind == Divide                ? "Divide" :
+           kind == Operator              ? "Operator" :
            kind == PrimitiveTypenameKind ? "PrimitiveTypenameKind" :
            kind == INVALID_TOKENKIND     ? "INVALID_TOKENKIND" :
            (assert(false), "");
@@ -65,13 +57,17 @@ private:
     rownumber row;
     colnumber startCol;
     charcount length;
+    
     PrimitiveTypeEnum primitiveTypeEnum;
-    std::string str;
+    char operatorChar;
+    
     // Str contains the contents of a literal (whether it be a number literal or a string literal), OR,
     // if the token is an identifier, it contains the identifer.
+    std::string str;
     
 public:
     Token() { clean(); }
+    
     void clean() {
         kind = INVALID_TOKENKIND;
         row = 99999;
@@ -80,20 +76,7 @@ public:
         primitiveTypeEnum = INVALID_PRIMITIVETYPEENUM;
         str = "";
     }
-    bool is(TokenKind kind) const { return this->kind == kind; }
-    bool isNot(TokenKind kind) const { return this->kind != kind; }
-    void setKind(TokenKind kind) { this->kind = kind; }
-    TokenKind getKind() const { return this->kind; }
-    void setRow(rownumber row) { this->row = row; }
-    rownumber getRow() { return this->row; }
-    void setStartCol(colnumber startCol) { this->startCol = startCol; }
-    colnumber getStartCol() { return this->startCol; }
-    void setLength(charcount length) { this->length = length; }
-    charcount getLength() { return this->length; }
-    void setStr(const std::string &str) { this->str = str; }
-    std::string getStr() { return this->str; }
-    void setPrimitiveTypeEnum(PrimitiveTypeEnum p) { primitiveTypeEnum = p; }
-    PrimitiveTypeEnum getPrimitiveTypeEnum() { return primitiveTypeEnum; }
+    
     void dump() {
         std::cout << '(' << getLogStrForTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
         if (str.length() > 0)
@@ -102,4 +85,28 @@ public:
             std::cout << " primitiveTypename: " << stringFromPrimitiveTypeEnum(getPrimitiveTypeEnum());
         std::cout << std::endl;
     }
+    
+    bool is(TokenKind kind) const { return this->kind == kind; }
+    bool isNot(TokenKind kind) const { return this->kind != kind; }
+    
+    void setKind(TokenKind kind) { this->kind = kind; }
+    TokenKind getKind() const { return this->kind; }
+    
+    void setRow(rownumber row) { this->row = row; }
+    rownumber getRow() { return this->row; }
+    
+    void setStartCol(colnumber startCol) { this->startCol = startCol; }
+    colnumber getStartCol() { return this->startCol; }
+    
+    void setLength(charcount length) { this->length = length; }
+    charcount getLength() { return this->length; }
+    
+    void setStr(const std::string &str) { this->str = str; }
+    std::string getStr() { return this->str; }
+    
+    void setOperatorChar(char c) { this->operatorChar = c; }
+    char getOperatorChar() { return this->operatorChar; }
+    
+    void setPrimitiveTypeEnum(PrimitiveTypeEnum p) { primitiveTypeEnum = p; }
+    PrimitiveTypeEnum getPrimitiveTypeEnum() { return primitiveTypeEnum; }
 };

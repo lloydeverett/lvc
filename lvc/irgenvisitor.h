@@ -2,84 +2,46 @@
 //  irgenvisitor.h
 //  lvc
 //
-//  Created by Lloyd Everett on 2015/06/12.
+//  Created by Lloyd Everett on 2015/06/15.
 //  Copyright (c) 2015 Lloyd Everett. All rights reserved.
 //
 
 #pragma once
+#include "ast.h"
 #include "inodevisitor.h"
+#include "irgenconfig.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
+#include "typevisitor.h"
+#include "expvisitor.h"
 
-class IRGenNodeVisitor : public INodeVisitor {
+class IRGenVisitor : public INodeVisitor {
 private:
+    llvm::LLVMContext &llvmContext;
+    //////////
+    //
+    // Be careful: member initialization relies on the order of these
+    // members. (i.e. reorder with care)
+    //
+    //////////
+    llvm::Module *llvmModule;
     llvm::IRBuilder<> builder;
-    llvm::Module *llvmmod;
-    bool keepNames;
+    IRGenConfig config;
+    //////////
+    TypeVisitor typeVisitor;
+    ExpVisitor expVisitor;
+    //////////
     
 public:
-    // Note that the meaning of the llvm module does not necessarily correspond with that of
-    // ast::Module. Multiple ast::Module's could be built into the same llvm module.
-    // This is why we accept the llvm module in the constructor.
-    
-    IRGenNodeVisitor(llvm::Module *llvmmodp, bool keepNames) : llvmmod(llvmmodp), builder(llvmmodp->getContext()), keepNames(keepNames) {
-        
+    IRGenVisitor(llvm::Module *llvmModuleParam, IRGenConfig config);
+    llvm::Module *getLLLVMModule() {
+        return llvmModule;
     }
-    
-    virtual void visit(ast::Module &module) override {
-        
-    }
-    
-    virtual void visit(ast::Function &function) override {
-        
-        llvm::FunctionType ft = llvm::FunctionType::get(<#llvm::Type *Result#>, <#ArrayRef<llvm::Type *> Params#>, <#bool isVarArg#>);
-    }
-    
-    virtual void visit(ast::ArgumentDecl &argumentDecl) override {
-        
-    }
-    
-    virtual void visit(ast::FunctionDecl &functionDecl) override {
-        
-    }
-    
-    virtual void visit(ast::VariableDecl &variableDecl) override {
-        
-    }
-    
-    virtual void visit(ast::BinOpExp &binOpExp) override {
-        
-    }
-    
-    virtual void visit(ast::FunctionCallExp &functionCallExp) override {
-        
-    }
-    
-    virtual void visit(ast::IntegerLiteralExp &integerLiteralExp) override {
-        
-    }
-    
-    virtual void visit(ast::VariableExp &variableExp) override {
-        
-    }
-    
-    virtual void visit(ast::FunctionCallStmt &functionCallStmt) override {
-        
-    }
-    
-    virtual void visit(ast::ReturnStmt &returnStmt) override {
-        
-    }
-    
-    virtual void visit(ast::VariableDeclStmt &variableDeclStmt) override {
-        
-    }
-    
-    virtual void visit(ast::PrimitiveType &p) override {
-        
-    }
+    virtual void visit(ast::Function &function);
+    virtual void visit(ast::ReturnStmt &returnStmt);
+    virtual void visit(ast::Module &module);
     
 };

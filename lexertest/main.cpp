@@ -27,11 +27,10 @@ int main(int argc, const char * argv[]) {
             t = lexer.lexToken(issueReporter);
         }
         catch (LexerErrorException &e) {
-            // already printed by issuereporter
-            continue;
+            assert(false);
         }
         catch (LexerFinishedException &e) {
-            return 0;
+            assert(false);
         }
         
         if (t.is(Indent)) {

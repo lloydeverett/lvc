@@ -29,26 +29,25 @@ enum TokenKind {
 };
 
 inline const char* getLogStrForTokenKind(TokenKind kind) {
-    return kind == Newline               ? "Newline" :
-           kind == Identifier            ? "Identifier" :
-           kind == OpenParenthesis       ? "OpenParenthesis" :
-           kind == CloseParenthesis      ? "CloseParenthesis" :
-           kind == KeywordReturn         ? "KeywordReturn" :
-           kind == KeywordIf             ? "KeywordIf" :
-           kind == Indent                ? "Indent" :
-           kind == Dedent                ? "Dedent" :
-           kind == IntegerLiteral        ? "IntegerLiteral" :
-           kind == RealLiteral           ? "RealLiteral" :
-           kind == Operator              ? "Operator" :
-           kind == PrimitiveTypenameKind ? "PrimitiveTypenameKind" :
-           kind == INVALID_TOKENKIND     ? "INVALID_TOKENKIND" :
-           (assert(false), "");
+    if (kind == Newline)               return "Newline";
+    if (kind == Identifier)            return "Identifier";
+    if (kind == OpenParenthesis )      return "OpenParenthesis";
+    if (kind == CloseParenthesis)      return "CloseParenthesis";
+    if (kind == KeywordReturn)         return "KeywordReturn";
+    if (kind == KeywordIf)             return "KeywordIf";
+    if (kind == Indent)                return "Indent";
+    if (kind == Dedent)                return "Dedent";
+    if (kind == IntegerLiteral)        return "IntegerLiteral";
+    if (kind == RealLiteral)           return "RealLiteral";
+    if (kind == Operator)              return "Operator";
+    if (kind == PrimitiveTypenameKind) return "PrimitiveTypenameKind";
+    return "INVALID_TOKENKIND";
 }
 
 inline TokenKind getKeywordTokenKindFromStr(const std::string &str) {
-    return str == "return"               ? KeywordReturn :
-           str == "if"                   ? KeywordIf :
-                                           INVALID_TOKENKIND;
+    if (str == "return")               return KeywordReturn;
+    if (str == "if")                   return KeywordIf;
+    return INVALID_TOKENKIND;
 }
 
 class Token {

@@ -9,5 +9,6 @@
 #pragma once
 
 unsigned int getOperatorPrecedence(char c) {
+    if (c == '=') return 4;
     
 }

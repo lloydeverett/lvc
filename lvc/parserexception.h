@@ -9,18 +9,14 @@
 #pragma once
 #include <stdexcept>
 
+class ParserException : public std::exception {
+    
+};
+
 enum ParserInputError {
     
 };
 
-class ParserInputErrorException : public std::exception {
-private:
-    ParserInputError error;
-public:
-    ParserInputErrorException(ParserInputError error) : error(error) {
-        
-    }
-    ParserInputError getError() {
-        return error;
-    }
+class ParserErrorException : public ParserException {
+    
 };

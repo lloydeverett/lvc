@@ -32,7 +32,7 @@ public:
     
     virtual void report(rownumber row, colnumber col, std::string message, Subsystem subsystem) override {
         hasErrorOccuredBool = true;
-        std::cerr << path << ":" << row << ":" << col << ": error:" << message
+        std::cerr << path << ":" << row << ":" << col << ": error: " << message
                    << " (" << (subsystem == SubsystemLexer ? "lex" : "parse") << " error)" << std::endl;
     }
         

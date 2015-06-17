@@ -20,7 +20,7 @@ private:
     unsigned int row;
     
 public:
-    StringReader(std::string const &str) : str(str), position(0), positionAfterLastNewline(0), row(0) {}
+    StringReader(std::string const &str) : str(str), position(0), positionAfterLastNewline(0), row(1) {}
     
     virtual bool atWhitespace() override {
         return peekChar(0) == ' ';
@@ -69,7 +69,7 @@ public:
     }
     
     virtual colnumber getCol() override {
-        return (colnumber)(position - positionAfterLastNewline);
+        return (colnumber)(position - positionAfterLastNewline + 1);
     }
     
     virtual SourcePosition getSourcePosition() override {

@@ -6,4 +6,6 @@ int getZero()
     return 0
 
 int main()
+    return 10/*
+  */return 10
     return 0

@@ -8,13 +8,19 @@
 
 #pragma once
 #include <stdexcept>
-#include "iissuereporter.h"
 
-class ParserException : public std::exception {
+enum ParserInputError {
+    
+};
+
+class ParserInputErrorException : public std::exception {
 private:
-    const ParserError error;
-    ReportedParserError reportOnCurrentTok(ParserError er);
+    ParserInputError error;
 public:
-    ParserException(ReportedParserError reportedError) : error(reportedError.error) {}
-    ParserError getAssociatedError() { return error; }
+    ParserInputErrorException(ParserInputError error) : error(error) {
+        
+    }
+    ParserInputError getError() {
+        return error;
+    }
 };

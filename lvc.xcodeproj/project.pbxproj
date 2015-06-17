@@ -117,7 +117,7 @@
 		5752E2C31B2320A70087DD1E /* parsertest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = parsertest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5752E2C51B2320A70087DD1E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5752E2CC1B2339E60087DD1E /* parserexception.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parserexception.h; sourceTree = "<group>"; };
-		5752E2CD1B233A980087DD1E /* lexerexception.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerexception.h; sourceTree = "<group>"; };
+		5752E2CD1B233A980087DD1E /* lexerexceptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerexceptions.h; sourceTree = "<group>"; };
 		5752E2D21B2487930087DD1E /* lexerbuffertest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lexerbuffertest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5752E2D41B2487930087DD1E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5752E2DA1B248AAB0087DD1E /* primitivetypeenum.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = primitivetypeenum.h; sourceTree = "<group>"; };
@@ -128,6 +128,7 @@
 		577B99BA1B30371E00FCF79F /* typevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typevisitor.h; sourceTree = "<group>"; };
 		577B99BB1B303B9000FCF79F /* expvisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = expvisitor.h; sourceTree = "<group>"; };
 		577B99BC1B304E8000FCF79F /* operatorprecedence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = operatorprecedence.h; sourceTree = "<group>"; };
+		577EB46F1B30BCD3001F23DF /* sourceposition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sourceposition.h; sourceTree = "<group>"; };
 		578EFB741B20583700A3968C /* lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lexer.cpp; sourceTree = "<group>"; };
 		578EFB751B20583700A3968C /* lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexer.h; sourceTree = "<group>"; };
 		578EFB7A1B2239F200A3968C /* lexerbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerbuffer.h; sourceTree = "<group>"; };
@@ -262,6 +263,7 @@
 		57334CE01B1076E300085754 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				577EB46F1B30BCD3001F23DF /* sourceposition.h */,
 				571AB4EA1B1A0EC400B866E2 /* getfilecontents.h */,
 				571AB4E71B18BC8200B866E2 /* integertypedefs.h */,
 			);
@@ -326,8 +328,8 @@
 			children = (
 				57ADD13A1B1E06E50031EB0F /* parser.cpp */,
 				57ADD13B1B1E06E50031EB0F /* parser.h */,
-				5752E2CC1B2339E60087DD1E /* parserexception.h */,
 				577B99BC1B304E8000FCF79F /* operatorprecedence.h */,
+				5752E2CC1B2339E60087DD1E /* parserexception.h */,
 			);
 			name = parser;
 			sourceTree = "<group>";
@@ -357,8 +359,8 @@
 		57CD4CAA1B2C27C100EF9490 /* ast */ = {
 			isa = PBXGroup;
 			children = (
-				57D8FFE61B089E8300630274 /* ast.h */,
 				57CD4CAB1B2C27E700EF9490 /* ast.cpp */,
+				57D8FFE61B089E8300630274 /* ast.h */,
 				57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */,
 			);
 			name = ast;
@@ -387,7 +389,7 @@
 				578EFB751B20583700A3968C /* lexer.h */,
 				57DE87451B1F2A9300143D74 /* ilexer.h */,
 				578EFB7A1B2239F200A3968C /* lexerbuffer.h */,
-				5752E2CD1B233A980087DD1E /* lexerexception.h */,
+				5752E2CD1B233A980087DD1E /* lexerexceptions.h */,
 			);
 			name = lexer;
 			sourceTree = "<group>";

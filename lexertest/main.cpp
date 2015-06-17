@@ -20,15 +20,18 @@ int main(int argc, const char * argv[]) {
     
     Token tok;
     charcount indent = 0;
-    while (!lexer.isFinished()) {
+    while (!lexer.isFinished(issueReporter)) {
         Token t;
         
         try {
             t = lexer.lexToken(issueReporter);
         }
-        catch (LexerException &e) {
+        catch (LexerErrorException &e) {
             // already printed by issuereporter
             continue;
+        }
+        catch (LexerFinishedException &e) {
+            return 0;
         }
         
         if (t.is(Indent)) {

@@ -31,10 +31,12 @@ private:
     Token makeIndentToken(colnumber col);
     Token popQueuedDedent();
     Token getTokenFromQueuedDedent(QueuedDedent q);
+    bool tryToSkipComment(IIssueReporter &issueReporter);
+    void skipCommentsAndNonIndentWhitespace(IIssueReporter &issueReporter);
 public:
     Lexer(IReader &reader);
-    virtual bool isFinished() override;
+    virtual bool isFinished(IIssueReporter &issueReporter) override;
     virtual Token lexToken(IIssueReporter &issueReporter) override;
     virtual bool attemptToRecoverBySkippingLine() override;
-    virtual bool attemptToRecoverBySkippingUntilValidIndentation() override;
+    virtual bool attemptToRecoverBySkippingLinesUntilValidIndentation() override;
 };

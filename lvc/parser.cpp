@@ -94,6 +94,9 @@ FunctionDecl Parser::parseFunctionDecl() {
         throw ParserException(reportOnCurrentTok(ParserErrorExpectedIdentifier));
     }
     std::string identifier(currentToken.getStr());
+    if (moduleLevelSymbols.count(identifier) > 0) {
+        reportOnCurrentTok("A function with this name already exists.");
+    }
     
     currentToken = lexerBuffer.readToken();
     if (currentToken.isNot(OpenParenthesis)) {

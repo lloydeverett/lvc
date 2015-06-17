@@ -8,6 +8,8 @@
 
 #pragma once
 
+#warning TODO: use this
+
 enum PreserveNamesEnum {
     DoPreserveNames = true,
     DontPreserveNames = false,

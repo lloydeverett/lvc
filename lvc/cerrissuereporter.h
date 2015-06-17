@@ -19,25 +19,30 @@ class CerrIssueReporter : public IIssueReporter {
 private:
     std::string path;
     LoggingSetting loggingSetting;
+    bool hasErrorOccuredBool;
     
 public:
-    CerrIssueReporter(std::string path, LoggingSetting s = LoggingDisabled) : path(path), loggingSetting(s) {
+    CerrIssueReporter(std::string path, LoggingSetting s = LoggingEnabled) : path(path), loggingSetting(s), hasErrorOccuredBool(false) {
         
     }
     
-    virtual ReportedLexerError report(rownumber row, colnumber col, LexerError lexerError) override {
-        std::cerr << path << ":" << row << ":" << col << ": error:" << getMessageForLexerError(lexerError) << " (lex error)" << std::endl;
-        return makeReportedError(lexerError);
+    virtual void report(SourcePosition pos, std::string message, Subsystem subsystem) override {
+        report(pos.row, pos.col, message, subsystem);
     }
     
-    virtual ReportedParserError report(rownumber row, colnumber col, ParserError parserError) override {
-        std::cerr << path << ":" << row << ":" << col << ": error:" << getMessageForParserError(parserError) << " (parse error)" << std::endl;
-        return makeReportedError(parserError);
+    virtual void report(rownumber row, colnumber col, std::string message, Subsystem subsystem) override {
+        hasErrorOccuredBool = true;
+        std::cerr << path << ":" << row << ":" << col << ": error:" << message
+                   << " (" << (subsystem == SubsystemLexer ? "lex" : "parse") << " error)" << std::endl;
     }
         
     virtual void log(std::string s) override {
         if (loggingSetting == LoggingEnabled)
             std::cout << "LOG: " << s << std::endl;
+    }
+    
+    virtual bool hasAnErrorOccured() override {
+        return hasErrorOccuredBool;
     }
     
 };

@@ -21,5 +21,3 @@ typedef uint64_t colnumber;
 #endif
 
 typedef uint64_t charcount;
-
-typedef uint64_t sourceposition;

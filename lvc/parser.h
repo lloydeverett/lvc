@@ -19,8 +19,8 @@ private:
     LexerBuffer lexerBuffer;
     Token currentToken;
     
-    std::map<std::string, ast::IDecl&> moduleLevelSymbols;
-    std::map<std::string, ast::IDecl&> functionLevelSymbols;
+    std::map<std::string, ast::IDecl&> moduleLevelSymbols; // Contains globals & functions
+    std::map<std::string, ast::IDecl&> functionLevelSymbols; // Contains local variables
     ast::FunctionDecl parseFunctionDecl();
     ReportedParserError reportOnCurrentTok(ParserError er);
     ast::Function parseFunction();

@@ -8,6 +8,7 @@
 
 #pragma once
 #include "integertypedefs.h"
+#include "sourceposition.h"
 
 class IReader {
 public:
@@ -19,8 +20,7 @@ public:
     virtual bool eof() = 0;
     virtual rownumber getRow() = 0;
     virtual colnumber getCol() = 0;
-    virtual sourceposition getPositionAfterLastNewline() = 0;
-    virtual sourceposition getPosition() = 0;
+    virtual SourcePosition getSourcePosition() = 0;
     virtual bool atStartOfRow() = 0;
     
 };

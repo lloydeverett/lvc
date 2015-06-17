@@ -15,8 +15,8 @@
 class StringReader : public IReader {
 private:
     std::string const &str;
-    sourceposition position;
-    sourceposition positionAfterLastNewline;
+    charcount position;
+    charcount positionAfterLastNewline;
     unsigned int row;
     
 public:
@@ -72,12 +72,8 @@ public:
         return (colnumber)(position - positionAfterLastNewline);
     }
     
-    virtual sourceposition getPositionAfterLastNewline() override {
-        return positionAfterLastNewline;
-    }
-    
-    virtual sourceposition getPosition() override {
-        return position;
+    virtual SourcePosition getSourcePosition() override {
+        return SourcePosition(getRow(), getCol());
     }
     
     virtual bool atStartOfRow() override {

@@ -21,6 +21,5 @@ class IIssueReporter {
 public:
     virtual void report(SourcePosition pos, std::string message, Subsystem subsystem) = 0;
     virtual void report(rownumber row, colnumber col, std::string message, Subsystem subsystem) = 0;
-    virtual void log(std::string s) = 0;
     virtual bool hasAnErrorOccured() = 0;
 };

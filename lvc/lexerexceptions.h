@@ -10,22 +10,22 @@
 #include <stdexcept>
 
 class LexerException : public std::exception {
-    
+protected:
+    LexerException() {}
 };
 
 enum LexerError {
     LexerErrorInvalidDedent,
     LexerErrorUnterminatedBlockComment,
     LexerErrorInvalidNumberLiteral,
+    LexerErrorUnexpectedCharacter,
 };
 
 class LexerErrorException : public LexerException {
 private:
     LexerError error;
 public:
-    LexerErrorException(LexerError error) : error(error) {
-        
-    }
+    LexerErrorException(LexerError error) : error(error) {}
     LexerError getError() {
         return error;
     }

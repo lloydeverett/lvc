@@ -22,9 +22,7 @@ private:
     bool hasErrorOccuredBool;
     
 public:
-    CerrIssueReporter(std::string path, LoggingSetting s = LoggingEnabled) : path(path), loggingSetting(s), hasErrorOccuredBool(false) {
-        
-    }
+    CerrIssueReporter(std::string path, LoggingSetting s = LoggingEnabled) : path(path), loggingSetting(s), hasErrorOccuredBool(false) {}
     
     virtual void report(SourcePosition pos, std::string message, Subsystem subsystem) override {
         report(pos.row, pos.col, message, subsystem);
@@ -34,11 +32,6 @@ public:
         hasErrorOccuredBool = true;
         std::cerr << path << ":" << row << ":" << col << ": error: " << message
                    << " (" << (subsystem == SubsystemLexer ? "lex" : "parse") << " error)" << std::endl;
-    }
-        
-    virtual void log(std::string s) override {
-        if (loggingSetting == LoggingEnabled)
-            std::cout << "LOG: " << s << std::endl;
     }
     
     virtual bool hasAnErrorOccured() override {

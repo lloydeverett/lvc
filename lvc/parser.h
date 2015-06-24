@@ -12,6 +12,8 @@
 #include "ireader.h"
 #include "iissuereporter.h"
 #include "lexerbuffer.h"
+#include "symbols.h"
+#include "parserexceptions.h"
 
 class Parser {
 private:
@@ -19,13 +21,14 @@ private:
     LexerBuffer lexerBuffer;
     Token currentToken;
     
-    std::map<std::string, ast::IDecl&> moduleLevelSymbols; // Contains globals & functions
-    std::map<std::string, ast::IDecl&> functionLevelSymbols; // Contains local variables
+    Symbols symbols;
     ast::FunctionDecl parseFunctionDecl();
-    ReportedParserError reportOnCurrentTok(ParserError er);
+    void reportOnCurrentToken(const std::string& message);
     ast::Function parseFunction();
     std::unique_ptr<ast::IStmt> parseStatement();
     std::unique_ptr<ast::IExp> parseExpression();
+    std::unique_ptr<ast::IExp> parsePrimaryExpression();
+    boost::optional<std::unique_ptr<ast::IType>> tryParseType();
     std::unique_ptr<ast::IType> parseType();
 public:
     Parser(IReader &reader, IIssueReporter &issueReporter);

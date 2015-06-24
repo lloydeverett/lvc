@@ -44,6 +44,11 @@
 			<key>orderHint</key>
 			<integer>6</integer>
 		</dict>
+		<key>symbolstest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>10</integer>
+		</dict>
 		<key>testaggregate.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -113,6 +118,11 @@
 			<true/>
 		</dict>
 		<key>57D426BF1B231EEC005B5D61</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>57F9CC6E1B35A19A0084A086</key>
 		<dict>
 			<key>primary</key>
 			<true/>

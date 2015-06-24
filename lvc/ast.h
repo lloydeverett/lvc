@@ -7,11 +7,12 @@
 //
 
 #pragma once
-#include "primitivetypeenum.h"
 #include <vector>
 #include <memory>
 #include <string>
 #include <iostream>
+#include <boost/optional.hpp>
+#include "boperator.h"
 
 class INodeVisitor;
 
@@ -39,11 +40,8 @@ namespace ast {
     class IDecl : public INode {
     protected:
         IDecl() {};
-    };
-    
-    class IExp : public INode {
-    protected:
-        IExp() {};
+    public:
+        virtual const std::string& getIdentifier() const = 0;
     };
     
     class IStmt : public INode {
@@ -56,103 +54,37 @@ namespace ast {
         IType() {};
     };
     
+    class IExp : public INode {
+    protected:
+        IExp() {};
+    };
+    
+    class IPrimType : public IType {
+    protected:
+        IPrimType() {}
+    };
+    
     ///////////////////////////////
     
-    struct PrimitiveType : public IType {
-        PrimitiveTypeEnum name;
-        PrimitiveType(PrimitiveTypeEnum name) :
-        name(name) {}
+    struct PrimitiveType : IType {
+        static const int CHAR_CODE   = 10;
+        static const int SHORT_CODE  = 11;
+        static const int INT_CODE    = 12;
+        static const int LONG_CODE   = 13;
+        static const int UCHAR_CODE  = 20;
+        static const int USHORT_CODE = 21;
+        static const int UINT_CODE   = 22;
+        static const int ULONG_CODE  = 23;
+        static const int FLOAT_CODE  = 50;
+        static const int DOUBLE_CODE = 51;
+        static const int BOOL_CODE   = 52;
+        
+        int code;
+        
+        PrimitiveType(int code) : code(code) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
-            return o << std::string(stringFromPrimitiveTypeEnum(name)) << "wtf";
-        }
-        
-        virtual void accept(INodeVisitor &visitor) override;
-    };
-    
-    struct VariableDecl : public IDecl {
-        std::unique_ptr<IType> type_ptr;
-        std::string identifier;
-        VariableDecl(std::unique_ptr<IType> type_ptr, std::string identifier) :
-        type_ptr(std::move(type_ptr)),
-        identifier(identifier) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(VariableDecl: " << *type_ptr << " " << identifier << ")";
-        }
-        
-        virtual void accept(INodeVisitor &visitor) override;
-    };
-    
-    struct VariableExp : public IExp {
-        VariableDecl &decl;
-        VariableExp(VariableDecl &decl) :
-        decl(decl) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(VariableExp: " << decl << ")";
-        }
-        
-        virtual void accept(INodeVisitor &visitor) override;
-    };
-    
-    struct ArgumentDecl : public IDecl {
-        std::unique_ptr<IType> type_ptr;
-        std::unique_ptr<IExp> defaultValue_ptr;
-        std::string identifier;
-        ArgumentDecl(std::unique_ptr<IType> type_ptr, std::string identifier, std::unique_ptr<IExp> defaultValue) :
-        type_ptr(std::move(type_ptr)), defaultValue_ptr(std::move(defaultValue_ptr)),
-        identifier(identifier) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(ArgumentDecl: " << *type_ptr << ", " << identifier << ")";
-        }
-        
-        virtual void accept(INodeVisitor &visitor) override;
-    };
-    
-    struct FunctionDecl : public IDecl {
-        std::unique_ptr<IType> returnType_ptr;
-        std::string identifier;
-        std::vector<ArgumentDecl> arguments;
-        FunctionDecl(std::unique_ptr<IType> returnType_ptr, std::string identifier, std::vector<ArgumentDecl> arguments) :
-        returnType_ptr(std::move(returnType_ptr)),
-        identifier(identifier), arguments(std::move(arguments)) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const {
-            o << "(FunctionDecl: " << *returnType_ptr << ", " << identifier << ", (Arguments: " ;
-            for (const ArgumentDecl &decl : arguments) {
-                o << decl;
-            }
-            o << "))";
-            return o;
-        }
-        
-        virtual void accept(INodeVisitor &visitor) override;
-    };
-    
-    struct VariableDeclStmt : public IStmt {
-        std::unique_ptr<IExp> initialValue_ptr;
-        VariableDecl decl;
-        
-        VariableDeclStmt(VariableDecl decl, std::unique_ptr<IExp> initialValue_ptr) :
-        initialValue_ptr(std::move(initialValue_ptr)),
-        decl(std::move(decl))  {}
-        
-        virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(VariableDeclStmt: " << decl << ", " << *initialValue_ptr << ")";
-        }
-        
-        virtual void accept(INodeVisitor &visitor) override;
-    };
-    
-    struct ReturnStmt : public IStmt {
-        std::unique_ptr<IExp> returnedExpression_ptr;
-        ReturnStmt(std::unique_ptr<IExp> returnedExpression_ptr) :
-        returnedExpression_ptr(std::move(returnedExpression_ptr)) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(ReturnStmt: " << *returnedExpression_ptr << ")";
+            return o << "(PrimitiveType"  << code << ")";
         }
         
         virtual void accept(INodeVisitor &visitor) override;
@@ -174,11 +106,119 @@ namespace ast {
         virtual void accept(INodeVisitor &visitor) override;
     };
     
+    struct VariableDecl : public IDecl {
+        std::unique_ptr<IType> type_ptr;
+        std::string identifier;
+        VariableDecl(std::unique_ptr<IType> type_ptr, std::string identifier) :
+        type_ptr(std::move(type_ptr)),
+        identifier(identifier) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            return o << "(VariableDecl: " << *type_ptr << " " << identifier << ")";
+        }
+        
+        virtual void accept(INodeVisitor &visitor) override;
+        
+        virtual const std::string& getIdentifier() const {
+            return identifier;
+        }
+    };
+    
+    struct VariableExp : public IExp {
+        VariableDecl *decl;
+        VariableExp(VariableDecl *decl) :
+        decl(decl) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            return o << "(VariableExp: " << *decl << ")";
+        }
+        
+        virtual void accept(INodeVisitor &visitor) override;
+    };
+    
+    struct ArgumentDecl : public IDecl {
+        VariableDecl variableDecl;
+        boost::optional<std::unique_ptr<IExp>> defaultValue_ptr;
+        ArgumentDecl(VariableDecl variableDecl, boost::optional<std::unique_ptr<IExp>> defaultValue_ptr = boost::none) :
+        variableDecl(std::move(variableDecl)), defaultValue_ptr(std::move(defaultValue_ptr)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            o << "(ArgumentDecl: " << variableDecl;
+            if (defaultValue_ptr)
+                o << ", " << **defaultValue_ptr;
+            o << ")";
+            return o;
+        }
+        
+        virtual void accept(INodeVisitor &visitor) override;
+        
+        virtual const std::string& getIdentifier() const {
+            return variableDecl.identifier;
+        }
+    };
+    
+    struct FunctionDecl : public IDecl {
+        std::unique_ptr<IType> returnType_ptr;
+        std::string identifier;
+        std::vector<ArgumentDecl> arguments;
+        FunctionDecl(std::unique_ptr<IType> returnType_ptr, std::string identifier, std::vector<ArgumentDecl> arguments) :
+        returnType_ptr(std::move(returnType_ptr)),
+        identifier(identifier), arguments(std::move(arguments)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            o << "(FunctionDecl: " << *returnType_ptr << ", " << identifier << ", (Arguments: " ;
+            for (const ArgumentDecl &decl : arguments) {
+                o << decl;
+            }
+            o << "))";
+            return o;
+        }
+        
+        virtual void accept(INodeVisitor &visitor) override;
+        
+        virtual const std::string& getIdentifier() const {
+            return identifier;
+        }
+    };
+    
+    struct VariableDeclStmt : public IStmt {
+        boost::optional<std::unique_ptr<IExp>> initialValue_ptr;
+        VariableDecl decl;
+        
+        VariableDeclStmt(VariableDecl decl, boost::optional<std::unique_ptr<IExp>> initialValue_ptr = boost::none) :
+        initialValue_ptr(std::move(initialValue_ptr)),
+        decl(std::move(decl))  {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            if (initialValue_ptr)
+                return o << "(VariableDeclStmt: " << decl << ", " << **initialValue_ptr << ")";
+            else
+                return o << "(VariableDeclStmt: " << decl << ")";
+        }
+        
+        virtual void accept(INodeVisitor &visitor) override;
+    };
+    
+    struct ReturnStmt : public IStmt {
+        boost::optional<std::unique_ptr<IExp>> returnedExpression_ptr;
+        ReturnStmt(boost::optional<std::unique_ptr<IExp>> returnedExpression_ptr = boost::none) :
+        returnedExpression_ptr(std::move(returnedExpression_ptr)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            if (returnedExpression_ptr)
+                return o << "(ReturnStmt: " << **returnedExpression_ptr << ")";
+            else
+                return o << "(ReturnStmt)";
+        }
+        
+        virtual void accept(INodeVisitor &visitor) override;
+    };
+    
     struct BinOpExp : public IExp {
-        char op;
+        BOperator op;
         std::unique_ptr<IExp> lhs;
         std::unique_ptr<IExp> rhs;
-        BinOpExp(char op, std::unique_ptr<IExp> lhs, std::unique_ptr<IExp> rhs) :
+        BinOpExp(BOperator op, std::unique_ptr<IExp> lhs, std::unique_ptr<IExp> rhs) :
         op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
@@ -189,13 +229,13 @@ namespace ast {
     };
     
     struct FunctionCallExp : public IExp {
-        const FunctionDecl &calleeDeclRef;
+        FunctionDecl* calleeDeclRef;
         std::vector<std::unique_ptr<IExp>> passedArguments;
-        FunctionCallExp(const FunctionDecl &calleeDeclRef, std::vector<std::unique_ptr<IExp>> passedArguments) :
+        FunctionCallExp(FunctionDecl* calleeDeclRef, std::vector<std::unique_ptr<IExp>> passedArguments) :
         calleeDeclRef(calleeDeclRef), passedArguments(std::move(passedArguments)) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
-            o << "(FunctionCallExp: )" << calleeDeclRef << ", (Arguments: ";
+            o << "(FunctionCallExp: " << *calleeDeclRef << ", (Arguments: ";
             for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
                 o << *exp_ptr;
             }
@@ -218,7 +258,33 @@ namespace ast {
         virtual void accept(INodeVisitor &visitor) override;
     };
     
-    ///////////////////////////////
+    struct IfStmt : public IStmt {
+        std::unique_ptr<IExp> condition;
+        std::vector<std::unique_ptr<IStmt>> thenStatements;
+        boost::optional<std::vector<std::unique_ptr<IStmt>>> elseStatements;
+        IfStmt(std::unique_ptr<IExp> condition, std::vector<std::unique_ptr<IStmt>> thenStatements,
+               boost::optional<std::vector<std::unique_ptr<IStmt>>> elseStatements = boost::none) :
+        condition(std::move(condition)), thenStatements(std::move(thenStatements)), elseStatements(std::move(elseStatements)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            o << "(IfStmt: (";
+            for (const std::unique_ptr<IStmt>& statement_ptr : thenStatements) {
+                o << *statement_ptr << std::endl;
+            }
+            o << ")";
+            if (elseStatements) {
+                o << ", (";
+                for (const std::unique_ptr<IStmt>& statement_ptr : *elseStatements) {
+                    o << *statement_ptr << std::endl;
+                }
+                o << ")";
+            }
+            o << ")";
+            return o;
+        }
+        
+        virtual void accept(INodeVisitor &visitor) override;
+    };
     
     struct Function : public INode {
         FunctionDecl decl;
@@ -227,10 +293,9 @@ namespace ast {
         decl(std::move(decl)), statements(std::move(statements)) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
-            o << "Function" << std::endl;
             o << decl << std::endl;
             for (const std::unique_ptr<IStmt>& statement_ptr : statements) {
-                o << *statement_ptr << std::endl;
+                o << "    " << *statement_ptr << std::endl;
             }
             return o;
         }
@@ -245,7 +310,7 @@ namespace ast {
         moduleName(moduleName), functions(std::move(functions)) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
-            o << "Module " << moduleName << std::endl;
+            o << "Module: " << moduleName << std::endl;
             for (const Function& function : functions) {
                 o << function;
             }

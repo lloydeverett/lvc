@@ -18,7 +18,6 @@ int main(int argc, const char * argv[]) {
     CerrIssueReporter issueReporter(filePath);
     Lexer lexer(reader);
     
-    Token tok;
     charcount indent = 0;
     while (!lexer.isFinished(issueReporter)) {
         Token t;
@@ -37,8 +36,7 @@ int main(int argc, const char * argv[]) {
             indent += 4;
         }
         
-        std::cout << std::string(indent, ' ');
-        t.dump();
+        std::cout << std::string(indent, ' ') << t << std::endl;
         
         if (t.is(Dedent)) {
             assert(indent >= 4);

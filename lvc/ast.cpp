@@ -62,3 +62,7 @@ void PrimitiveType::accept(INodeVisitor &visitor) {
 void Module::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
+
+void IfStmt::accept(INodeVisitor &visitor) {
+    visitor.visit(*this);
+}

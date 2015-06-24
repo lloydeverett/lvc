@@ -14,7 +14,5 @@ public:
     colnumber col;
     rownumber row;
     
-    SourcePosition(colnumber col, rownumber row) : col(col), row(row) {
-        
-    }
+    SourcePosition(colnumber col, rownumber row) : col(col), row(row) {}
 };

@@ -31,20 +31,39 @@ public:
         llvm::Value* lhs = returnValue();
         binOpExp.accept(*this);
         llvm::Value* rhs = returnValue();
-#warning TODO: implement
+        
         switch (binOpExp.op) {
-            case '+':
+            case LargerThan:
+                
                 break;
-            case '-':
+            case SmallerThan:
+                
                 break;
-            case '*':
+            case LargerThanEquals:
+                
                 break;
-            case '/':
+            case SmallerThanEquals:
+                
+                break;
+            case EqualsEquals:
+                
+                break;
+            case Plus:
+                
+                break;
+            case Minus:
+                
+                break;
+            case Multiply:
+                
+                break;
+            case Divide:
+                
                 break;
             default:
                 assert(false);
-                break;
         }
+#warning TODO: implement
     }
     virtual void visit(ast::IntegerLiteralExp &integerLiteralExp) {
         returnThis = llvm::ConstantInt::get(llvm::Type::getInt32Ty(c), integerLiteralExp.value.data(), 10);

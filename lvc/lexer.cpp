@@ -18,6 +18,13 @@ bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
 
+bool doesStrBeginWith(const std::string& str, const std::string& with) {
+    if (str.length() < with.length())
+        return false;
+    
+    return str.substr(0, with.length()) == with;
+}
+
 Lexer::Lexer(IReader &reader) : reader(reader) {
     indentStack.push(0);
 }
@@ -118,21 +125,21 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     t.setStartCol(startCol);
     t.setLength(str.length());
     
-    TokenKind k = getKeywordTokenKindFromStr(str);
-    if (k != INVALID_TOKENKIND) {
-        t.setKind(k);
-        return t;
+    if (str == "return") t.setKind(Return);
+    else if (str == "if") t.setKind(If);
+    else if (str == "struct") t.setKind(Struct);
+    else if (str == "char") t.setKind(Char);
+    else if (str == "short") t.setKind(Short);
+    else if (str == "int") t.setKind(Int);
+    else if (str == "long") t.setKind(Long);
+    else if (str == "uchar") t.setKind(Uchar);
+    else if (str == "ushort") t.setKind(Ushort);
+    else if (str == "uint") t.setKind(Uint);
+    else if (str == "ulong") t.setKind(Ulong);
+    else {
+        t.setKind(Identifier);
+        t.setStr(str);
     }
-    
-    PrimitiveTypeEnum pt = primitiveTypeEnumFromStrInSource(str);
-    if (pt != INVALID_PRIMITIVETYPEENUM) {
-        t.setKind(PrimitiveTypenameKind);
-        t.setPrimitiveTypeEnum(pt);
-        return t;
-    }
-    
-    t.setKind(Identifier);
-    t.setStr(str);
     return t;
 }
 
@@ -193,14 +200,12 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
     t.setLength(1);
     
     if (c == '\n' || c == '\r') {
-        charcount len = 1;
         if (c == '\r') {
             if (reader.peekChar() == '\n') {
                 reader.readChar();
-                len++;
+                t.setLength(2);
             }
         }
-        t.setLength(len);
         t.setKind(Newline);
         return t;
     }
@@ -212,9 +217,52 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         t.setKind(CloseParenthesis);
         return t;
     }
-    if (c == '+' || c == '-' || c == '/' || c == '*' || c == '=') {
-        t.setKind(Operator);
-        t.setOperatorChar(c);
+    if (c == '>') {
+        if (reader.peekChar() == '=') {
+            reader.readChar();
+            t.setKind(LargenThanEquals);
+        }
+        else {
+            t.setKind(LargerThan);
+        }
+        return t;
+    }
+    if (c == '<') {
+        if (reader.peekChar() == '=') {
+            reader.readChar();
+            t.setKind(SmalerThanEquals);
+        }
+        else {
+            t.setKind(SmallerThan);
+        }
+        return t;
+    }
+    if (c == '=') {
+        if (reader.peekChar() == '=') {
+            reader.readChar();
+            t.setKind(EqualsEquals);
+        }
+        else {
+            t.setKind(Equals);
+        }
+        return t;
+    }
+    if (c == '!') {
+        if (reader.peekChar() == '=') {
+            reader.readChar();
+            t.setKind(ExclamationEquals);
+        }
+        else {
+            t.setKind(Exclamation);
+        }
+        return t;
+    }
+    if (c == '.') {
+        t.setKind(Dot);
+        return t;
+    }
+    if (c == ',') {
+        t.setKind(Comma);
         return t;
     }
     
@@ -244,9 +292,8 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         return t;
     }
     
-#warning TODO: Throw exception on unrecognized tokens.
-    assert(false);
-    return Token();
+    issueReporter.report(reader.getSourcePosition(), "Did not expect character", SubsystemLexer);
+    throw LexerErrorException(LexerErrorUnexpectedCharacter);
 }
 
 bool Lexer::attemptToRecoverBySkippingLine() {

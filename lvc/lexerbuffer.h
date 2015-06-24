@@ -27,9 +27,7 @@ private:
         return t;
     }
 public:
-    LexerBuffer(IIssueReporter &issueReporter, IReader &reader) : issueReporter(issueReporter), lexer(reader) {
-        aheadBy = 0;
-    }
+    LexerBuffer(IIssueReporter &issueReporter, IReader &reader) : issueReporter(issueReporter), lexer(reader), aheadBy(0) {}
     
     Token readToken() {
         if (aheadBy == 0) {
@@ -40,7 +38,7 @@ public:
         }
     }
     
-    Token peekOneAhead() {
+    Token peekNext() {
         if (aheadBy >= 1) return next;
         else {
             next = lexer.lexToken(issueReporter);
@@ -49,7 +47,7 @@ public:
         }
     }
     
-    Token peekTwoAhead() {
+    Token peekNextNext() {
         if (aheadBy >= 2) return nextNext;
         else {
             if (aheadBy == 0) {
@@ -62,7 +60,7 @@ public:
         }
     }
     
-    bool isFinished() {
-        return aheadBy == 0 && lexer.isFinished();
+    bool isFinished(IIssueReporter &issueReporter) {
+        return aheadBy == 0 && lexer.isFinished(issueReporter);
     }
 };

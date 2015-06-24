@@ -30,7 +30,7 @@ void IRGenVisitor::visit(ast::Function &function) {
     std::vector<llvm::Type*> argTypes;
     argTypes.reserve(function.decl.arguments.size());
     for (const ast::ArgumentDecl& argdecl : function.decl.arguments) {
-        argdecl.type_ptr->accept(typeVisitor);
+        argdecl.variableDecl.type_ptr->accept(typeVisitor);
         argTypes.push_back(typeVisitor.returnValue());
     }
     auto argTypesArrayRef = llvm::ArrayRef<llvm::Type*>(argTypes.data(), argTypes.size());
@@ -52,6 +52,12 @@ void IRGenVisitor::visit(ast::Function &function) {
 }
 
 void IRGenVisitor::visit(ast::ReturnStmt &returnStmt) {
-    returnStmt.returnedExpression_ptr->accept(expVisitor);
-    builder.CreateRet(expVisitor.returnValue());
+    if (returnStmt.returnedExpression_ptr) {
+        std::unique_ptr<ast::IExp> &exp_ptr = *returnStmt.returnedExpression_ptr;
+        exp_ptr->accept(expVisitor);
+        builder.CreateRet(expVisitor.returnValue());
+    }
+    else {
+        builder.CreateRetVoid();
+    }
 }

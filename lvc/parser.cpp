@@ -9,11 +9,18 @@
 #include "parser.h"
 #include <memory>
 
+#warning TODO: make using this class more convenient
+
 using namespace ast;
 
 Parser::Parser(IReader &reader, IIssueReporter &issueReporter) :
 issueReporter(issueReporter), lexerBuffer(issueReporter, reader) {
     
+}
+
+Token& Parser::readTokenIntoCurrent() {
+    currentToken = lexerBuffer.readToken();
+    return currentToken;
 }
 
 void Parser::reportOnCurrentToken(const std::string& message) {
@@ -24,59 +31,63 @@ Module Parser::parse(std::string nameOfModule) {
     
     std::vector<Function> functions;
     
-    while (!lexerBuffer.isFinished(issueReporter)) {
-        
-        // On each iteration, we attempt to parse a function or global (unless empty line).
+    while (true) {
         try {
-            currentToken = lexerBuffer.readToken();
+            if (currentToken.is(Eof)) break;
             
-            if (currentToken.is(Newline)) continue;
+            if (currentToken.is(Newline)) {
+                readTokenIntoCurrent();
+                continue;
+            }
             
             if (lexerBuffer.peekNextNext().is(OpenParenthesis)) {
                 functions.push_back(parseFunction());
             }
             else {
-                
+                #warning TOOD: parse global
             }
         }
         catch (LexerException &e) {
+            #warning TODO: implement this
             assert(false);
         }
         catch (LexerFinishedException &e) {
             assert(false);
         }
-        
     }
     
     return Module(nameOfModule, std::move(functions));
     
 }
 
-// This function assumes we are at the first token of the function
-// (the return type). When it's finished, currentToken should be the
-// final dedent token of the function.
 Function Parser::parseFunction() {
     FunctionDecl decl(parseFunctionDecl());
     
-    currentToken = lexerBuffer.readToken();
     #warning TOOD: handle same-line functions.
     if (currentToken.isNot(Newline)) {
         reportOnCurrentToken("Expected a newline after function declaration.");
         throw ParserErrorException(ParserErrorExpectedNewline);
     }
-    currentToken = lexerBuffer.readToken();
+    readTokenIntoCurrent();
     if (currentToken.isNot(Indent)) {
         reportOnCurrentToken("Expected indent on new line after function declaration.");
         throw ParserErrorException(ParserErrorExpectedIndent);
     }
+    readTokenIntoCurrent();
     
     symbols.openScope();
     
+    for (ArgumentDecl &argDecl : decl.arguments) {
+        symbols.create(&argDecl);
+    }
+    
     std::vector<std::unique_ptr<IStmt>> statements;
-    while (true) {
-        currentToken = lexerBuffer.readToken();
-        if (currentToken.is(Newline)) continue; // skip empty lines
-        if (currentToken.is(Dedent)) break;
+    while (currentToken.isNot(Dedent)) {
+        if (currentToken.is(Newline)) {
+            // empty line
+            readTokenIntoCurrent();
+            continue;
+        }
         statements.push_back(parseStatement());
     }
     
@@ -85,84 +96,89 @@ Function Parser::parseFunction() {
     return Function(std::move(decl), std::move(statements));
 }
 
-// This function assumes currentToken is the first token of the function (the typename).
-// After this function is called, currentToken will be the token of the
-// closing ) parenthesis for the argument list (which precedes an indent if the function is well-formed and not empty).
 FunctionDecl Parser::parseFunctionDecl() {
     std::unique_ptr<IType> returnType(parseType());
+    std::string identifier(parseIdentifier());
     
-    currentToken = lexerBuffer.readToken();
-    if (currentToken.isNot(Identifier)) {
-        reportOnCurrentToken("Expected identifier at beginning of function declaration.");
-        throw ParserErrorException(ParserErrorExpectedIdentifier);
-    }
-    std::string identifier = currentToken.getStr();
-    
-#warning TODO: symbol
-    
-    currentToken = lexerBuffer.readToken();
     if (currentToken.isNot(OpenParenthesis)) {
-        reportOnCurrentToken("Expected open parenthesis after identifier in function declaration.");
-        throw ParserErrorException(ParserErrorExpectedParenthesis);
+        reportOnCurrentToken("Expected '(' after identifier in function declaration.");
+        throw ParserErrorException(ParserErrorExpectedOpenParenthesis);
     }
+    readTokenIntoCurrent();
     
     std::vector<ArgumentDecl> arguments;
-    #warning TODO: Parse arguments; we'll just leave them empty for now.
-    
-    currentToken = lexerBuffer.readToken();
     if (currentToken.isNot(CloseParenthesis)) {
-        reportOnCurrentToken("Expected close parenthesis");
-        throw ParserErrorException(ParserErrorExpectedCloseParenthesis);
+        while (true) {
+            std::unique_ptr<IType> argType(parseType());
+            std::string argIdentifier(parseIdentifier());
+            
+            boost::optional<std::unique_ptr<IExp>> optDefaultValue = boost::none;
+            if (currentToken.is(Equals)) {
+                readTokenIntoCurrent();
+                optDefaultValue = parseExpression();
+            }
+            
+            VariableDecl varDecl = VariableDecl(std::move(argType), argIdentifier);
+            arguments.emplace_back(std::move(varDecl), optDefaultValue);
+            
+            if (currentToken.is(CloseParenthesis)) break;
+            if (currentToken.is(Comma)) {
+                readTokenIntoCurrent();
+                continue;
+            }
+            
+            reportOnCurrentToken("Badly formed function declaration. Expected comma or ')'.");
+            throw ParserErrorException(ParserErrorExpectedCommaOrCloseParenthesis);
+        }
     }
+    readTokenIntoCurrent(); // read token after the close parenthesis into currentToken
     
     return FunctionDecl(std::move(returnType), identifier, std::move(arguments));
 }
 
-#warning todo: make tryParseType
-
-boost::optional<std::unique_ptr<ast::IType>> Parser::tryParseType() {
-    unsigned int code;
+boost::optional<std::unique_ptr<IType>> Parser::tryParseType() {
+    PrimitiveTypeCode code;
     switch (currentToken.getKind()) {
-        case Char: code = ast::PrimitiveType::CHAR_CODE; break;
-        case Short: code = ast::PrimitiveType::SHORT_CODE; break;
-        case Int: code = ast::PrimitiveType::INT_CODE; break;
-        case Long: code = ast::PrimitiveType::LONG_CODE; break;
-        case Uchar: code = ast::PrimitiveType::UCHAR_CODE; break;
-        case Ushort: code = ast::PrimitiveType::USHORT_CODE; break;
-        case Uint: code = ast::PrimitiveType::UINT_CODE; break;
-        case Ulong: code = ast::PrimitiveType::ULONG_CODE; break;
-        case Bool: code = ast::PrimitiveType::BOOL_CODE; break;
-        case Float: code = ast::PrimitiveType::FLOAT_CODE; break;
-        case Double: code = ast::PrimitiveType::DOUBLE_CODE; break;
+        case Char: code = PrimitiveTypeCodeChar; break;
+        case Short: code = PrimitiveTypeCodeShort; break;
+        case Int: code = PrimitiveTypeCodeInt; break;
+        case Long: code = PrimitiveTypeCodeLong; break;
+        case Uchar: code = PrimitiveTypeCodeUchar; break;
+        case Ushort: code = PrimitiveTypeCodeUshort; break;
+        case Uint: code = PrimitiveTypeCodeUint; break;
+        case Ulong: code = PrimitiveTypeCodeUlong; break;
+        case Bool: code = PrimitiveTypeCodeBool; break;
+        case Float: code = PrimitiveTypeCodeFloat; break;
+        case Double: code = PrimitiveTypeCodeDouble; break;
         default:
             return boost::none;
     }
-    std::unique_ptr<ast::IType> ret = std::make_unique<ast::PrimitiveType>(code);
+    std::unique_ptr<IType> ret = std::make_unique<PrimitiveType>(code);
+    readTokenIntoCurrent();
     return std::move(ret);
 }
 
-std::unique_ptr<ast::IType> Parser::parseType() {
-    boost::optional<std::unique_ptr<ast::IType>> opt = tryParseType();
+std::unique_ptr<IType> Parser::parseType() {
+    boost::optional<std::unique_ptr<IType>> opt = tryParseType();
     if (!opt) {
-        reportOnCurrentToken("Expected type specifier.");
+        reportOnCurrentToken("Expected typename.");
         throw ParserErrorException(ParserErrorExpectedType);
     }
     return std::move(*opt);
 }
 
-// This function assumes currentToken is the first token of the statement.
-// When finished, currentToken is the last token of the statement (including the newline)
+// After this function is called, currentToken will be the token after the newline that terminates the statement.
 std::unique_ptr<IStmt> Parser::parseStatement() {
-#warning todo istype
     
     if (currentToken.is(If)) {
-        lexerBuffer.readToken();
-        parseStatement();
-#warning TODO: THI
+        readTokenIntoCurrent();
+        std::unique_ptr<IExp> condition = parseParenExpression();
+        
+#warning TODO: make parse if
     }
     
     if (currentToken.is(Return)) {
-        currentToken = lexerBuffer.readToken();
+        readTokenIntoCurrent();
         std::unique_ptr<IExp> exp(parseExpression());
         return std::make_unique<ReturnStmt>(std::move(exp));
     }
@@ -176,28 +192,74 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
     assert(false);
 }
 
-// This function expects currentToken to be the first token of an expression.
-// After calling this function, currentToken should be the last token of the expression.
-std::unique_ptr<IExp> Parser::parseExpression() {
+std::unique_ptr<IExp> Parser::parseParenExpression() {
+    if (currentToken.isNot(OpenParenthesis)) {
+        reportOnCurrentToken("Expected '('");
+        throw ParserErrorException(ParserErrorExpectedOpenParenthesis);
+    }
+    readTokenIntoCurrent();
     
-    return std::make_unique<IntegerLiteralExp>("0");
+    std::unique_ptr<IExp> exp(parseExpression());
+    
+    if (currentToken.isNot(CloseParenthesis)) {
+        reportOnCurrentToken("Expected ')'");
+        throw ParserErrorException(ParserErrorExpectedCloseParenthesis);
+    }
+    readTokenIntoCurrent();
+    
+    return std::move(exp);
+}
+
+std::unique_ptr<IExp> Parser::parseExpression() {
+    std::unique_ptr<IExp> lhs = parsePrimaryExpression();
+    
+}
+
+std::unique_ptr<IExp> Parser::parseRHSExpression(int precedence) {
+    
 }
 
 // A primary expression is an expression that is not a BinOpExp.
 // This dinstinction is important becausee BinOpExps require operator precedence parsing.
 // Note that parseExpression can still parse primary expressions; this function
 // is called by it.
-std::unique_ptr<ast::IExp> Parser::parsePrimaryExpression() {
+std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
+    if (currentToken.is(Identifier)) {
+        if (lexerBuffer.peekNext().is(OpenParenthesis)) {\
+            // Function call
+            readTokenIntoCurrent(); // read open parenthesis -> currentToken
+            readTokenIntoCurrent(); // read token after it -> currentToken
+            std::vector<ArgumentDecl> args;
+            if (currentToken.isNot(CloseParenthesis)) {
+                while (true) {
+                    ArgumentDecl def;
+                    parseExpression();
+#warning TODO: lookup symbol for function
+                    
+                    if (currentToken.is(CloseParenthesis)) break;
+                    if (currentToken.is(Comma)) {
+                        readTokenIntoCurrent();
+                        continue;
+                    }
+                    
+                    reportOnCurrentToken("Expected comma or ')' in argument list.");
+                    throw ParserErrorException(ParserErrorExpectedCommaOrCloseParenthesis);
+                }
+            }
+            readTokenIntoCurrent(); // read token after close parenthesis -> currentToken
+            
+        }
+        else {
+            // Variable Expression
+        }
+    }
     if (currentToken.is(Identifier)) {
         if (!lexerBuffer.isFinished(issueReporter) && lexerBuffer.peekNext().is(OpenParenthesis)) {
             // Function call
-            lexerBuffer.readToken(); // read the open parenthesis
-            lexerBuffer.readToken(); // read the token after the open parenthesis
-#warning TOOD: rmemeber tpo set currentTOken
-            while (currentToken.isNot(CloseParenthesis)) {
-                parseExpression();
-                currentToken = lexerBuffer.readToken();
-                std::string identifier = currentToken.getStr();
+            readTokenIntoCurrent(); // read the open parenthesis
+            readTokenIntoCurrent(); // read the token after the open parenthesis
+            if (currentToken.isNot(CloseParenthesis)) {
+                parseExpression(7);
             }
         }
         else {
@@ -205,7 +267,35 @@ std::unique_ptr<ast::IExp> Parser::parsePrimaryExpression() {
             
         }
     }
+    else if (currentToken.is(IntegerLiteral)) {
+        return std::make_unique<IntegerLiteralExp>(currentToken.getStr());
+    }
+    else if (currentToken.is(RealLiteral)) {
+        return std::make_unique<RealLiteralExp>(currentToken.getStr());
+    }
     assert(false);
 }
 
-#warning TODO: make static methods so using this is not so stupid
+std::string Parser::parseIdentifier() {
+    if (currentToken.isNot(Identifier)) {
+        reportOnCurrentToken("Expected identifier.");
+        throw ParserErrorException(ParserErrorExpectedIdentifier);
+    }
+    std::string s = currentToken.getStr();
+    readTokenIntoCurrent();
+    return s;
+}
+
+boost::optional<BinopCode> Parser::tryParseBinopCode() {
+    BinopCode code;
+    switch (currentToken.getKind()) {
+        case Plus: code = BinopCodeAdd; break;
+        case Minus: code = BinopCodeSubtract; break;
+        case Asterisk: code = BinopCodeMultiply; break;
+        case Slash: code = BinopCodeDivide; break;
+        default:
+            return boost::none;
+    }
+    readTokenIntoCurrent();
+    return code;
+}

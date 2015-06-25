@@ -29,10 +29,10 @@ private:
     
     bool addDedentsToQueueUntilColnumberIsReached(colnumber col);
     Token makeIndentToken(colnumber col);
-    Token popQueuedDedent();
     Token getTokenFromQueuedDedent(QueuedDedent q);
     bool tryToSkipComment(IIssueReporter &issueReporter);
     void skipCommentsAndNonIndentWhitespace(IIssueReporter &issueReporter);
+    bool hasProducedEof;
 public:
     Lexer(IReader &reader);
     virtual bool isFinished(IIssueReporter &issueReporter) override;

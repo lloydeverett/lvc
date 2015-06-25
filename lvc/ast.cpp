@@ -27,7 +27,11 @@ void VariableDecl::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
 
-void BinOpExp::accept(INodeVisitor &visitor) {
+void RealLiteralExp::accept(INodeVisitor &visitor) {
+    visitor.visit(*this);
+}
+
+void BinopExp::accept(INodeVisitor &visitor) {
     visitor.visit(*this);
 }
 

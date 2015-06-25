@@ -13,7 +13,8 @@
 
 int main(int argc, const char * argv[]) {
     Symbols symbols;
-    symbols.openBlock();
+    symbols.openBlock();dvsijosfgjiofsgijo
+    sdfgiofvioio;
     std::vector<ast::ArgumentDecl> args;
     ast::FunctionDecl dec(std::make_unique<ast::PrimitiveType>(ast::PrimitiveType(Int)), "hello", std::move(args));
     symbols.addSymbol(&dec);

@@ -19,7 +19,7 @@ int main(int argc, const char * argv[]) {
     Lexer lexer(reader);
     
     charcount indent = 0;
-    while (!lexer.isFinished(issueReporter)) {
+    while (true) {
         Token t;
         
         try {
@@ -41,6 +41,9 @@ int main(int argc, const char * argv[]) {
         if (t.is(Dedent)) {
             assert(indent >= 4);
             indent -= 4;
+        }
+        else if (t.is(Eof)) {
+            break;
         }
     }
     return 0;

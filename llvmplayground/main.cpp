@@ -19,15 +19,9 @@ int main(int argc, const char * argv[]) {
     LLVMContext &context = getGlobalContext();
     Module module("helloworld", context);
     IRBuilder<> builder(context);
-    FunctionType *ft = FunctionType::get(Type::getDoubleTy(context), false);
-    Function *f = Function::Create(ft, llvm::GlobalValue::LinkageTypes::ExternalLinkage, "", &module);
-    BasicBlock *b = BasicBlock::Create(getGlobalContext(), "entry", f);
-    builder.SetInsertPoint(b);
-    Value* v = builder.CreateAdd(Constant::getAllOnesValue(Type::getInt32Ty(context)), Constant::getNullValue(Type::getInt32Ty(context)));
-    builder.CreateMul(v, ConstantInt::get(Type::getInt32Ty(context), 30));
-    builder.CreateRet(v);
     
     std::vector<Type*> t;
+    t.push_back(builder.getInt32Ty());
     ArrayRef<Type*> arref(t.data(), t.size());
     
     FunctionType *otherT = FunctionType::get(builder.getInt32Ty(), arref, false);
@@ -35,6 +29,15 @@ int main(int argc, const char * argv[]) {
     BasicBlock *otherb = BasicBlock::Create(getGlobalContext(), "entry", other);
     builder.SetInsertPoint(otherb);
     builder.CreateRet(builder.getInt32(40));
+    
+    
+    FunctionType *ft = FunctionType::get(Type::getDoubleTy(context), false);
+    Function *f = Function::Create(ft, llvm::GlobalValue::LinkageTypes::ExternalLinkage, "", &module);
+    BasicBlock *b = BasicBlock::Create(getGlobalContext(), "entry", f);
+    builder.SetInsertPoint(b);
+    builder.CreateCall(other, builder.getInt32(349));
+    Value* v = builder.CreateAdd(Constant::getAllOnesValue(Type::getInt32Ty(context)), Constant::getNullValue(Type::getInt32Ty(context)));
+    builder.CreateRet(v);
     
     module.dump();
     return 0;

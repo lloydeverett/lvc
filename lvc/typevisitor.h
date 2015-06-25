@@ -29,33 +29,25 @@ public:
         return returnThis;
     }
     virtual void visit(ast::PrimitiveType &p) {
-        PrimitiveTypeEnum name = p.name;
-        if (name == Int || name == Uint) {
-            returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByIntsWithUnspecifiedBitWidth);
-        }
-        else if (name == Int8 || name == Uint8) {
-            returnThis = llvm::Type::getInt8Ty(c);
-        }
-        else if (name == Int16 || name == Uint16) {
-            returnThis = llvm::Type::getInt16Ty(c);
-        }
-        else if (name == Int32 || name == Uint32) {
-            returnThis = llvm::Type::getInt32Ty(c);
-        }
-        else if (name == Int64 || name == Uint64) {
-            returnThis = llvm::Type::getInt64Ty(c);
-        }
-        else if (name == Bool) {
-            returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByBooleanType);
-        }
-        else if (name == Float) {
-            returnThis = llvm::Type::getFloatTy(c);
-        }
-        else if (name == Double) {
-            returnThis = llvm::Type::getDoubleTy(c);
-        }
-        else {
-            assert(false);
+        switch (p.code) {
+             case ast::PrimitiveType::CHAR_CODE:
+             case ast::PrimitiveType::UCHAR_CODE:
+                returnThis = llvm::Type::getInt8Ty(c); return;
+             case ast::PrimitiveType::SHORT_CODE:
+             case ast::PrimitiveType::USHORT_CODE:
+                returnThis = llvm::Type::getInt16Ty(c); return;
+             case ast::PrimitiveType::INT_CODE:
+             case ast::PrimitiveType::UINT_CODE:
+                returnThis = llvm::Type::getInt32Ty(c); return;
+             case ast::PrimitiveType::LONG_CODE:
+             case ast::PrimitiveType::ULONG_CODE:
+                returnThis = llvm::Type::getInt64Ty(c); return;
+             case ast::PrimitiveType::FLOAT_CODE:
+                returnThis = llvm::Type::getFloatTy(c); return;
+             case ast::PrimitiveType::DOUBLE_CODE:
+                returnThis = llvm::Type::getDoubleTy(c); return;
+             case ast::PrimitiveType::BOOL_CODE:
+                returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByBooleanType);
         }
     }
 };

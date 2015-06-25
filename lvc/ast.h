@@ -12,7 +12,8 @@
 #include <string>
 #include <iostream>
 #include <boost/optional.hpp>
-#include "boperator.h"
+#include "binopcode.h"
+#include "primitivetypecode.h"
 
 class INodeVisitor;
 
@@ -59,48 +60,39 @@ namespace ast {
         IExp() {};
     };
     
-    class IPrimType : public IType {
-    protected:
-        IPrimType() {}
-    };
-    
     ///////////////////////////////
     
     struct PrimitiveType : IType {
-        static const int CHAR_CODE   = 10;
-        static const int SHORT_CODE  = 11;
-        static const int INT_CODE    = 12;
-        static const int LONG_CODE   = 13;
-        static const int UCHAR_CODE  = 20;
-        static const int USHORT_CODE = 21;
-        static const int UINT_CODE   = 22;
-        static const int ULONG_CODE  = 23;
-        static const int FLOAT_CODE  = 50;
-        static const int DOUBLE_CODE = 51;
-        static const int BOOL_CODE   = 52;
+        PrimitiveTypeCode code;
         
-        int code;
-        
-        PrimitiveType(int code) : code(code) {}
+        PrimitiveType(PrimitiveTypeCode code) : code(code) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(PrimitiveType"  << code << ")";
+            return o << "(PrimitiveType"  << debugStringForPrimitiveType(code) << ")";
         }
         
         virtual void accept(INodeVisitor &visitor) override;
     };
     
     struct IntegerLiteralExp : public IExp {
-        std::string value;
-        IntegerLiteralExp(std::string value) :
-        value(value) {}
+        std::string valueStr;
+        IntegerLiteralExp(std::string valueStr) :
+        valueStr(valueStr) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(IntegerLiteralExp: " << value << ")";
+            return o << "(IntegerLiteralExp: " << valueStr << ")";
         }
         
-        virtual std::string dump() const {
-            return value;
+        virtual void accept(INodeVisitor &visitor) override;
+    };
+    
+    struct RealLiteralExp : public IExp {
+        std::string valueStr;
+        RealLiteralExp(std::string valueStr) :
+        valueStr(valueStr) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const {
+            return o << "(RealLiteralExp: " << valueStr << ")";
         }
         
         virtual void accept(INodeVisitor &visitor) override;
@@ -214,15 +206,15 @@ namespace ast {
         virtual void accept(INodeVisitor &visitor) override;
     };
     
-    struct BinOpExp : public IExp {
-        BOperator op;
+    struct BinopExp : public IExp {
+        BinopCode opCode;
         std::unique_ptr<IExp> lhs;
         std::unique_ptr<IExp> rhs;
-        BinOpExp(BOperator op, std::unique_ptr<IExp> lhs, std::unique_ptr<IExp> rhs) :
-        op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+        BinopExp(BinopCode opCode, std::unique_ptr<IExp> lhs, std::unique_ptr<IExp> rhs) :
+        opCode(opCode), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
         
         virtual std::ostream& dump(std::ostream& o) const {
-            return o << "(BinOpExp: " << *lhs << ", " << *rhs << ")";
+            return o << "(BinopExp: " << *lhs << ", " << *rhs << ")";
         }
         
         virtual void accept(INodeVisitor &visitor) override;

@@ -132,6 +132,9 @@
 		5752E2D21B2487930087DD1E /* lexerbuffertest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lexerbuffertest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5752E2D41B2487930087DD1E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5752E2DB1B25C4BE0087DD1E /* iissuereporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iissuereporter.h; sourceTree = "<group>"; };
+		577A42BB1B3AEF020094C7CD /* tostringliterals.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = tostringliterals.py; path = lvc/tostringliterals.py; sourceTree = "<group>"; };
+		577A42BC1B3C52770094C7CD /* ciossdjnvoijkvklncsknlxc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ciossdjnvoijkvklncsknlxc.h; sourceTree = "<group>"; };
+		577A42BD1B3C54A60094C7CD /* symbols.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symbols.h; sourceTree = "<group>"; };
 		577B99B61B2F7CC100FCF79F /* irgenvisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = irgenvisitor.cpp; sourceTree = "<group>"; };
 		577B99B71B2F7CC100FCF79F /* irgenvisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = irgenvisitor.h; sourceTree = "<group>"; };
 		577B99BA1B30371E00FCF79F /* typevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typevisitor.h; sourceTree = "<group>"; };
@@ -145,9 +148,10 @@
 		57ADD1291B1B68CF0031EB0F /* llvmplayground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = llvmplayground; sourceTree = BUILT_PRODUCTS_DIR; };
 		57ADD12B1B1B68CF0031EB0F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		57ADD1361B1DFB7E0031EB0F /* cerrissuereporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cerrissuereporter.h; sourceTree = "<group>"; };
-		57ADD13A1B1E06E50031EB0F /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parser.cpp; sourceTree = "<group>"; };
+		57ADD13A1B1E06E50031EB0F /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = parser.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		57ADD13B1B1E06E50031EB0F /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
-		57B7D8381B39ABD90037A24C /* boperator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = boperator.h; sourceTree = "<group>"; };
+		57B61E9C1B3AEA670044D994 /* primitivetypecode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = primitivetypecode.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		57B7D8381B39ABD90037A24C /* binopcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binopcode.h; sourceTree = "<group>"; };
 		57CD4CAB1B2C27E700EF9490 /* ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ast.cpp; sourceTree = "<group>"; };
 		57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = inodevisitor.h; sourceTree = "<group>"; };
 		57D426BB1B231DE0005B5D61 /* testutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testutil.h; sourceTree = "<group>"; };
@@ -157,7 +161,7 @@
 		57D8FFF11B0B923100630274 /* libLLVMSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMSupport.a; path = ../../../llvm/install/lib/libLLVMSupport.a; sourceTree = "<group>"; };
 		57DE87451B1F2A9300143D74 /* ilexer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ilexer.h; sourceTree = "<group>"; };
 		57F5B7791B2F333700C8C603 /* irgenconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = irgenconfig.h; sourceTree = "<group>"; };
-		57F9CC691B3447760084A086 /* symbols.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symbols.h; sourceTree = "<group>"; };
+		57F9CC691B3447760084A086 /* symbolsold.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symbolsold.h; sourceTree = "<group>"; };
 		57F9CC6F1B35A19A0084A086 /* symbolstest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = symbolstest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57F9CC711B35A19A0084A086 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -241,6 +245,7 @@
 			children = (
 				57D8FFF11B0B923100630274 /* libLLVMSupport.a */,
 				57D8FFED1B0B91E400630274 /* libLLVMCore.a */,
+				577A42BB1B3AEF020094C7CD /* tostringliterals.py */,
 				57ADD12A1B1B68CF0031EB0F /* llvmplayground */,
 				571AB4E81B1A0E0C00B866E2 /* vfiles */,
 				57D8FFDF1B0893B000630274 /* tests */,
@@ -267,8 +272,6 @@
 		5727F1A81B07EBA500A6966F /* lvc */ = {
 			isa = PBXGroup;
 			children = (
-				57D8FFEA1B08A19400630274 /* token.h */,
-				57B7D8381B39ABD90037A24C /* boperator.h */,
 				57CD4CAA1B2C27C100EF9490 /* ast */,
 				57ADD1341B1DBC7A0031EB0F /* issuereporter */,
 				57D8FFE01B0893BB00630274 /* lexer */,
@@ -348,7 +351,9 @@
 			children = (
 				57ADD13A1B1E06E50031EB0F /* parser.cpp */,
 				57ADD13B1B1E06E50031EB0F /* parser.h */,
-				57F9CC691B3447760084A086 /* symbols.h */,
+				577A42BD1B3C54A60094C7CD /* symbols.h */,
+				577A42BC1B3C52770094C7CD /* ciossdjnvoijkvklncsknlxc.h */,
+				57F9CC691B3447760084A086 /* symbolsold.h */,
 				5752E2CC1B2339E60087DD1E /* parserexceptions.h */,
 			);
 			name = parser;
@@ -378,9 +383,11 @@
 		57CD4CAA1B2C27C100EF9490 /* ast */ = {
 			isa = PBXGroup;
 			children = (
+				57B61E9C1B3AEA670044D994 /* primitivetypecode.h */,
+				57B7D8381B39ABD90037A24C /* binopcode.h */,
+				57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */,
 				57CD4CAB1B2C27E700EF9490 /* ast.cpp */,
 				57D8FFE61B089E8300630274 /* ast.h */,
-				57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */,
 			);
 			name = ast;
 			sourceTree = "<group>";
@@ -403,6 +410,7 @@
 		57D8FFE01B0893BB00630274 /* lexer */ = {
 			isa = PBXGroup;
 			children = (
+				57D8FFEA1B08A19400630274 /* token.h */,
 				57334CF71B10D23500085754 /* ireader.h */,
 				57334CFC1B10EBD700085754 /* stringreader.h */,
 				578EFB741B20583700A3968C /* lexer.cpp */,

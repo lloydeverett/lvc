@@ -9,7 +9,6 @@
 #pragma once
 
 struct IRGenConfig {
-    int bitsUsedByIntsWithUnspecifiedBitWidth; // number of bits used by the 'int' and 'uint' type in V
     int bitsUsedByBooleanType;
     bool preserveNames;
     #warning TODO: use preserveNames

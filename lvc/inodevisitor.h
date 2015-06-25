@@ -18,9 +18,10 @@ public:
     virtual void visit(ast::ArgumentDecl &argumentDecl) {assert(false);}
     virtual void visit(ast::FunctionDecl &functionDecl) {assert(false);}
     virtual void visit(ast::VariableDecl &variableDecl) {assert(false);}
-    virtual void visit(ast::BinOpExp &binOpExp) {assert(false);}
+    virtual void visit(ast::BinopExp &binOpExp) {assert(false);}
     virtual void visit(ast::FunctionCallExp &functionCallExp) {assert(false);}
     virtual void visit(ast::IntegerLiteralExp &integerLiteralExp) {assert(false);}
+    virtual void visit(ast::RealLiteralExp &realLiteralExp) {assert(false);}
     virtual void visit(ast::VariableExp &variableExp) {assert(false);}
     virtual void visit(ast::FunctionCallStmt &functionCallStmt) {assert(false);}
     virtual void visit(ast::ReturnStmt &returnStmt) {assert(false);}

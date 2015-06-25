@@ -2,92 +2,99 @@
 //  symbols.h
 //  lvc
 //
-//  Created by Lloyd Everett on 2015/06/19.
+//  Created by Lloyd Everett on 2015/06/25.
 //  Copyright (c) 2015 Lloyd Everett. All rights reserved.
 //
 
 #pragma once
-#include <vector>
 #include <unordered_map>
+#include <stack>
 #include <cassert>
-#include <boost/optional.hpp>
+#include <string>
+#include <cstdint>
 #include <stdexcept>
+#include <boost/optional.hpp>
 #include "ast.h"
 
-#warning TODO: determine whether to use map or unordered_map
-
-class CouldNotAssignTBDException : std::exception {
-private:
-    std::string identifier;
-public:
-    CouldNotAssignTBDException(std::string identifier) : identifier(identifier) {}
-    std::string getIdentifier() {
-        return identifier;
-    }
-};
+class SymbolsException : std::exception {};
+class SymbolsExceptionVarAlreadyExistsInScope : SymbolsException {};
+class SymbolsExceptionVarDoesNotExist : SymbolsException {};
 
 class Symbols {
 private:
-    std::vector<std::unordered_map<std::string, ast::IDecl*>> symbolVec;
-    std::unordered_map<std::string, std::vector<ast::IDecl**>> undefineds;
+    std::unordered_map<std::string, std::stack<ast::VariableDecl*>> vars;
+    std::unordered_map<std::string, std::vector<ast::VariableDecl**>> undefinedVars;
+    std::unordered_map<std::string, ast::FunctionDecl*> functions;
+    uint64_t currentScope;
+    
+    template<class T>
+    uint64_t indexOfTopInStack(const std::stack<T>& s) {
+        assert(s.size() > 0);
+        return s.size() - 1;
+    }
     
 public:
+    
     Symbols() {
-        symbolVec.push_back(std::unordered_map<std::string, ast::IDecl*>());
+        currentScope = 0;
     }
     
-    void openScope() {
-        symbolVec.push_back(std::unordered_map<std::string, ast::IDecl*>());
+    void openVarScope() {
+        currentScope++;
     }
     
-    void closeScope() {
-        assert(symbolVec.size() > 0);
-        symbolVec.pop_back();
-    }
-    
-    void create(ast::IDecl* decl) {
-        assert(symbolVec.size() > 0);
-        symbolVec[symbolVec.size() - 1].insert(std::pair<std::string, ast::IDecl*>(decl->getIdentifier(), decl));
-    }
-    
-    boost::optional<ast::IDecl*> getSymbol(std::string identifier) {
-        // Iterate backwards over the vector elements (maps)
-        for (auto rIt = symbolVec.rbegin(); rIt != symbolVec.rend(); ++rIt) {
-            const auto& theMap = *rIt;
-            const auto iteratorToElement = theMap.find(identifier);
-            if (iteratorToElement != theMap.end()) {
-                return iteratorToElement->second;
-            }
+    boost::optional<ast::VariableDecl*> tryGetVar(const std::string& identifier) {
+        const auto iter = vars.find(identifier);
+        if (iter == vars.end()) {
+            return boost::none;
         }
-        return boost::none;
+        const auto& stack = iter->second;
+        if (stack.empty()) {
+            return boost::none;
+        }
+        return stack.top();
     }
     
-    ast::IDecl* getSymbolElseAddToUndefineds(std::string identifier, ast::IDecl** declPtrPtr) {
-        boost::optional<ast::IDecl*> optSymbol = getSymbol(identifier);
-        if (optSymbol) {
-            return *optSymbol;
+    void tryGetVarElseAddToUndefineds(const std::string& identifier, ast::VariableDecl** declPtrPtr) {
+        boost::optional<ast::VariableDecl*> varPtrOpt = tryGetVar(identifier);
+        if (varPtrOpt) {
+            ast::VariableDecl* varPtr = *varPtrOpt;
+            *declPtrPtr = varPtr;
         }
         else {
-            undefineds[identifier].push_back(declPtrPtr);
-            return nullptr;
+            *declPtrPtr = nullptr;
+            undefinedVars[identifier].push_back(declPtrPtr);
         }
     }
     
-    void defineUndefinedsUsingCurrentlyStoredSymbols() {
-        for (auto iter : undefineds) {
-            const std::string& identifier = iter.first;
-            const std::vector<ast::IDecl**> undefinedVec = iter.second;
+    void addVarToScope(ast::VariableDecl* declPtr) {
+        // Check that the variable isn't already in the current scope
+        auto& stack = vars[declPtr->identifier];
+        if (!stack.empty() && indexOfTopInStack(stack) == currentScope) {
+            throw SymbolsExceptionVarAlreadyExistsInScope();
+        }
+        
+        stack.push(declPtr);
+    }
+    
+    void destroyVarsInCurrentScope() {
+        for (auto& pair : vars) {
+            auto& stack = pair.second;
             
-            boost::optional<ast::IDecl*> declPtrOpt = getSymbol(identifier);
-            if (!declPtrOpt) {
-                throw CouldNotAssignTBDException(identifier);
-            }
-            ast::IDecl* declPtr = *declPtrOpt;
+            if (stack.empty()) continue;
             
-            for (ast::IDecl** thisUndefined : undefinedVec) {
-                *thisUndefined = declPtr;
+            uint64_t stackScope = indexOfTopInStack(stack);
+            assert(stackScope <= currentScope);
+            if (stackScope == currentScope) {
+                stack.pop();
             }
         }
-        undefineds.clear();
     }
+    
+    void destroyVarsInCurrentScopeAndCloseScope() {
+        assert(currentScope > 0);
+        destroyVarsInCurrentScope();
+        currentScope--;
+    }
+    
 };

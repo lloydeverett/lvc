@@ -12,8 +12,6 @@
 #include "integertypedefs.h"
 #include <boost/optional.hpp>
 
-// Revise the rest of this file if changes are made to the enum
-
 enum TokenKind {
     Newline,
     Identifier,
@@ -51,6 +49,7 @@ enum TokenKind {
     ExclamationEquals,
     Exclamation,
     Comma,
+    Eof,
     
     INVALID_TOKEN_KIND_VALUE,
 };
@@ -93,6 +92,7 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "ExclamationEquals",
         "Exclamation",
         "Comma",
+        "Eof",
     };
     static const int numVals = sizeof(vals) / sizeof(vals[0]);
     
@@ -128,10 +128,6 @@ public:
         if (str.length() > 0)
             o << " str: " << getStr();
         return o;
-    }
-    
-    bool isLiteral() {
-        return kind == IntegerLiteral || kind == RealLiteral;
     }
     
     bool is(TokenKind kind) const { return this->kind == kind; }

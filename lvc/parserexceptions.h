@@ -18,9 +18,10 @@ enum ParserError {
     ParserErrorExpectedNewline,
     ParserErrorExpectedIndent,
     ParserErrorExpectedIdentifier,
-    ParserErrorExpectedParenthesis,
+    ParserErrorExpectedOpenParenthesis,
     ParserErrorExpectedCloseParenthesis,
     ParserErrorExpectedType,
+    ParserErrorExpectedCommaOrCloseParenthesis,
 };
 
 class ParserErrorException : public ParserException {

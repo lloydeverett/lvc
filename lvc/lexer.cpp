@@ -18,15 +18,9 @@ bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
 
-bool doesStrBeginWith(const std::string& str, const std::string& with) {
-    if (str.length() < with.length())
-        return false;
-    
-    return str.substr(0, with.length()) == with;
-}
-
 Lexer::Lexer(IReader &reader) : reader(reader) {
     indentStack.push(0);
+    hasProducedEof = false;
 }
 
 Token Lexer::getTokenFromQueuedDedent(QueuedDedent q) {
@@ -115,8 +109,7 @@ void Lexer::skipCommentsAndNonIndentWhitespace(IIssueReporter &issueReporter) {
 }
 
 bool Lexer::isFinished(IIssueReporter &issueReporter) {
-    skipCommentsAndNonIndentWhitespace(issueReporter);
-    return reader.eof() && indentStack.top() == 0 && queuedDedents.size() == 0;
+    return hasProducedEof;
 }
 
 Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::string &str) {
@@ -186,7 +179,18 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
             return getTokenFromQueuedDedent(q);
         }
         else {
-            throw LexerFinishedException();
+            if (!hasProducedEof) {
+                hasProducedEof = true;
+                Token t;
+                t.setKind(Eof);
+                t.setRow(reader.getRow());
+                t.setStartCol(reader.getCol());
+                t.setLength(0);
+                return t;
+            }
+            else {
+                throw LexerFinishedException();
+            }
         }
     }
     
@@ -209,14 +213,17 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         t.setKind(Newline);
         return t;
     }
+    
     if (c == '(') {
         t.setKind(OpenParenthesis);
         return t;
     }
+    
     if (c == ')') {
         t.setKind(CloseParenthesis);
         return t;
     }
+    
     if (c == '>') {
         if (reader.peekChar() == '=') {
             reader.readChar();
@@ -227,6 +234,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
         return t;
     }
+    
     if (c == '<') {
         if (reader.peekChar() == '=') {
             reader.readChar();
@@ -237,6 +245,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
         return t;
     }
+    
     if (c == '=') {
         if (reader.peekChar() == '=') {
             reader.readChar();
@@ -247,6 +256,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
         return t;
     }
+    
     if (c == '!') {
         if (reader.peekChar() == '=') {
             reader.readChar();
@@ -257,10 +267,12 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
         return t;
     }
+    
     if (c == '.') {
         t.setKind(Dot);
         return t;
     }
+    
     if (c == ',') {
         t.setKind(Comma);
         return t;

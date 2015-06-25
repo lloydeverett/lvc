@@ -41,8 +41,6 @@ namespace ast {
     class IDecl : public INode {
     protected:
         IDecl() {};
-    public:
-        virtual const std::string& getIdentifier() const = 0;
     };
     
     class IStmt : public INode {
@@ -110,10 +108,6 @@ namespace ast {
         }
         
         virtual void accept(INodeVisitor &visitor) override;
-        
-        virtual const std::string& getIdentifier() const {
-            return identifier;
-        }
     };
     
     struct VariableExp : public IExp {
@@ -143,10 +137,6 @@ namespace ast {
         }
         
         virtual void accept(INodeVisitor &visitor) override;
-        
-        virtual const std::string& getIdentifier() const {
-            return variableDecl.identifier;
-        }
     };
     
     struct FunctionDecl : public IDecl {
@@ -167,10 +157,6 @@ namespace ast {
         }
         
         virtual void accept(INodeVisitor &visitor) override;
-        
-        virtual const std::string& getIdentifier() const {
-            return identifier;
-        }
     };
     
     struct VariableDeclStmt : public IStmt {

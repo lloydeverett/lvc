@@ -133,7 +133,6 @@
 		5752E2D41B2487930087DD1E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5752E2DB1B25C4BE0087DD1E /* iissuereporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iissuereporter.h; sourceTree = "<group>"; };
 		577A42BB1B3AEF020094C7CD /* tostringliterals.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = tostringliterals.py; path = lvc/tostringliterals.py; sourceTree = "<group>"; };
-		577A42BC1B3C52770094C7CD /* ciossdjnvoijkvklncsknlxc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ciossdjnvoijkvklncsknlxc.h; sourceTree = "<group>"; };
 		577A42BD1B3C54A60094C7CD /* symbols.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symbols.h; sourceTree = "<group>"; };
 		577B99B61B2F7CC100FCF79F /* irgenvisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = irgenvisitor.cpp; sourceTree = "<group>"; };
 		577B99B71B2F7CC100FCF79F /* irgenvisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = irgenvisitor.h; sourceTree = "<group>"; };
@@ -161,7 +160,6 @@
 		57D8FFF11B0B923100630274 /* libLLVMSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMSupport.a; path = ../../../llvm/install/lib/libLLVMSupport.a; sourceTree = "<group>"; };
 		57DE87451B1F2A9300143D74 /* ilexer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ilexer.h; sourceTree = "<group>"; };
 		57F5B7791B2F333700C8C603 /* irgenconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = irgenconfig.h; sourceTree = "<group>"; };
-		57F9CC691B3447760084A086 /* symbolsold.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symbolsold.h; sourceTree = "<group>"; };
 		57F9CC6F1B35A19A0084A086 /* symbolstest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = symbolstest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57F9CC711B35A19A0084A086 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -352,8 +350,6 @@
 				57ADD13A1B1E06E50031EB0F /* parser.cpp */,
 				57ADD13B1B1E06E50031EB0F /* parser.h */,
 				577A42BD1B3C54A60094C7CD /* symbols.h */,
-				577A42BC1B3C52770094C7CD /* ciossdjnvoijkvklncsknlxc.h */,
-				57F9CC691B3447760084A086 /* symbolsold.h */,
 				5752E2CC1B2339E60087DD1E /* parserexceptions.h */,
 			);
 			name = parser;

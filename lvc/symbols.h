@@ -68,8 +68,9 @@ public:
     }
     
     void addVarToScope(ast::VariableDecl* declPtr) {
-        // Check that the variable isn't already in the current scope
         auto& stack = vars[declPtr->identifier];
+        
+        // Check that the variable isn't already in the current scope
         if (!stack.empty() && indexOfTopInStack(stack) == currentScope) {
             throw SymbolsExceptionVarAlreadyExistsInScope();
         }

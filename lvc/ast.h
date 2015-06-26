@@ -21,8 +21,8 @@ namespace ast {
     
     class INode {
     protected:
-        // Protected constructor prevents this class from being constructed
-        // (it should only be used as a base class for a derived class)
+        // The protected constructor prevents this class from being constructed
+        // (it should only be used as a base class for a derived class).
         INode() {}
         
     public:
@@ -30,7 +30,7 @@ namespace ast {
         virtual void accept(INodeVisitor &visitor) = 0;
         
         // Making the virtual destructor public allows the derived classes
-        // to be destructed polymorphically (i.e. through their base class)
+        // to be destructed polymorphically (i.e. through their base class).
         virtual ~INode() {}
     };
     
@@ -65,7 +65,7 @@ namespace ast {
         
         PrimitiveType(PrimitiveTypeCode code) : code(code) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             return o << "(PrimitiveType"  << debugStringForPrimitiveType(code) << ")";
         }
         
@@ -77,7 +77,7 @@ namespace ast {
         IntegerLiteralExp(std::string valueStr) :
         valueStr(valueStr) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             return o << "(IntegerLiteralExp: " << valueStr << ")";
         }
         
@@ -89,7 +89,7 @@ namespace ast {
         RealLiteralExp(std::string valueStr) :
         valueStr(valueStr) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             return o << "(RealLiteralExp: " << valueStr << ")";
         }
         
@@ -103,7 +103,7 @@ namespace ast {
         type_ptr(std::move(type_ptr)),
         identifier(identifier) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             return o << "(VariableDecl: " << *type_ptr << " " << identifier << ")";
         }
         
@@ -115,7 +115,7 @@ namespace ast {
         VariableExp(VariableDecl *decl) :
         decl(decl) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             return o << "(VariableExp: " << *decl << ")";
         }
         
@@ -128,7 +128,7 @@ namespace ast {
         ArgumentDecl(VariableDecl variableDecl, boost::optional<std::unique_ptr<IExp>> defaultValue_ptr = boost::none) :
         variableDecl(std::move(variableDecl)), defaultValue_ptr(std::move(defaultValue_ptr)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             o << "(ArgumentDecl: " << variableDecl;
             if (defaultValue_ptr)
                 o << ", " << **defaultValue_ptr;
@@ -147,7 +147,7 @@ namespace ast {
         returnType_ptr(std::move(returnType_ptr)),
         identifier(identifier), arguments(std::move(arguments)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             o << "(FunctionDecl: " << *returnType_ptr << ", " << identifier << ", (Arguments: " ;
             for (const ArgumentDecl &decl : arguments) {
                 o << decl;
@@ -167,7 +167,7 @@ namespace ast {
         initialValue_ptr(std::move(initialValue_ptr)),
         decl(std::move(decl))  {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             if (initialValue_ptr)
                 return o << "(VariableDeclStmt: " << decl << ", " << **initialValue_ptr << ")";
             else
@@ -182,7 +182,7 @@ namespace ast {
         ReturnStmt(boost::optional<std::unique_ptr<IExp>> returnedExpression_ptr = boost::none) :
         returnedExpression_ptr(std::move(returnedExpression_ptr)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             if (returnedExpression_ptr)
                 return o << "(ReturnStmt: " << **returnedExpression_ptr << ")";
             else
@@ -199,7 +199,7 @@ namespace ast {
         BinopExp(BinopCode opCode, std::unique_ptr<IExp> lhs, std::unique_ptr<IExp> rhs) :
         opCode(opCode), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             return o << "(BinopExp: " << *lhs << ", " << *rhs << ")";
         }
         
@@ -212,7 +212,7 @@ namespace ast {
         FunctionCallExp(FunctionDecl* calleeDeclRef, std::vector<std::unique_ptr<IExp>> passedArguments) :
         calleeDeclRef(calleeDeclRef), passedArguments(std::move(passedArguments)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             o << "(FunctionCallExp: " << *calleeDeclRef << ", (Arguments: ";
             for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
                 o << *exp_ptr;
@@ -229,7 +229,7 @@ namespace ast {
         FunctionCallStmt(FunctionCallExp functionCallExp) :
         functionCallExp(std::move(functionCallExp)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             return o << "(FunctionCallStmt: " << functionCallExp << ")";
         }
         
@@ -244,7 +244,7 @@ namespace ast {
                boost::optional<std::vector<std::unique_ptr<IStmt>>> elseStatements = boost::none) :
         condition(std::move(condition)), thenStatements(std::move(thenStatements)), elseStatements(std::move(elseStatements)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             o << "(IfStmt: (";
             for (const std::unique_ptr<IStmt>& statement_ptr : thenStatements) {
                 o << *statement_ptr << std::endl;
@@ -270,7 +270,7 @@ namespace ast {
         Function(FunctionDecl decl, std::vector<std::unique_ptr<IStmt>> statements) :
         decl(std::move(decl)), statements(std::move(statements)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             o << decl << std::endl;
             for (const std::unique_ptr<IStmt>& statement_ptr : statements) {
                 o << "    " << *statement_ptr << std::endl;
@@ -287,7 +287,7 @@ namespace ast {
         Module(std::string moduleName, std::vector<Function> functions) :
         moduleName(moduleName), functions(std::move(functions)) {}
         
-        virtual std::ostream& dump(std::ostream& o) const {
+        virtual std::ostream& dump(std::ostream& o) const override {
             o << "Module: " << moduleName << std::endl;
             for (const Function& function : functions) {
                 o << function;

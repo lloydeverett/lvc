@@ -304,7 +304,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         return t;
     }
     
-    issueReporter.report(reader.getSourcePosition(), "Did not expect character", SubsystemLexer);
+    issueReporter.report(reader.getSourcePosition(), "Did not expect character.", SubsystemLexer);
     throw LexerErrorException(LexerErrorUnexpectedCharacter);
 }
 

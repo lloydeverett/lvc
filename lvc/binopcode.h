@@ -26,10 +26,6 @@ inline int getBinopPrecedence(BinopCode c) {
     return -1;
 }
 
-inline int getMaxBinopPrecedence() {
-    return 32767;
-}
-
 inline const char* debugStringForBinop(BinopCode c) {
     static const char* vals[] = {
         "BinopCodeAdd",

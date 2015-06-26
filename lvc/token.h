@@ -94,11 +94,10 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "Comma",
         "Eof",
     };
-    static const int numVals = sizeof(vals) / sizeof(vals[0]);
     
-    int kindAsInt = (int)kind;
-    assert(kindAsInt >= 0 && kindAsInt < numVals);
-    return vals[kindAsInt];
+    int numVals = sizeof(vals) / sizeof(vals[0]);
+    assert(kind >= 0 && kind < numVals);
+    return vals[kind];
 }
 
 class Token {

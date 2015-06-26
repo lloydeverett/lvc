@@ -119,7 +119,7 @@ FunctionDecl Parser::parseFunctionDecl() {
             }
             
             VariableDecl varDecl = VariableDecl(std::move(argType), argIdentifier);
-            arguments.emplace_back(std::move(varDecl), optDefaultValue);
+            arguments.emplace_back(std::move(varDecl), std::move(*optDefaultValue));
             
             if (currentToken.is(CloseParenthesis)) break;
             if (currentToken.is(Comma)) {
@@ -153,8 +153,8 @@ boost::optional<std::unique_ptr<IType>> Parser::tryParseType() {
         default:
             return boost::none;
     }
-    std::unique_ptr<IType> ret = std::make_unique<PrimitiveType>(code);
     readTokenIntoCurrent();
+    std::unique_ptr<IType> ret = std::make_unique<PrimitiveType>(code);
     return std::move(ret);
 }
 
@@ -182,7 +182,6 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
         std::unique_ptr<IExp> exp(parseExpression());
         return std::make_unique<ReturnStmt>(std::move(exp));
     }
-
     
     boost::optional<std::unique_ptr<IType>> optType = tryParseType();
     if (optType) {
@@ -219,21 +218,20 @@ std::unique_ptr<IExp> Parser::parseRHSExpression(int precedence) {
     
 }
 
-// A primary expression is an expression that is not a BinOpExp.
-// This dinstinction is important becausee BinOpExps require operator precedence parsing.
+// A primary expression is an expression that is not a BinopExp.
+// This dinstinction is important becausee BinopExps require operator precedence parsing.
 // Note that parseExpression can still parse primary expressions; this function
 // is called by it.
 std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
     if (currentToken.is(Identifier)) {
         if (lexerBuffer.peekNext().is(OpenParenthesis)) {\
             // Function call
-            readTokenIntoCurrent(); // read open parenthesis -> currentToken
-            readTokenIntoCurrent(); // read token after it -> currentToken
-            std::vector<ArgumentDecl> args;
+            readTokenIntoCurrent(); // read open parenthesis into currentToken
+            readTokenIntoCurrent(); // read token after open parenthesis into currentToken
+            std::vector<std::unique_ptr<IExp>> argExps;
             if (currentToken.isNot(CloseParenthesis)) {
                 while (true) {
-                    ArgumentDecl def;
-                    parseExpression();
+                    argExps.push_back(parseExpression());
 #warning TODO: lookup symbol for function
                     
                     if (currentToken.is(CloseParenthesis)) break;
@@ -251,20 +249,6 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
         }
         else {
             // Variable Expression
-        }
-    }
-    if (currentToken.is(Identifier)) {
-        if (!lexerBuffer.isFinished(issueReporter) && lexerBuffer.peekNext().is(OpenParenthesis)) {
-            // Function call
-            readTokenIntoCurrent(); // read the open parenthesis
-            readTokenIntoCurrent(); // read the token after the open parenthesis
-            if (currentToken.isNot(CloseParenthesis)) {
-                parseExpression(7);
-            }
-        }
-        else {
-            // Variable
-            
         }
     }
     else if (currentToken.is(IntegerLiteral)) {

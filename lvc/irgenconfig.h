@@ -10,6 +10,6 @@
 
 struct IRGenConfig {
     int bitsUsedByBooleanType;
-    bool preserveNames;
+    bool preserveNamesInIR;
     #warning TODO: use preserveNames
 };

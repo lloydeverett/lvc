@@ -34,7 +34,7 @@ private:
     TypeVisitor typeVisitor;
     ExpVisitor expVisitor;
     //////////
-    
+
 public:
     IRGenVisitor(llvm::Module *llvmModuleParam, IRGenConfig config);
     llvm::Module *getLLLVMModule() {
@@ -43,5 +43,5 @@ public:
     virtual void visit(ast::Function &function);
     virtual void visit(ast::ReturnStmt &returnStmt);
     virtual void visit(ast::Module &module);
-    
+
 };

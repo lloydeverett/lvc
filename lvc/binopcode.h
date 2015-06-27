@@ -16,16 +16,6 @@ enum BinopCode {
     BinopCodeDivide,
 };
 
-inline int getBinopPrecedence(BinopCode c) {
-    switch (c) {
-        case BinopCodeAdd:      return 10;
-        case BinopCodeSubtract: return 10;
-        case BinopCodeMultiply: return 20;
-        case BinopCodeDivide:   return 20;
-    }
-    return -1;
-}
-
 inline const char* debugStringForBinop(BinopCode c) {
     static const char* vals[] = {
         "BinopCodeAdd",

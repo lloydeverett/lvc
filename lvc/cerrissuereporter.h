@@ -10,19 +10,13 @@
 #include <iostream>
 #include "iissuereporter.h"
 
-enum LoggingSetting {
-    LoggingEnabled,
-    LoggingDisabled,
-};
-
 class CerrIssueReporter : public IIssueReporter {
 private:
     std::string path;
-    LoggingSetting loggingSetting;
     bool hasErrorOccuredBool;
     
 public:
-    CerrIssueReporter(std::string path, LoggingSetting s = LoggingEnabled) : path(path), loggingSetting(s), hasErrorOccuredBool(false) {}
+    CerrIssueReporter(std::string path) : path(path), hasErrorOccuredBool(false) {}
     
     virtual void report(SourcePosition pos, std::string message, Subsystem subsystem) override {
         report(pos.row, pos.col, message, subsystem);

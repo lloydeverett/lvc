@@ -10,6 +10,8 @@
 #include "integertypedefs.h"
 #include <cassert>
 
+#warning TODO: make lexer ignore empty lines
+
 bool isAlpha(char c) {
     return c >= 'A' && c <= 'z';
 }
@@ -34,28 +36,28 @@ Token Lexer::getTokenFromQueuedDedent(QueuedDedent q) {
 
 bool Lexer::addDedentsToQueueUntilColnumberIsReached(colnumber col) {
     assert(indentStack.top() > col);
-    
+
     colnumber currentCol;
     do {
         colnumber prevCol = indentStack.top();
         indentStack.pop();
         currentCol = indentStack.top();
-        
+
         colnumber dedentStartCol = currentCol;
         colnumber dedentEndCol = prevCol;
         queuedDedents.emplace(dedentStartCol, dedentEndCol - dedentStartCol);
     } while (currentCol > col);
-    
+
     if (col != indentStack.top()) {
         return false;
     }
-    
+
     return true;
 }
 
 Token Lexer::makeIndentToken(colnumber col) {
     assert(col > indentStack.top());
-    
+
     colnumber origIndent = indentStack.top();
     indentStack.push(col);
     Token t;
@@ -99,7 +101,7 @@ void Lexer::skipCommentsAndNonIndentWhitespace(IIssueReporter &issueReporter) {
     bool didConsumeWhitespace;
     do {
         didSkipComment = tryToSkipComment(issueReporter);
-        
+
         didConsumeWhitespace = false;
         if (reader.atWhitespace() && !reader.atStartOfRow()) {
             reader.consumeWhitespace();
@@ -117,9 +119,10 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     t.setRow(row);
     t.setStartCol(startCol);
     t.setLength(str.length());
-    
+
     if (str == "return") t.setKind(Return);
     else if (str == "if") t.setKind(If);
+    else if (str == "else") t.setKind(Else);
     else if (str == "struct") t.setKind(Struct);
     else if (str == "char") t.setKind(Char);
     else if (str == "short") t.setKind(Short);
@@ -137,7 +140,7 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
 }
 
 Token Lexer::lexToken(IIssueReporter &issueReporter) {
-    
+
     // Return a queued dedent if there are any.
     // This should always get priority over other tokens
     // (and thus the code is run first).
@@ -146,10 +149,10 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         queuedDedents.pop();
         return getTokenFromQueuedDedent(q);
     }
-    
+
     bool wasAtStartOfRowBeforeConsumingWhitespace = reader.atStartOfRow();
     charcount whitespaceCount = reader.consumeWhitespace();
-    
+
     if (wasAtStartOfRowBeforeConsumingWhitespace) {
         if (whitespaceCount > indentStack.top()) {
             return makeIndentToken(whitespaceCount);
@@ -166,9 +169,9 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
             return getTokenFromQueuedDedent(q);
         }
     }
-    
+
     skipCommentsAndNonIndentWhitespace(issueReporter);
-    
+
     if (reader.eof()) {
         if (indentStack.top() > 0) {
             bool success = addDedentsToQueueUntilColnumberIsReached(0);
@@ -193,89 +196,70 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
             }
         }
     }
-    
+
     colnumber rowOfC = reader.getRow();
     colnumber colOfC = reader.getCol();
     char c = reader.readChar();
-    
+
     Token t;
     t.setRow(rowOfC);
     t.setStartCol(colOfC);
     t.setLength(1);
     
-    if (c == '\n' || c == '\r') {
-        if (c == '\r') {
+    switch (c) {
+        case '(': t.setKind(OpenParenthesis); return t;
+        case ')': t.setKind(CloseParenthesis); return t;
+        case '+': t.setKind(Plus); return t;
+        case '-': t.setKind(Minus); return t;
+        case '*': t.setKind(Asterisk); return t;
+        case '/': t.setKind(Slash); return t;
+        case '.': t.setKind(Dot); return t;
+        case ',': t.setKind(Comma); return t;
+        case '=':
+            if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(EqualsEquals);
+            }
+            else
+                t.setKind(Equals);
+            return t;
+        case '<':
+            if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(SmalerThanEquals);
+            }
+            else
+                t.setKind(SmallerThan);
+            return t;
+        case '>':
+            if (reader.peekChar() == '=') {
+                reader.peekChar();
+                t.setLength(2);
+                t.setKind(LargenThanEquals);
+            }
+            else
+                t.setKind(LargerThan);
+            return t;
+        case '\n':
+            t.setKind(Newline);
+            return t;
+        case '\r':
             if (reader.peekChar() == '\n') {
                 reader.readChar();
                 t.setLength(2);
             }
-        }
-        t.setKind(Newline);
-        return t;
-    }
-    
-    if (c == '(') {
-        t.setKind(OpenParenthesis);
-        return t;
-    }
-    
-    if (c == ')') {
-        t.setKind(CloseParenthesis);
-        return t;
-    }
-    
-    if (c == '>') {
-        if (reader.peekChar() == '=') {
-            reader.readChar();
-            t.setKind(LargenThanEquals);
-        }
-        else {
-            t.setKind(LargerThan);
-        }
-        return t;
-    }
-    
-    if (c == '<') {
-        if (reader.peekChar() == '=') {
-            reader.readChar();
-            t.setKind(SmalerThanEquals);
-        }
-        else {
-            t.setKind(SmallerThan);
-        }
-        return t;
-    }
-    
-    if (c == '=') {
-        if (reader.peekChar() == '=') {
-            reader.readChar();
-            t.setKind(EqualsEquals);
-        }
-        else {
-            t.setKind(Equals);
-        }
-        return t;
-    }
-    
-    if (c == '!') {
-        if (reader.peekChar() == '=') {
-            reader.readChar();
-            t.setKind(ExclamationEquals);
-        }
-        else {
-            t.setKind(Exclamation);
-        }
-        return t;
-    }
-    
-    if (c == '.') {
-        t.setKind(Dot);
-        return t;
-    }
-    
-    if (c == ',') {
-        t.setKind(Comma);
-        return t;
+            t.setKind(Newline);
+            return t;
+        case '!':
+            if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setKind(ExclamationEquals);
+            }
+            else
+                t.setKind(Exclamation);
+            return t;
     }
     
     if (isAlpha(c)) {
@@ -284,10 +268,10 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         while (isAlpha(reader.peekChar()) || isDigit(reader.peekChar())) {
             str += reader.readChar();
         }
-        
+
         return lexStrBegginningWithAlpha(rowOfC, colOfC, str);
     }
-    
+
     if (isDigit(c)) {
         std::string str;
         str += c;
@@ -303,12 +287,13 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         t.setStr(str);
         return t;
     }
-    
+
     issueReporter.report(reader.getSourcePosition(), "Did not expect character.", SubsystemLexer);
     throw LexerErrorException(LexerErrorUnexpectedCharacter);
 }
 
 bool Lexer::attemptToRecoverBySkippingLine() {
+#warning TODO: implement
     return (assert(false), true);
 }
 

@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include <cassert>
 
 enum PrimitiveTypeCode {
     PrimitiveTypeCodeChar,
@@ -36,7 +37,7 @@ inline const char* debugStringForPrimitiveType(PrimitiveTypeCode c) {
         "PrimitiveTypeCodeDouble",
         "PrimitiveTypeCodeBool",
     };
-    
+
     int numVals = sizeof(vals) / sizeof(vals[0]);
     assert(c >= 0 && c < numVals);
     return vals[c];

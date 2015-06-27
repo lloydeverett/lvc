@@ -30,7 +30,6 @@ int main(int argc, const char * argv[]) {
     builder.SetInsertPoint(otherb);
     builder.CreateRet(builder.getInt32(40));
     
-    
     FunctionType *ft = FunctionType::get(Type::getDoubleTy(context), false);
     Function *f = Function::Create(ft, llvm::GlobalValue::LinkageTypes::ExternalLinkage, "", &module);
     BasicBlock *b = BasicBlock::Create(getGlobalContext(), "entry", f);

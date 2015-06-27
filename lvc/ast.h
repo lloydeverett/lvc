@@ -27,7 +27,7 @@ namespace ast {
         
     public:
         virtual std::ostream& dump(std::ostream& o) const = 0;
-        virtual void accept(INodeVisitor &visitor) = 0;
+        virtual void accept(INodeVisitor& visitor) = 0;
         
         // Making the virtual destructor public allows the derived classes
         // to be destructed polymorphically (i.e. through their base class).
@@ -66,10 +66,10 @@ namespace ast {
         PrimitiveType(PrimitiveTypeCode code) : code(code) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(PrimitiveType"  << debugStringForPrimitiveType(code) << ")";
+            return o << "("  << debugStringForPrimitiveType(code) << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct IntegerLiteralExp : public IExp {
@@ -81,7 +81,7 @@ namespace ast {
             return o << "(IntegerLiteralExp: " << valueStr << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct RealLiteralExp : public IExp {
@@ -93,7 +93,7 @@ namespace ast {
             return o << "(RealLiteralExp: " << valueStr << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct VariableDecl : public IDecl {
@@ -107,7 +107,7 @@ namespace ast {
             return o << "(VariableDecl: " << *type_ptr << " " << identifier << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct VariableExp : public IExp {
@@ -119,7 +119,7 @@ namespace ast {
             return o << "(VariableExp: " << *decl << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct ArgumentDecl : public IDecl {
@@ -136,7 +136,7 @@ namespace ast {
             return o;
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct FunctionDecl : public IDecl {
@@ -156,7 +156,7 @@ namespace ast {
             return o;
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct VariableDeclStmt : public IStmt {
@@ -174,7 +174,7 @@ namespace ast {
                 return o << "(VariableDeclStmt: " << decl << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct ReturnStmt : public IStmt {
@@ -189,21 +189,21 @@ namespace ast {
                 return o << "(ReturnStmt)";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct BinopExp : public IExp {
-        BinopCode opCode;
         std::unique_ptr<IExp> lhs;
+        BinopCode code;
         std::unique_ptr<IExp> rhs;
-        BinopExp(BinopCode opCode, std::unique_ptr<IExp> lhs, std::unique_ptr<IExp> rhs) :
-        opCode(opCode), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+        BinopExp(std::unique_ptr<IExp> lhs, BinopCode code, std::unique_ptr<IExp> rhs) :
+        lhs(std::move(lhs)), code(code), rhs(std::move(rhs)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(BinopExp: " << *lhs << ", " << *rhs << ")";
+            return o << "(BinopExp: " << *lhs << ", " << debugStringForBinop(code) << ", " << *rhs << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct FunctionCallExp : public IExp {
@@ -221,7 +221,7 @@ namespace ast {
             return o;
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct FunctionCallStmt : public IStmt {
@@ -233,52 +233,61 @@ namespace ast {
             return o << "(FunctionCallStmt: " << functionCallExp << ")";
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
+    };
+    
+    struct BlockStmt : public IStmt {
+        std::vector<std::unique_ptr<IStmt>> statements;
+        BlockStmt(std::vector<std::unique_ptr<IStmt>> statements) :
+        statements(std::move(statements)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const override {
+            o << "(Block: ";
+            for (const std::unique_ptr<IStmt>& statement_ptr : statements) {
+                o << *statement_ptr;
+                if (statement_ptr != statements[statements.size() - 1]) {
+                    o << ", ";
+                }
+            }
+            o << ")";
+            return o;
+        }
+        
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct IfStmt : public IStmt {
         std::unique_ptr<IExp> condition;
-        std::vector<std::unique_ptr<IStmt>> thenStatements;
-        boost::optional<std::vector<std::unique_ptr<IStmt>>> elseStatements;
-        IfStmt(std::unique_ptr<IExp> condition, std::vector<std::unique_ptr<IStmt>> thenStatements,
-               boost::optional<std::vector<std::unique_ptr<IStmt>>> elseStatements = boost::none) :
-        condition(std::move(condition)), thenStatements(std::move(thenStatements)), elseStatements(std::move(elseStatements)) {}
+        BlockStmt thenBlock;
+        boost::optional<BlockStmt> elseBlock;
+        IfStmt(std::unique_ptr<IExp> condition, BlockStmt thenBlock, boost::optional<BlockStmt> elseBlock = boost::none) :
+        condition(std::move(condition)), thenBlock(std::move(thenBlock)), elseBlock(std::move(elseBlock)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(IfStmt: (";
-            for (const std::unique_ptr<IStmt>& statement_ptr : thenStatements) {
-                o << *statement_ptr << std::endl;
-            }
-            o << ")";
-            if (elseStatements) {
-                o << ", (";
-                for (const std::unique_ptr<IStmt>& statement_ptr : *elseStatements) {
-                    o << *statement_ptr << std::endl;
-                }
-                o << ")";
+            o << "(IfStmt: " << *condition << ", ";
+            o << thenBlock;
+            if (elseBlock) {
+                o << ", " << *elseBlock;
             }
             o << ")";
             return o;
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct Function : public INode {
         FunctionDecl decl;
-        std::vector<std::unique_ptr<IStmt>> statements;
-        Function(FunctionDecl decl, std::vector<std::unique_ptr<IStmt>> statements) :
-        decl(std::move(decl)), statements(std::move(statements)) {}
+        BlockStmt block;
+        Function(FunctionDecl decl, BlockStmt block) :
+        decl(std::move(decl)), block(std::move(block)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << decl << std::endl;
-            for (const std::unique_ptr<IStmt>& statement_ptr : statements) {
-                o << "    " << *statement_ptr << std::endl;
-            }
+            o << "(Function: " << decl << ", " << block;
             return o;
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct Module : public INode {
@@ -290,12 +299,12 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             o << "Module: " << moduleName << std::endl;
             for (const Function& function : functions) {
-                o << function;
+                o << function << std::endl;
             }
             return o;
         }
         
-        virtual void accept(INodeVisitor &visitor) override;
+        virtual void accept(INodeVisitor& visitor) override;
     };
     
 }

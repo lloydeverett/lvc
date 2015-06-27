@@ -67,7 +67,7 @@ public:
         }
     }
     
-    void addVarToScope(ast::VariableDecl* declPtr) {
+    void addVar(ast::VariableDecl* declPtr) {
         auto& stack = vars[declPtr->identifier];
         
         // Check that the variable isn't already in the current scope
@@ -92,7 +92,7 @@ public:
         }
     }
     
-    void destroyVarsInCurrentScopeAndCloseScope() {
+    void closeVarScope() {
         assert(currentScope > 0);
         destroyVarsInCurrentScope();
         currentScope--;

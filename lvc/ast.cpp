@@ -11,62 +11,66 @@
 
 using namespace ast;
 
-void Function::accept(INodeVisitor &visitor) {
+void Function::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void ArgumentDecl::accept(INodeVisitor &visitor) {
+void ArgumentDecl::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void FunctionDecl::accept(INodeVisitor &visitor) {
+void FunctionDecl::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void VariableDecl::accept(INodeVisitor &visitor) {
+void VariableDecl::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void RealLiteralExp::accept(INodeVisitor &visitor) {
+void RealLiteralExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void BinopExp::accept(INodeVisitor &visitor) {
+void BinopExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void FunctionCallExp::accept(INodeVisitor &visitor) {
+void FunctionCallExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void IntegerLiteralExp::accept(INodeVisitor &visitor) {
+void IntegerLiteralExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void VariableExp::accept(INodeVisitor &visitor) {
+void VariableExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void FunctionCallStmt::accept(INodeVisitor &visitor) {
+void FunctionCallStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void ReturnStmt::accept(INodeVisitor &visitor) {
+void ReturnStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void VariableDeclStmt::accept(INodeVisitor &visitor) {
+void VariableDeclStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void PrimitiveType::accept(INodeVisitor &visitor) {
+void PrimitiveType::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void Module::accept(INodeVisitor &visitor) {
+void Module::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void IfStmt::accept(INodeVisitor &visitor) {
+void IfStmt::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void BlockStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }

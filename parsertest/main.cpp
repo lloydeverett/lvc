@@ -18,11 +18,9 @@ int main(int argc, const char * argv[]) {
     CerrIssueReporter c(filePath);
     Parser parser(s, c);
     
-        std::cout << argv[0] << std::endl;
-    
     ast::Module m = parser.parse("eh");
     
-    std::cout << std::endl << m;
+    std::cout << m;
     
     return 0;
 }

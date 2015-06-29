@@ -30,7 +30,7 @@ private:
     std::unique_ptr<ast::IStmt> parseStatement();
     std::unique_ptr<ast::IExp> parseParenExpression();
     std::unique_ptr<ast::IExp> parseExpression();
-    ast::BinopExp parseBinopRHS(std::unique_ptr<ast::IExp> lhs, BinopCode afterLhsBinopCode);
+    std::unique_ptr<ast::IExp> parseBinopRhs(std::unique_ptr<ast::IExp> lhs, BinopCode afterLhsCode, int minPrecedence);
     std::unique_ptr<ast::IExp> parsePrimaryExpression();
     std::string parseIdentifier();
     boost::optional<std::unique_ptr<ast::IType>> tryParseTypename();

@@ -43,5 +43,6 @@ public:
     virtual void visit(ast::Function &function);
     virtual void visit(ast::ReturnStmt &returnStmt);
     virtual void visit(ast::Module &module);
-
+    virtual void visit(ast::BlockStmt &block);
+    
 };

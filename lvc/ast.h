@@ -66,7 +66,7 @@ namespace ast {
         PrimitiveType(PrimitiveTypeCode code) : code(code) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "("  << debugStringForPrimitiveType(code) << ")";
+            return o << debugStringForPrimitiveType(code);
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -78,7 +78,7 @@ namespace ast {
         valueStr(valueStr) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(IntegerLiteralExp: " << valueStr << ")";
+            return o << "IntegerLiteralExp" << valueStr;
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -90,7 +90,7 @@ namespace ast {
         valueStr(valueStr) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(RealLiteralExp: " << valueStr << ")";
+            return o << "RealLiteralExp" << valueStr;
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -104,7 +104,7 @@ namespace ast {
         identifier(identifier) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(VariableDecl: " << *type_ptr << " " << identifier << ")";
+            return o << "(VariableDecl: " << *type_ptr << ", " << identifier << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -224,13 +224,13 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct FunctionCallStmt : public IStmt {
+    struct FunctionCalExplStmt : public IStmt {
         FunctionCallExp functionCallExp;
-        FunctionCallStmt(FunctionCallExp functionCallExp) :
+        FunctionCalExplStmt(FunctionCallExp functionCallExp) :
         functionCallExp(std::move(functionCallExp)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(FunctionCallStmt: " << functionCallExp << ")";
+            return o << "(FunctionCallExpStmt: " << functionCallExp << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;

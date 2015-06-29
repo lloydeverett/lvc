@@ -156,7 +156,6 @@ std::unique_ptr<IType> Parser::parseTypename() {
 //  - a single statement found on the same line that prompted the parsing of a block, terminated by a newline.
 // currentToken will be the token after the terminating token in each case.
 BlockStmt Parser::parseBlock() {
-#warning TOOD: check this
     std::vector<std::unique_ptr<IStmt>> statements;
     if (currentToken.is(Newline)) {
         readTokenIntoCurrent();
@@ -181,7 +180,6 @@ BlockStmt Parser::parseBlock() {
 
 // After this function is called, currentToken will be the token after the newline that terminates the statement.
 std::unique_ptr<IStmt> Parser::parseStatement() {
-#warning TODO: test
     
     // Block statements
     if (currentToken.is(If)) {
@@ -213,7 +211,11 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
                 optInitialValue = parseExpression();
             }
             
-            stmt = std::make_unique<VariableDeclStmt>(VariableDecl(std::move(*optType), identifier), std::move(optInitialValue));
+            VariableDecl decl(std::move(*optType), identifier);
+            auto variableDeclStmt = std::make_unique<VariableDeclStmt>(std::move(decl),
+                                                                       std::move(optInitialValue));
+            symbols.addVar(&variableDeclStmt->decl);
+            stmt = std::move(variableDeclStmt);
         }
         else {
 #warning TODO: impl
@@ -254,50 +256,49 @@ std::unique_ptr<IExp> Parser::parseExpression() {
         return std::move(leftmostPrimary);
     }
     else {
-        return std::make_unique<BinopExp>(parseBinopRHS(std::move(leftmostPrimary), *optNextBinopCode));
+        return parseBinopRhs(std::move(leftmostPrimary), *optNextBinopCode, 0);
     }
 }
 
 // This function takes a left-hand-side part of an expression as input and parses until the tree
 // of BinopExps is discerned according to operator precedences, and it returns the BinopExp tree.
 // Generally lhs is the leftmost primary expression of an expression when this is called by other functions,
-// but lhs can represent any left-hand-side part of the expression (including the entire expression).
-// currentToken should be the token that appears directly after the operator that follows lhs.
-BinopExp Parser::parseBinopRHS(std::unique_ptr<IExp> lhs, BinopCode afterLhsBinopCode) {
+// but lhs can represent any left-hand-side part of the expression.
+// currentToken should be the token that appears directly after the operator that follows lhs when this function is called.
+// If afterLhsCode's precedence is lower than minPrecedence, lhs is returned.
+std::unique_ptr<IExp> Parser::parseBinopRhs(std::unique_ptr<IExp> lhs, BinopCode afterLhsCode, int minPrecedence) {
     while (true) {
-        int afterLhsBinopPrec = getBinopCodePrecedence(afterLhsBinopCode);
+        int afterLhsPrec = getBinopCodePrecedence(afterLhsCode);
         
-        // For now, just fill rhs with the primary expression after lhs.
+        if (afterLhsPrec < minPrecedence) {
+            return std::move(lhs);
+        }
+        
         std::unique_ptr<IExp> rhs(parsePrimaryExpression());
         
-        // We check to see whether there's a binary operator *after* the primary expression in rhs.
-        // If not, we're finished.
-        boost::optional<BinopCode> optNextBinopCode(tryParseBinopCode());
-        if (!optNextBinopCode) {
-            return BinopExp(std::move(lhs), afterLhsBinopCode, std::move(rhs));
+        boost::optional<BinopCode> optAfterRhsCode(tryParseBinopCode());
+        if (!optAfterRhsCode) {
+            return std::make_unique<BinopExp>(std::move(lhs), afterLhsCode, std::move(rhs));
         }
-        BinopCode nextBinopCode = *optNextBinopCode;
-        int nextBinopPrec = getBinopCodePrecedence(nextBinopCode);
-        
-        // If afterLhsBinopCode binds less tightly with RHS than the operator after LHS,
-        // let the pending operator take RHS as its LHS.
-        if (nextBinopPrec > afterLhsBinopPrec) {
-            rhs = std::make_unique<BinopExp>(parseBinopRHS(std::move(rhs), nextBinopCode));
-            
-            // Now that rhs has been changed, we need to update nextBinopCode.
-            // We don't have to update nextBinopPrec because that's determined in the
-            // beginning of the loop body.
-            // Again, if there's no remaining operator, we're finished.
-            optNextBinopCode = tryParseBinopCode();
-            if (!optNextBinopCode) {
-                return BinopExp(std::move(lhs), afterLhsBinopCode, std::move(rhs));
+        BinopCode afterRhsCode = *optAfterRhsCode;
+        int afterRhsPrec = getBinopCodePrecedence(afterRhsCode);
+        if (afterLhsPrec < afterRhsPrec) {
+            // Let afterRhsCode take rhs as its lhs
+            rhs = parseBinopRhs(std::move(rhs), afterRhsCode, afterLhsPrec + 1);
+            // RHS has changed so we need to adjust afterRhsCode
+            optAfterRhsCode = tryParseBinopCode();
+            if (!optAfterRhsCode) {
+                return std::make_unique<BinopExp>(std::move(lhs), afterLhsCode, std::move(rhs));
             }
-            nextBinopCode = *optNextBinopCode;
+            afterRhsCode = *optAfterRhsCode;
+            // Don't need to update afterRhsPrec; it isn't used again.
         }
         
-        // Combine LHS and RHS into LHS and repeat the process.
-        lhs = std::make_unique<BinopExp>(std::move(lhs), afterLhsBinopCode, std::move(rhs));
-        afterLhsBinopCode = nextBinopCode;
+        // Now we take what we've parsed and merge it into the LHS and then
+        // run this function again; we set the arguments for the next iteration.
+        lhs = std::make_unique<BinopExp>(std::move(lhs), afterLhsCode, std::move(rhs)); // merge LHS and RHS into LHS
+        afterLhsCode = afterRhsCode; // adjust afterLhsCode according to updated LHS
+        // We don't change minPrecedence
     }
 }
 
@@ -305,6 +306,7 @@ BinopExp Parser::parseBinopRHS(std::unique_ptr<IExp> lhs, BinopCode afterLhsBino
 // This dinstinction is important because BinopExps require operator precedence parsing.
 // Note that parseExpression can still parse primary expressions that appear without BinopExps; this function
 // is called by it.
+// This includes parenthesis expressions.
 std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
     if (currentToken.is(Identifier)) {
         if (lexerBuffer.peekNext().is(OpenParenthesis)) { // function call
@@ -326,8 +328,8 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
                     throw ParserErrorException(ParserErrorExpectedCommaOrCloseParenthesis);
                 }
             }
-            readTokenIntoCurrent(); // read token after close parenthesis -> currentToken
-
+            readTokenIntoCurrent(); // read token after close parenthesis into currentToken
+            
         }
         else { // variable expression
             
@@ -346,7 +348,7 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
     else if (currentToken.is(OpenParenthesis)) {
         return parseParenExpression();
     }
-#warning TODO: impl
+    #warning TODO: impl
     assert(false);
 }
 

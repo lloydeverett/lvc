@@ -133,7 +133,7 @@
 		5752E2D41B2487930087DD1E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5752E2DB1B25C4BE0087DD1E /* iissuereporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iissuereporter.h; sourceTree = "<group>"; };
 		577A42BB1B3AEF020094C7CD /* tostringliterals.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = tostringliterals.py; path = lvc/tostringliterals.py; sourceTree = "<group>"; };
-		577A42BD1B3C54A60094C7CD /* symbols.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symbols.h; sourceTree = "<group>"; };
+		577A42BD1B3C54A60094C7CD /* localstable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = localstable.h; sourceTree = "<group>"; };
 		577B99B61B2F7CC100FCF79F /* irgenvisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = irgenvisitor.cpp; sourceTree = "<group>"; };
 		577B99B71B2F7CC100FCF79F /* irgenvisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = irgenvisitor.h; sourceTree = "<group>"; };
 		577B99BA1B30371E00FCF79F /* typevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typevisitor.h; sourceTree = "<group>"; };
@@ -142,6 +142,7 @@
 		578EFB741B20583700A3968C /* lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lexer.cpp; sourceTree = "<group>"; };
 		578EFB751B20583700A3968C /* lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexer.h; sourceTree = "<group>"; };
 		578EFB7A1B2239F200A3968C /* lexerbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerbuffer.h; sourceTree = "<group>"; };
+		57A0D0FA1B3F4C4000E0A968 /* indentast.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = indentast.py; path = lvc/indentast.py; sourceTree = "<group>"; };
 		57ADD1161B1B67A50031EB0F /* asttest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = asttest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57ADD1181B1B67A50031EB0F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		57ADD1291B1B68CF0031EB0F /* llvmplayground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = llvmplayground; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -153,6 +154,7 @@
 		57B7D8381B39ABD90037A24C /* binopcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binopcode.h; sourceTree = "<group>"; };
 		57CD4CAB1B2C27E700EF9490 /* ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ast.cpp; sourceTree = "<group>"; };
 		57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = inodevisitor.h; sourceTree = "<group>"; };
+		57D019231B41987700031198 /* locals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = locals.h; sourceTree = "<group>"; };
 		57D426BB1B231DE0005B5D61 /* testutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testutil.h; sourceTree = "<group>"; };
 		57D8FFE61B089E8300630274 /* ast.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ast.h; sourceTree = "<group>"; };
 		57D8FFEA1B08A19400630274 /* token.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = token.h; sourceTree = "<group>"; };
@@ -244,6 +246,7 @@
 				57D8FFF11B0B923100630274 /* libLLVMSupport.a */,
 				57D8FFED1B0B91E400630274 /* libLLVMCore.a */,
 				577A42BB1B3AEF020094C7CD /* tostringliterals.py */,
+				57A0D0FA1B3F4C4000E0A968 /* indentast.py */,
 				57ADD12A1B1B68CF0031EB0F /* llvmplayground */,
 				571AB4E81B1A0E0C00B866E2 /* vfiles */,
 				57D8FFDF1B0893B000630274 /* tests */,
@@ -349,8 +352,9 @@
 			children = (
 				57ADD13A1B1E06E50031EB0F /* parser.cpp */,
 				57ADD13B1B1E06E50031EB0F /* parser.h */,
-				577A42BD1B3C54A60094C7CD /* symbols.h */,
+				577A42BD1B3C54A60094C7CD /* localstable.h */,
 				5752E2CC1B2339E60087DD1E /* parserexceptions.h */,
+				57D019231B41987700031198 /* locals.h */,
 			);
 			name = parser;
 			sourceTree = "<group>";

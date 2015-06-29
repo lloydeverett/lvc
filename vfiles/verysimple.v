@@ -3,7 +3,7 @@
 // In fact, it was the first V source file ever compiled!
 
 int getZero()
-    return 3 + 5 * 2
+    return 0
 
 int main()
     return 0

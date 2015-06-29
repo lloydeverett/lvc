@@ -61,3 +61,7 @@ void IRGenVisitor::visit(ast::ReturnStmt &returnStmt) {
         builder.CreateRetVoid();
     }
 }
+
+void IRGenVisitor::visit(ast::BlockStmt &blockStmt) {
+    
+}

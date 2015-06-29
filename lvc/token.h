@@ -29,6 +29,7 @@ enum TokenKind {
     Minus,
     Asterisk,
     Slash,
+    Percent,
     Dot,
     Char,
     Short,
@@ -50,8 +51,9 @@ enum TokenKind {
     ExclamationEquals,
     Exclamation,
     Comma,
+    Extern,
     Eof,
-    
+
     INVALID_TOKEN_KIND_VALUE,
 };
 
@@ -73,6 +75,7 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "Minus",
         "Asterisk",
         "Slash",
+        "Percent",
         "Dot",
         "Char",
         "Short",
@@ -94,9 +97,10 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "ExclamationEquals",
         "Exclamation",
         "Comma",
+        "Extern",
         "Eof",
     };
-    
+
     int numVals = sizeof(vals) / sizeof(vals[0]);
     assert(kind >= 0 && kind < numVals);
     return vals[kind];
@@ -108,14 +112,14 @@ private:
     rownumber row;
     colnumber startCol;
     charcount length;
-    
+
     // Str contains the contents of a literal (whether it be a number literal or a string literal), OR,
     // if the token is an identifier, it contains the identifer.
     std::string str;
-    
+
 public:
     Token() { clean(); }
-    
+
     void clean() {
         kind = INVALID_TOKEN_KIND_VALUE;
         row = 99999;
@@ -123,29 +127,29 @@ public:
         length = 99999;
         str = "";
     }
-    
+
     virtual std::ostream& dump(std::ostream& o) const {
         o << "(" << debugStringForTokenKind(kind) << ") row:" << getRow() << " col:" << getStartCol() << " len:" << getLength();
         if (str.length() > 0)
             o << " str: " << getStr();
         return o;
     }
-    
+
     bool is(TokenKind kind) const { return this->kind == kind; }
     bool isNot(TokenKind kind) const { return this->kind != kind; }
-    
+
     void setKind(TokenKind kind) { this->kind = kind; }
     TokenKind getKind() const { return this->kind; }
-    
+
     void setRow(rownumber row) { this->row = row; }
     rownumber getRow() const { return this->row; }
-    
+
     void setStartCol(colnumber startCol) { this->startCol = startCol; }
     colnumber getStartCol() const { return this->startCol; }
-    
+
     void setLength(charcount length) { this->length = length; }
     charcount getLength() const { return this->length; }
-    
+
     void setStr(const std::string &str) { this->str = str; }
     std::string getStr() const { return this->str; }
 };

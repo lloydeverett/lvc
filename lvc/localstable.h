@@ -20,11 +20,9 @@ class SymbolsException : std::exception {};
 class SymbolsExceptionVarAlreadyExistsInScope : SymbolsException {};
 class SymbolsExceptionVarDoesNotExist : SymbolsException {};
 
-class Symbols {
+class LocalsTable {
 private:
-    std::unordered_map<std::string, std::stack<ast::VariableDecl*>> vars;
-    std::unordered_map<std::string, std::vector<ast::VariableDecl**>> undefinedVars;
-    std::unordered_map<std::string, ast::FunctionDecl*> functions;
+    std::unordered_map<std::string, std::stack<ast::VariableDecl*>> locals;
     uint64_t currentScope;
     
     template<class T>

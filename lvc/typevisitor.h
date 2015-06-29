@@ -30,24 +30,18 @@ public:
     }
     virtual void visit(ast::PrimitiveType &p) {
         switch (p.code) {
-             case ast::PrimitiveType::CHAR_CODE:
-             case ast::PrimitiveType::UCHAR_CODE:
-                returnThis = llvm::Type::getInt8Ty(c); return;
-             case ast::PrimitiveType::SHORT_CODE:
-             case ast::PrimitiveType::USHORT_CODE:
-                returnThis = llvm::Type::getInt16Ty(c); return;
-             case ast::PrimitiveType::INT_CODE:
-             case ast::PrimitiveType::UINT_CODE:
-                returnThis = llvm::Type::getInt32Ty(c); return;
-             case ast::PrimitiveType::LONG_CODE:
-             case ast::PrimitiveType::ULONG_CODE:
-                returnThis = llvm::Type::getInt64Ty(c); return;
-             case ast::PrimitiveType::FLOAT_CODE:
-                returnThis = llvm::Type::getFloatTy(c); return;
-             case ast::PrimitiveType::DOUBLE_CODE:
-                returnThis = llvm::Type::getDoubleTy(c); return;
-             case ast::PrimitiveType::BOOL_CODE:
-                returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByBooleanType);
+            case PrimitiveTypeCodeChar: returnThis = llvm::Type::getInt8Ty(c); return;
+            case PrimitiveTypeCodeShort: returnThis = llvm::Type::getInt16Ty(c); return;
+            case PrimitiveTypeCodeInt: returnThis = llvm::Type::getInt32Ty(c); return;
+            case PrimitiveTypeCodeLong: returnThis = llvm::Type::getInt64Ty(c); return;
+            case PrimitiveTypeCodeUchar: returnThis = llvm::Type::getInt8Ty(c); return;
+            case PrimitiveTypeCodeUshort: returnThis = llvm::Type::getInt16Ty(c); return;
+            case PrimitiveTypeCodeUint: returnThis = llvm::Type::getInt32Ty(c); return;
+            case PrimitiveTypeCodeUlong: returnThis = llvm::Type::getInt64Ty(c); return;
+            case PrimitiveTypeCodeFloat: returnThis = llvm::Type::getFloatTy(c); return;
+            case PrimitiveTypeCodeDouble: returnThis = llvm::Type::getDoubleTy(c); return;
+            case PrimitiveTypeCodeBool: returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByBooleanType); return;
         }
+        assert(false);
     }
 };

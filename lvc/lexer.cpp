@@ -132,6 +132,7 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     else if (str == "ushort") t.setKind(Ushort);
     else if (str == "uint") t.setKind(Uint);
     else if (str == "ulong") t.setKind(Ulong);
+    else if (str == "extern") t.setKind(Extern);
     else {
         t.setKind(Identifier);
         t.setStr(str);
@@ -215,6 +216,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         case '/': t.setKind(Slash); return t;
         case '.': t.setKind(Dot); return t;
         case ',': t.setKind(Comma); return t;
+        case '%': t.setKind(Percent); return t;
         case '=':
             if (reader.peekChar() == '=') {
                 reader.readChar();

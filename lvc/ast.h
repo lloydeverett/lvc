@@ -15,6 +15,8 @@
 #include "binopcode.h"
 #include "primitivetypecode.h"
 
+#warning TODO: refactor _ptr
+
 class INodeVisitor;
 
 namespace ast {
@@ -59,6 +61,13 @@ namespace ast {
     };
     
     ///////////////////////////////
+    
+    struct VoidType : IType {
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "VoidType";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+    };
     
     struct PrimitiveType : IType {
         PrimitiveTypeCode code;
@@ -111,12 +120,12 @@ namespace ast {
     };
     
     struct VariableExp : public IExp {
-        VariableDecl *decl;
-        VariableExp(VariableDecl *decl) :
-        decl(decl) {}
+        std::string identifier;
+        VariableExp(std::string identifier) :
+        identifier(identifier) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(VariableExp: " << *decl << ")";
+            return o << "(VariableExp: " << identifier << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -207,17 +216,21 @@ namespace ast {
     };
     
     struct FunctionCallExp : public IExp {
-        FunctionDecl* calleeDeclRef;
+        std::string calleeIdentifier;
         std::vector<std::unique_ptr<IExp>> passedArguments;
-        FunctionCallExp(FunctionDecl* calleeDeclRef, std::vector<std::unique_ptr<IExp>> passedArguments) :
-        calleeDeclRef(calleeDeclRef), passedArguments(std::move(passedArguments)) {}
+        FunctionCallExp(std::string calleeIdentifier, std::vector<std::unique_ptr<IExp>> passedArguments) :
+        calleeIdentifier(calleeIdentifier), passedArguments(std::move(passedArguments)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(FunctionCallExp: " << *calleeDeclRef << ", (Arguments: ";
-            for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
-                o << *exp_ptr;
+            o << "(FunctionCallExp: " << calleeIdentifier;
+            if (!passedArguments.empty()) {
+                o << ", (Arguments: ";
+                for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
+                    o << *exp_ptr;
+                }
+                o << ")";
             }
-            o << "))";
+            o << ")";
             return o;
         }
         

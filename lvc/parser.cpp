@@ -28,8 +28,8 @@ void Parser::reportOnCurrentToken(const std::string& message) {
 }
 
 Module Parser::parse(std::string nameOfModule) {
-
     std::vector<Function> functions;
+    std::vector<VariableDeclStmt> variableDecls;
     
     readTokenIntoCurrent();
 
@@ -46,8 +46,12 @@ Module Parser::parse(std::string nameOfModule) {
                 functions.push_back(parseFunction());
             }
             else {
-                assert(false);
-                #warning TOOD: parse global
+                boost::optional<std::unique_ptr<IType>> optType(tryParseTypename());
+                if (!optType) {
+                    reportOnCurrentToken("Did not expect token at beginning of line when parsing at module level.");
+                    throw ParserErrorException(ParserErrorUnknownLineBeginningAtModuleLevel);
+                }
+                variableDecls.push_back(parseVariableDeclStmt(std::move(*optType)));
             }
         }
         catch (LexerException &e) {
@@ -66,16 +70,11 @@ Module Parser::parse(std::string nameOfModule) {
 Function Parser::parseFunction() {
     FunctionDecl decl(parseFunctionDecl());
 
-    symbols.openVarScope();
-
     for (ArgumentDecl& argDecl : decl.arguments) {
         VariableDecl* varDeclPtr = &(argDecl.variableDecl);
-        symbols.addVar(varDeclPtr);
     }
     
     BlockStmt block(parseBlock());
-    
-    symbols.closeVarScope();
 
     return Function(std::move(decl), std::move(block));
 }
@@ -121,25 +120,35 @@ FunctionDecl Parser::parseFunctionDecl() {
 }
 
 boost::optional<std::unique_ptr<IType>> Parser::tryParseTypename() {
-    PrimitiveTypeCode code;
-    switch (currentToken.getKind()) {
-        case Char: code = PrimitiveTypeCodeChar; break;
-        case Short: code = PrimitiveTypeCodeShort; break;
-        case Int: code = PrimitiveTypeCodeInt; break;
-        case Long: code = PrimitiveTypeCodeLong; break;
-        case Uchar: code = PrimitiveTypeCodeUchar; break;
-        case Ushort: code = PrimitiveTypeCodeUshort; break;
-        case Uint: code = PrimitiveTypeCodeUint; break;
-        case Ulong: code = PrimitiveTypeCodeUlong; break;
-        case Bool: code = PrimitiveTypeCodeBool; break;
-        case Float: code = PrimitiveTypeCodeFloat; break;
-        case Double: code = PrimitiveTypeCodeDouble; break;
-        default:
-            return boost::none;
+    boost::optional<std::unique_ptr<IType>> optRet;
+    
+    if (currentToken.is(Void)) {
+        optRet = std::make_unique<VoidType>();
     }
-    readTokenIntoCurrent();
-    std::unique_ptr<IType> ret = std::make_unique<PrimitiveType>(code);
-    return std::move(ret);
+    else { // keep this last
+        PrimitiveTypeCode code;
+        switch (currentToken.getKind()) {
+            case Char: code = PrimitiveTypeCodeChar; break;
+            case Short: code = PrimitiveTypeCodeShort; break;
+            case Int: code = PrimitiveTypeCodeInt; break;
+            case Long: code = PrimitiveTypeCodeLong; break;
+            case Uchar: code = PrimitiveTypeCodeUchar; break;
+            case Ushort: code = PrimitiveTypeCodeUshort; break;
+            case Uint: code = PrimitiveTypeCodeUint; break;
+            case Ulong: code = PrimitiveTypeCodeUlong; break;
+            case Bool: code = PrimitiveTypeCodeBool; break;
+            case Float: code = PrimitiveTypeCodeFloat; break;
+            case Double: code = PrimitiveTypeCodeDouble; break;
+            default:
+                return boost::none;
+        }
+        optRet = std::make_unique<PrimitiveType>(code);
+    }
+    
+    if (optRet) {
+        readTokenIntoCurrent();
+    }
+    return std::move(optRet);
 }
 
 std::unique_ptr<IType> Parser::parseTypename() {
@@ -203,25 +212,17 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
     }
     else {
         boost::optional<std::unique_ptr<IType>> optType = tryParseTypename();
-        if (optType) { // handle declaration of local
-            std::string identifier(parseIdentifier());
-            boost::optional<std::unique_ptr<IExp>> optInitialValue = boost::none;
-            if (currentToken.is(Equals)) {
-                readTokenIntoCurrent();
-                optInitialValue = parseExpression();
-            }
-            
-            VariableDecl decl(std::move(*optType), identifier);
-            auto variableDeclStmt = std::make_unique<VariableDeclStmt>(std::move(decl),
-                                                                       std::move(optInitialValue));
-            symbols.addVar(&variableDeclStmt->decl);
-            stmt = std::move(variableDeclStmt);
+        if (optType) {
+            VariableDeclStmt vds(parseVariableDeclStmt(std::move(*optType)));
+            stmt = std::make_unique<VariableDeclStmt>(std::move(vds));
         }
         else {
-#warning TODO: impl
-            assert(false);
+            reportOnCurrentToken("Could not parse statement begginning with this token.");
+            throw ParserErrorException(ParserErrorUnknownStatementBeginning);
         }
     }
+    
+    #warning TODO: refactor stmt =
     
     if (currentToken.isNot(Newline)) {
         reportOnCurrentToken("Expected newline after statement.");
@@ -229,6 +230,17 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
     }
     readTokenIntoCurrent();
     return std::move(stmt);
+}
+
+VariableDeclStmt Parser::parseVariableDeclStmt(std::unique_ptr<IType> type) {
+    std::string identifier(parseIdentifier());
+    boost::optional<std::unique_ptr<IExp>> optInitialValue = boost::none;
+    if (currentToken.is(Equals)) {
+        readTokenIntoCurrent();
+        optInitialValue = parseExpression();
+    }
+    VariableDecl decl(std::move(type), identifier);
+    return VariableDeclStmt(std::move(decl), std::move(optInitialValue));
 }
 
 std::unique_ptr<IExp> Parser::parseParenExpression() {
@@ -310,13 +322,12 @@ std::unique_ptr<IExp> Parser::parseBinopRhs(std::unique_ptr<IExp> lhs, BinopCode
 std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
     if (currentToken.is(Identifier)) {
         if (lexerBuffer.peekNext().is(OpenParenthesis)) { // function call
-            readTokenIntoCurrent(); // read open parenthesis into currentToken
+            std::string identifier = parseIdentifier();
             readTokenIntoCurrent(); // read token after open parenthesis into currentToken
             std::vector<std::unique_ptr<IExp>> argExps;
             if (currentToken.isNot(CloseParenthesis)) {
                 while (true) {
                     argExps.push_back(parseExpression());
-#warning TODO: lookup symbol for function
 
                     if (currentToken.is(CloseParenthesis)) break;
                     if (currentToken.is(Comma)) {
@@ -330,9 +341,10 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
             }
             readTokenIntoCurrent(); // read token after close parenthesis into currentToken
             
+            return std::make_unique<FunctionCallExp>(identifier, std::move(argExps));
         }
         else { // variable expression
-            
+            return std::make_unique<VariableExp>(parseIdentifier());
         }
     }
     else if (currentToken.is(IntegerLiteral)) {

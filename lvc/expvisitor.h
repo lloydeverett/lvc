@@ -17,55 +17,38 @@
 
 class ExpVisitor : public INodeVisitor {
 private:
-    llvm::LLVMContext &c;
+    llvm::IRBuilder<>& builder;
+    llvm::LLVMContext& context;
     llvm::Value* returnThis;
 public:
-    ExpVisitor(llvm::LLVMContext &context) : c(context) {
-        
-    }
+    ExpVisitor(llvm::IRBuilder<>& builder) : builder(builder), context(builder.getContext()), returnThis(nullptr) {}
     llvm::Value* returnValue() {
+        assert(returnThis != nullptr);
         return returnThis;
     }
-    virtual void visit(ast::BinOpExp &binOpExp) {
-        binOpExp.accept(*this);
+    virtual void visit(ast::BinopExp &binopExp) {
+        binopExp.lhs->accept(*this);
         llvm::Value* lhs = returnValue();
-        binOpExp.accept(*this);
+        
+        binopExp.rhs->accept(*this);
         llvm::Value* rhs = returnValue();
         
-        switch (binOpExp.op) {
-            case LargerThan:
-                
-                break;
-            case SmallerThan:
-                
-                break;
-            case LargerThanEquals:
-                
-                break;
-            case SmallerThanEquals:
-                
-                break;
-            case EqualsEquals:
-                
-                break;
-            case Plus:
-                
-                break;
-            case Minus:
-                
-                break;
-            case Multiply:
-                
-                break;
-            case Divide:
-                
-                break;
-            default:
+        BinopCode code;
+        switch (binopExp.code) {
+            case BinopCodeAdd:
+                returnThis = builder.CreateAdd(lhs, rhs); return;
+            case BinopCodeSubtract:
+                returnThis = builder.CreateSub(lhs, rhs); return;
+            case BinopCodeMultiply:
+                returnThis = builder.CreateMul(lhs, rhs); return;
+            case BinopCodeDivide:
+#warning TODO: THIS.
                 assert(false);
         }
-#warning TODO: implement
+        assert(false);
     }
     virtual void visit(ast::IntegerLiteralExp &integerLiteralExp) {
-        returnThis = llvm::ConstantInt::get(llvm::Type::getInt32Ty(c), integerLiteralExp.value.data(), 10);
+#warning TODO: THIS.
+        returnThis = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), integerLiteralExp.value.data(), 10);
     }
 };

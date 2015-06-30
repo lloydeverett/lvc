@@ -22,7 +22,11 @@ enum ParserError {
     ParserErrorExpectedCloseParenthesis,
     ParserErrorExpectedType,
     ParserErrorExpectedCommaOrCloseParenthesis,
+    ParserErrorUnknownStatementBeginning,
+    ParserErrorUnknownLineBeginningAtModuleLevel,
 };
+
+#warning TODO: REFACTOR.
 
 class ParserErrorException : public ParserException {
 private:

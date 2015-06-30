@@ -124,6 +124,7 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     else if (str == "if") t.setKind(If);
     else if (str == "else") t.setKind(Else);
     else if (str == "struct") t.setKind(Struct);
+    else if (str == "void") t.setKind(Void);
     else if (str == "char") t.setKind(Char);
     else if (str == "short") t.setKind(Short);
     else if (str == "int") t.setKind(Int);

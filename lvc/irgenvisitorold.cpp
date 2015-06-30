@@ -9,19 +9,21 @@
 #include "irgenvisitor.h"
 #include <vector>
 
+using namespace ast;
+
 IRGenVisitor::IRGenVisitor(llvm::Module *llvmModuleParam, IRGenConfig config)
 : llvmContext(llvmModuleParam->getContext()), llvmModule(llvmModuleParam), config(config), builder(llvmContext),
   typeVisitor(llvmContext, this->config), expVisitor(llvmContext) {
     
 }
 
-void IRGenVisitor::visit(ast::Module &module) {
-    for (ast::Function& function : module.functions) {
+void IRGenVisitor::visit(Module &module) {
+    for (Function& function : module.functions) {
         function.accept(*this);
     }
 }
 
-void IRGenVisitor::visit(ast::Function &function) {
+void IRGenVisitor::visit(Function &function) {
     // Determine return type in terms of LLVM constructs
     function.decl.returnType_ptr->accept(typeVisitor);
     llvm::Type* returnType = typeVisitor.returnValue();
@@ -29,7 +31,7 @@ void IRGenVisitor::visit(ast::Function &function) {
     // Determine param types in terms of LLVM constructs
     std::vector<llvm::Type*> argTypes;
     argTypes.reserve(function.decl.arguments.size());
-    for (const ast::ArgumentDecl& argdecl : function.decl.arguments) {
+    for (const ArgumentDecl& argdecl : function.decl.arguments) {
         argdecl.variableDecl.type_ptr->accept(typeVisitor);
         argTypes.push_back(typeVisitor.returnValue());
     }
@@ -45,15 +47,12 @@ void IRGenVisitor::visit(ast::Function &function) {
     llvm::BasicBlock *entryBlock = llvm::BasicBlock::Create(llvmContext, "entry", f);
     builder.SetInsertPoint(entryBlock);
     
-    // We make this visitor parse each statement
-    for (const std::unique_ptr<ast::IStmt>& statement_ptr : function.statements) {
-        statement_ptr->accept(*this);
-    }
+    function.block.accept(*this);
 }
 
-void IRGenVisitor::visit(ast::ReturnStmt &returnStmt) {
+void IRGenVisitor::visit(ReturnStmt &returnStmt) {
     if (returnStmt.returnedExpression_ptr) {
-        std::unique_ptr<ast::IExp> &exp_ptr = *returnStmt.returnedExpression_ptr;
+        std::unique_ptr<IExp> &exp_ptr = *returnStmt.returnedExpression_ptr;
         exp_ptr->accept(expVisitor);
         builder.CreateRet(expVisitor.returnValue());
     }
@@ -62,6 +61,8 @@ void IRGenVisitor::visit(ast::ReturnStmt &returnStmt) {
     }
 }
 
-void IRGenVisitor::visit(ast::BlockStmt &blockStmt) {
-    
+void IRGenVisitor::visit(BlockStmt &blockStmt) {
+    for (std::unique_ptr<IStmt>& stmt_ptr : blockStmt.statements) {
+        stmt_ptr->accept(*this);
+    }
 }

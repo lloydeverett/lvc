@@ -22,26 +22,39 @@ private:
     llvm::Type* returnThis;
     
 public:
-    TypeVisitor(llvm::LLVMContext &context, IRGenConfig &config) : c(context), config(config), returnThis(NULL) {
-        
-    }
+    TypeVisitor(llvm::LLVMContext &context, IRGenConfig &config) : c(context), config(config), returnThis(nullptr) {}
     llvm::Type* returnValue() {
+        assert(returnThis != nullptr);
         return returnThis;
     }
     virtual void visit(ast::PrimitiveType &p) {
         switch (p.code) {
-            case PrimitiveTypeCodeChar: returnThis = llvm::Type::getInt8Ty(c); return;
-            case PrimitiveTypeCodeShort: returnThis = llvm::Type::getInt16Ty(c); return;
-            case PrimitiveTypeCodeInt: returnThis = llvm::Type::getInt32Ty(c); return;
-            case PrimitiveTypeCodeLong: returnThis = llvm::Type::getInt64Ty(c); return;
-            case PrimitiveTypeCodeUchar: returnThis = llvm::Type::getInt8Ty(c); return;
-            case PrimitiveTypeCodeUshort: returnThis = llvm::Type::getInt16Ty(c); return;
-            case PrimitiveTypeCodeUint: returnThis = llvm::Type::getInt32Ty(c); return;
-            case PrimitiveTypeCodeUlong: returnThis = llvm::Type::getInt64Ty(c); return;
-            case PrimitiveTypeCodeFloat: returnThis = llvm::Type::getFloatTy(c); return;
-            case PrimitiveTypeCodeDouble: returnThis = llvm::Type::getDoubleTy(c); return;
-            case PrimitiveTypeCodeBool: returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByBooleanType); return;
+            case PrimitiveTypeCodeChar:
+                returnThis = llvm::Type::getInt8Ty(c); return;
+            case PrimitiveTypeCodeShort:
+                returnThis = llvm::Type::getInt16Ty(c); return;
+            case PrimitiveTypeCodeInt:
+                returnThis = llvm::Type::getInt32Ty(c); return;
+            case PrimitiveTypeCodeLong:
+                returnThis = llvm::Type::getInt64Ty(c); return;
+            case PrimitiveTypeCodeUchar:
+                returnThis = llvm::Type::getInt8Ty(c); return;
+            case PrimitiveTypeCodeUshort:
+                returnThis = llvm::Type::getInt16Ty(c); return;
+            case PrimitiveTypeCodeUint:
+                returnThis = llvm::Type::getInt32Ty(c); return;
+            case PrimitiveTypeCodeUlong:
+                returnThis = llvm::Type::getInt64Ty(c); return;
+            case PrimitiveTypeCodeFloat:
+                returnThis = llvm::Type::getFloatTy(c); return;
+            case PrimitiveTypeCodeDouble:
+                returnThis = llvm::Type::getDoubleTy(c); return;
+            case PrimitiveTypeCodeBool:
+                returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByBooleanType); return;
         }
         assert(false);
+    }
+    virtual void visit(ast::VoidType &v) {
+        returnThis = llvm::Type::getVoidTy(c);
     }
 };

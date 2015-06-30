@@ -17,6 +17,7 @@
 #include "llvm/IR/Module.h"
 #include "typevisitor.h"
 #include "expvisitor.h"
+#include "stmtvisitor.h"
 
 class IRGenVisitor : public INodeVisitor {
 private:

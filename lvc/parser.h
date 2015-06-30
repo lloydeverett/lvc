@@ -12,7 +12,6 @@
 #include "ireader.h"
 #include "iissuereporter.h"
 #include "lexerbuffer.h"
-#include "symbols.h"
 #include "parserexceptions.h"
 
 class Parser {
@@ -22,12 +21,12 @@ private:
     Token currentToken;
     
     Token& readTokenIntoCurrent();
-    Symbols symbols;
     ast::FunctionDecl parseFunctionDecl();
     void reportOnCurrentToken(const std::string& message);
     ast::Function parseFunction();
     ast::BlockStmt parseBlock();
     std::unique_ptr<ast::IStmt> parseStatement();
+    ast::VariableDeclStmt parseVariableDeclStmt(std::unique_ptr<ast::IType> type);
     std::unique_ptr<ast::IExp> parseParenExpression();
     std::unique_ptr<ast::IExp> parseExpression();
     std::unique_ptr<ast::IExp> parseBinopRhs(std::unique_ptr<ast::IExp> lhs, BinopCode afterLhsCode, int minPrecedence);

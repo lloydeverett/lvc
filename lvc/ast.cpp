@@ -47,7 +47,7 @@ void VariableExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void FunctionCallStmt::accept(INodeVisitor& visitor) {
+void FunctionCalExplStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
@@ -72,5 +72,9 @@ void IfStmt::accept(INodeVisitor& visitor) {
 }
 
 void BlockStmt::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void VoidType::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }

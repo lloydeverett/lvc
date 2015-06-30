@@ -124,14 +124,14 @@ namespace ast {
     };
     
     struct VariableDecl : public IDecl {
-        std::unique_ptr<IType> type_ptr;
+        std::unique_ptr<IType> type;
         std::string identifier;
-        VariableDecl(std::unique_ptr<IType> type_ptr, std::string identifier) :
-        type_ptr(std::move(type_ptr)),
+        VariableDecl(std::unique_ptr<IType> type, std::string identifier) :
+        type(std::move(type)),
         identifier(identifier) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "VariableDecl(" << *type_ptr << ", " << identifier << ")";
+            return o << "VariableDecl(" << *type << ", " << identifier << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
     };
@@ -149,14 +149,14 @@ namespace ast {
     
     struct ArgumentDecl : public IDecl {
         VariableDecl variableDecl;
-        boost::optional<std::unique_ptr<IExp>> defaultValue_ptr;
-        ArgumentDecl(VariableDecl variableDecl, boost::optional<std::unique_ptr<IExp>> defaultValue_ptr = boost::none) :
-        variableDecl(std::move(variableDecl)), defaultValue_ptr(std::move(defaultValue_ptr)) {}
+        boost::optional<std::unique_ptr<IExp>> optDefaultValue;
+        ArgumentDecl(VariableDecl variableDecl, boost::optional<std::unique_ptr<IExp>> optDefaultValue = boost::none) :
+        variableDecl(std::move(variableDecl)), optDefaultValue(std::move(optDefaultValue)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
             o << "ArgumentDecl(" << variableDecl;
-            if (defaultValue_ptr)
-                o << ", " << **defaultValue_ptr;
+            if (optDefaultValue)
+                o << ", " << **optDefaultValue;
             o << ")";
             return o;
         }
@@ -164,15 +164,15 @@ namespace ast {
     };
     
     struct FunctionDecl : public IDecl {
-        std::unique_ptr<IType> returnType_ptr;
+        std::unique_ptr<IType> returnType;
         std::string identifier;
         std::vector<ArgumentDecl> arguments;
-        FunctionDecl(std::unique_ptr<IType> returnType_ptr, std::string identifier, std::vector<ArgumentDecl> arguments) :
-        returnType_ptr(std::move(returnType_ptr)),
+        FunctionDecl(std::unique_ptr<IType> returnType, std::string identifier, std::vector<ArgumentDecl> arguments) :
+        returnType(std::move(returnType)),
         identifier(identifier), arguments(std::move(arguments)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "FunctionDecl(" << *returnType_ptr << ", " << identifier;
+            o << "FunctionDecl(" << *returnType << ", " << identifier;
             if (!arguments.empty()) {
                 o << ", Arguments(";
                 for (const ArgumentDecl &decl : arguments) {
@@ -190,16 +190,16 @@ namespace ast {
     };
     
     struct VariableDeclStmt : public IStmt {
-        boost::optional<std::unique_ptr<IExp>> initialValue_ptr;
+        boost::optional<std::unique_ptr<IExp>> optInitialValue;
         VariableDecl decl;
         
-        VariableDeclStmt(VariableDecl decl, boost::optional<std::unique_ptr<IExp>> initialValue_ptr = boost::none) :
-        initialValue_ptr(std::move(initialValue_ptr)),
+        VariableDeclStmt(VariableDecl decl, boost::optional<std::unique_ptr<IExp>> optInitialValue = boost::none) :
+        optInitialValue(std::move(optInitialValue)),
         decl(std::move(decl))  {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            if (initialValue_ptr)
-                return o << "VariableDeclStmt(" << decl << ", " << **initialValue_ptr << ")";
+            if (optInitialValue)
+                return o << "VariableDeclStmt(" << decl << ", " << **optInitialValue << ")";
             else
                 return o << "VariableDeclStmt(" << decl << ")";
         }
@@ -207,13 +207,13 @@ namespace ast {
     };
     
     struct ReturnStmt : public IStmt {
-        boost::optional<std::unique_ptr<IExp>> returnedExpression_ptr;
-        ReturnStmt(boost::optional<std::unique_ptr<IExp>> returnedExpression_ptr = boost::none) :
-        returnedExpression_ptr(std::move(returnedExpression_ptr)) {}
+        boost::optional<std::unique_ptr<IExp>> optReturnedExpression;
+        ReturnStmt(boost::optional<std::unique_ptr<IExp>> optReturnedExpression = boost::none) :
+        optReturnedExpression(std::move(optReturnedExpression)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            if (returnedExpression_ptr)
-                return o << "ReturnStmt(" << **returnedExpression_ptr << ")";
+            if (optReturnedExpression)
+                return o << "ReturnStmt(" << **optReturnedExpression << ")";
             else
                 return o << "ReturnStmt";
         }
@@ -243,9 +243,9 @@ namespace ast {
             o << "FunctionCallExp(" << calleeIdentifier;
             if (!passedArguments.empty()) {
                 o << ", Arguments(";
-                for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
-                    o << *exp_ptr;
-                    if (exp_ptr != passedArguments[passedArguments.size() - 1]) {
+                for (const std::unique_ptr<IExp>& exp : passedArguments) {
+                    o << *exp;
+                    if (exp != passedArguments[passedArguments.size() - 1]) {
                         o << ", ";
                     }
                 }
@@ -275,9 +275,9 @@ namespace ast {
         
         virtual std::ostream& dump(std::ostream& o) const override {
             o << "Block(";
-            for (const std::unique_ptr<IStmt>& statement_ptr : statements) {
-                o << *statement_ptr;
-                if (statement_ptr != statements[statements.size() - 1]) {
+            for (const std::unique_ptr<IStmt>& statement : statements) {
+                o << *statement;
+                if (statement != statements[statements.size() - 1]) {
                     o << ", ";
                 }
             }

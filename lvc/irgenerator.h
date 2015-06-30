@@ -41,12 +41,12 @@ public:
     }
     
     void genFunction(ast::Function& function) {
-        function.decl.returnType_ptr->accept(typeVisitor);
+        function.decl.returnType->accept(typeVisitor);
         llvm::Type* returnType = typeVisitor.returnValue();
         
         std::vector<llvm::Type*> argTypes;
         for (const auto& arg : function.decl.arguments) {
-            arg.variableDecl.type_ptr->accept(typeVisitor);
+            arg.variableDecl.type->accept(typeVisitor);
             argTypes.push_back(typeVisitor.returnValue());
         }
         

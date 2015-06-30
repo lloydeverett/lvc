@@ -145,6 +145,7 @@
 		57ADD13A1B1E06E50031EB0F /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = parser.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		57ADD13B1B1E06E50031EB0F /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
 		57AF4E421B4330D3009CB872 /* typechecker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typechecker.h; sourceTree = "<group>"; };
+		57AF4E431B43487B009CB872 /* locals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = locals.h; sourceTree = "<group>"; };
 		57B7D8381B39ABD90037A24C /* binopcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binopcode.h; sourceTree = "<group>"; };
 		57CD4CAB1B2C27E700EF9490 /* ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ast.cpp; sourceTree = "<group>"; };
 		57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = inodevisitor.h; sourceTree = "<group>"; };
@@ -347,6 +348,7 @@
 				57ADD13A1B1E06E50031EB0F /* parser.cpp */,
 				57ADD13B1B1E06E50031EB0F /* parser.h */,
 				5752E2CC1B2339E60087DD1E /* parserexceptions.h */,
+				57AF4E431B43487B009CB872 /* locals.h */,
 				57AF4E421B4330D3009CB872 /* typechecker.h */,
 			);
 			name = parser;

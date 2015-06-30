@@ -17,7 +17,7 @@
 #include "inodevisitor.h"
 #include "expvisitor.h"
 
-class StmtVisitor : INodeVisitor {
+class StmtVisitor : public INodeVisitor {
 private:
     llvm::IRBuilder<>& builder;
     ExpVisitor& expVisitor;
@@ -25,8 +25,8 @@ private:
 public:
     StmtVisitor(llvm::IRBuilder<>& builder, ExpVisitor& expVisitor) : builder(builder), expVisitor(expVisitor) {}
     
-    virtual void visit(ast::FunctionCalExplStmt& functionCallStmt) {
-        
+    virtual void visit(ast::FunctionCalExplStmt& functionCallExpStmt) {
+        functionCallExpStmt.functionCallExp.accept(expVisitor);
     }
     
     virtual void visit(ast::ReturnStmt& returnStmt) {
@@ -49,6 +49,8 @@ public:
     }
     
     virtual void visit(ast::BlockStmt& blockStmt) {
-        
+        for (std::unique_ptr<ast::IStmt>& statement : blockStmt.statements) {
+            statement->accept(*this);
+        }
     }
 };

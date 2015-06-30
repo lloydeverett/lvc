@@ -17,44 +17,34 @@
 
 class TypeVisitor : public INodeVisitor {
 private:
-    llvm::LLVMContext &c;
+    llvm::LLVMContext &context;
     IRGenConfig &config;
     llvm::Type* returnThis;
     
 public:
-    TypeVisitor(llvm::LLVMContext &context, IRGenConfig &config) : c(context), config(config), returnThis(nullptr) {}
+    TypeVisitor(llvm::LLVMContext &context, IRGenConfig &config) : context(context), config(config), returnThis(nullptr) {}
     llvm::Type* returnValue() {
         assert(returnThis != nullptr);
         return returnThis;
     }
-    virtual void visit(ast::PrimitiveType &p) {
-        switch (p.code) {
-            case PrimitiveTypeCodeChar:
-                returnThis = llvm::Type::getInt8Ty(c); return;
-            case PrimitiveTypeCodeShort:
-                returnThis = llvm::Type::getInt16Ty(c); return;
-            case PrimitiveTypeCodeInt:
-                returnThis = llvm::Type::getInt32Ty(c); return;
-            case PrimitiveTypeCodeLong:
-                returnThis = llvm::Type::getInt64Ty(c); return;
-            case PrimitiveTypeCodeUchar:
-                returnThis = llvm::Type::getInt8Ty(c); return;
-            case PrimitiveTypeCodeUshort:
-                returnThis = llvm::Type::getInt16Ty(c); return;
-            case PrimitiveTypeCodeUint:
-                returnThis = llvm::Type::getInt32Ty(c); return;
-            case PrimitiveTypeCodeUlong:
-                returnThis = llvm::Type::getInt64Ty(c); return;
-            case PrimitiveTypeCodeFloat:
-                returnThis = llvm::Type::getFloatTy(c); return;
-            case PrimitiveTypeCodeDouble:
-                returnThis = llvm::Type::getDoubleTy(c); return;
-            case PrimitiveTypeCodeBool:
-                returnThis = llvm::Type::getIntNTy(c, config.bitsUsedByBooleanType); return;
-        }
-        assert(false);
-    }
     virtual void visit(ast::VoidType &v) {
-        returnThis = llvm::Type::getVoidTy(c);
+        returnThis = llvm::Type::getVoidTy(context);
+    }
+    virtual void visit(ast::IntegerType& integerType) {
+        // LLVM doesn't care about signedness at this point.
+        // Only when we do certain operations (e.g. divide)
+        // will we have to supply the sign.
+        returnThis = llvm::Type::getIntNTy(context, integerType.numBits);
+    }
+    virtual void visit(ast::BoolType& boolType) {
+        returnThis = llvm::Type::getIntNTy(context, config.numBitsUsedByBooleans);
+    }
+    virtual void visit(ast::FloatingPointType& floatingPointType) {
+        if (floatingPointType.variation == ast::FloatingPointType::VariationFloat)
+            returnThis = llvm::Type::getFloatTy(context);
+        else if (floatingPointType.variation == ast::FloatingPointType::VariationDouble)
+            returnThis = llvm::Type::getDoubleTy(context);
+        else
+            assert(false);
     }
 };

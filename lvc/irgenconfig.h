@@ -9,7 +9,7 @@
 #pragma once
 
 struct IRGenConfig {
-    int bitsUsedByBooleanType;
+    int numBitsUsedByBooleans;
     bool preserveNamesInIR;
     #warning TODO: use preserveNames
 };

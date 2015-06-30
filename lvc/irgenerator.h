@@ -15,6 +15,7 @@
 #include "typevisitor.h"
 #include "expvisitor.h"
 #include "stmtvisitor.h"
+#include <cassert>
 
 class IRGenerator {
 private:
@@ -26,10 +27,33 @@ private:
     TypeVisitor typeVisitor;
     ExpVisitor expVisitor;
     StmtVisitor stmtVisitor;
+    llvm::Function* currentTargetFunction;
     
 public:
     IRGenerator(llvm::Module* targetModule, IRGenConfig config) : targetModule(targetModule), context(targetModule->getContext()), builder(context), config(config),
-                                                                  typeVisitor(context, config), expVisitor(builder), stmtVisitor(builder, expVisitor) {}
+                                                                  typeVisitor(context, config), expVisitor(builder), stmtVisitor(builder, expVisitor),
+                                                                  currentTargetFunction(nullptr) {}
     
+    void genModule(ast::Module& module) {
+        for (auto& function : module.functions) {
+            genFunction(function);
+        }
+    }
     
+    void genFunction(ast::Function& function) {
+        function.decl.returnType_ptr->accept(typeVisitor);
+        llvm::Type* returnType = typeVisitor.returnValue();
+        
+        std::vector<llvm::Type*> argTypes;
+        for (const auto& arg : function.decl.arguments) {
+            arg.variableDecl.type_ptr->accept(typeVisitor);
+            argTypes.push_back(typeVisitor.returnValue());
+        }
+        
+        llvm::FunctionType* type = llvm::FunctionType::get(returnType, argTypes, false);
+        auto targetFunction = llvm::Function::Create(type, llvm::GlobalValue::ExternalLinkage, function.decl.identifier, targetModule);
+        llvm::BasicBlock* entryBlock = llvm::BasicBlock::Create(context, "entry", targetFunction);
+        builder.SetInsertPoint(entryBlock);
+        function.block.accept(stmtVisitor);
+    }
 };

@@ -63,17 +63,12 @@ Module Parser::parse(std::string nameOfModule) {
         }
     }
 
-    return Module(nameOfModule, std::move(functions));
+    return Module(nameOfModule, std::move(functions), std::move(variableDecls));
 
 }
 
 Function Parser::parseFunction() {
     FunctionDecl decl(parseFunctionDecl());
-
-    for (ArgumentDecl& argDecl : decl.arguments) {
-        VariableDecl* varDeclPtr = &(argDecl.variableDecl);
-    }
-    
     BlockStmt block(parseBlock());
 
     return Function(std::move(decl), std::move(block));
@@ -102,7 +97,7 @@ FunctionDecl Parser::parseFunctionDecl() {
             }
 
             VariableDecl varDecl = VariableDecl(std::move(argType), argIdentifier);
-            arguments.emplace_back(std::move(varDecl), std::move(*optDefaultValue));
+            arguments.emplace_back(std::move(varDecl), std::move(optDefaultValue));
 
             if (currentToken.is(CloseParenthesis)) break;
             if (currentToken.is(Comma)) {
@@ -121,33 +116,33 @@ FunctionDecl Parser::parseFunctionDecl() {
 
 boost::optional<std::unique_ptr<IType>> Parser::tryParseTypename() {
     boost::optional<std::unique_ptr<IType>> optRet;
-    
-    if (currentToken.is(Void)) {
-        optRet = std::make_unique<VoidType>();
+    switch (currentToken.getKind()) {
+        case Void:
+            optRet = std::make_unique<VoidType>(); break;
+        case Char:
+            optRet = std::make_unique<IntegerType>(8, ast::IntegerType::Signed); break;
+        case Short:
+            optRet = std::make_unique<IntegerType>(16, ast::IntegerType::Signed); break;
+        case Int:
+            optRet = std::make_unique<IntegerType>(32, ast::IntegerType::Signed); break;
+        case Long:
+            optRet = std::make_unique<IntegerType>(64, ast::IntegerType::Signed); break;
+        case Uchar:
+            optRet = std::make_unique<IntegerType>(8, ast::IntegerType::Unsigned); break;
+        case Ushort:
+            optRet = std::make_unique<IntegerType>(16, ast::IntegerType::Unsigned); break;
+        case Uint:
+            optRet = std::make_unique<IntegerType>(32, ast::IntegerType::Unsigned); break;
+        case Ulong:
+            optRet = std::make_unique<IntegerType>(64, ast::IntegerType::Unsigned); break;
+        case Float:
+            optRet = std::make_unique<FloatingPointType>(ast::FloatingPointType::VariationFloat); break;
+        case Double:
+            optRet = std::make_unique<FloatingPointType>(ast::FloatingPointType::VariationDouble); break;
+        default:
+            return boost::none;
     }
-    else { // keep this last
-        PrimitiveTypeCode code;
-        switch (currentToken.getKind()) {
-            case Char: code = PrimitiveTypeCodeChar; break;
-            case Short: code = PrimitiveTypeCodeShort; break;
-            case Int: code = PrimitiveTypeCodeInt; break;
-            case Long: code = PrimitiveTypeCodeLong; break;
-            case Uchar: code = PrimitiveTypeCodeUchar; break;
-            case Ushort: code = PrimitiveTypeCodeUshort; break;
-            case Uint: code = PrimitiveTypeCodeUint; break;
-            case Ulong: code = PrimitiveTypeCodeUlong; break;
-            case Bool: code = PrimitiveTypeCodeBool; break;
-            case Float: code = PrimitiveTypeCodeFloat; break;
-            case Double: code = PrimitiveTypeCodeDouble; break;
-            default:
-                return boost::none;
-        }
-        optRet = std::make_unique<PrimitiveType>(code);
-    }
-    
-    if (optRet) {
-        readTokenIntoCurrent();
-    }
+    readTokenIntoCurrent();
     return std::move(optRet);
 }
 
@@ -163,7 +158,7 @@ std::unique_ptr<IType> Parser::parseTypename() {
 // This function parses a BlockStmt, which appears in source as either:
 //  - a newline followed by an indent, and then a series of statements (possibly one) each ending in a newline, and then a terminating dedent.
 //  - a single statement found on the same line that prompted the parsing of a block, terminated by a newline.
-// currentToken will be the token after the terminating token in each case.
+// currentToken will be the token after the terminating token in each case after the call.
 BlockStmt Parser::parseBlock() {
     std::vector<std::unique_ptr<IStmt>> statements;
     if (currentToken.is(Newline)) {
@@ -189,7 +184,6 @@ BlockStmt Parser::parseBlock() {
 
 // After this function is called, currentToken will be the token after the newline that terminates the statement.
 std::unique_ptr<IStmt> Parser::parseStatement() {
-    
     // Block statements
     if (currentToken.is(If)) {
         readTokenIntoCurrent();
@@ -202,7 +196,6 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
         }
         return std::make_unique<IfStmt>(std::move(condition), std::move(thenBlock), std::move(elseBlock));
     }
-    
     // Single line
     std::unique_ptr<IStmt> stmt;
     if (currentToken.is(Return)) {
@@ -221,8 +214,6 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
             throw ParserErrorException(ParserErrorUnknownStatementBeginning);
         }
     }
-    
-    #warning TODO: refactor stmt =
     
     if (currentToken.isNot(Newline)) {
         reportOnCurrentToken("Expected newline after statement.");
@@ -360,8 +351,10 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
     else if (currentToken.is(OpenParenthesis)) {
         return parseParenExpression();
     }
-    #warning TODO: impl
-    assert(false);
+    else {
+        reportOnCurrentToken("Cannot parse expression beginning with this token.");
+        throw ParserErrorException(ParserErrorUnknownExpressionBeginning);
+    }
 }
 
 std::string Parser::parseIdentifier() {

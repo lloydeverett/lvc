@@ -24,6 +24,7 @@ enum ParserError {
     ParserErrorExpectedCommaOrCloseParenthesis,
     ParserErrorUnknownStatementBeginning,
     ParserErrorUnknownLineBeginningAtModuleLevel,
+    ParserErrorUnknownExpressionBeginning,
 };
 
 #warning TODO: REFACTOR.

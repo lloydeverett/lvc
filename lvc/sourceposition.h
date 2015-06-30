@@ -11,8 +11,8 @@
 
 class SourcePosition {
 public:
-    colnumber col;
     rownumber row;
+    colnumber col;
     
-    SourcePosition(colnumber col, rownumber row) : col(col), row(row) {}
+    SourcePosition(rownumber row, colnumber col) : row(row), col(col) {}
 };

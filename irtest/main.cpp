@@ -18,11 +18,11 @@ int main(int argc, const char * argv[]) {
     Parser p(s, cr);
     ast::Module m = p.parse("verysimple");
     IRGenConfig config;
-    config.bitsUsedByBooleanType = 8;
+    config.numBitsUsedByBooleans = 8;
     config.preserveNamesInIR = true;
     llvm::Module llvmm("helloworld", llvm::getGlobalContext());
-    IRGenVisitor v(&llvmm, config);
-    m.accept(v);
+    IRGenerator irGenerator(&llvmm, config);
+    irGenerator.genModule(m);
     llvmm.dump();
     return 0;
 }

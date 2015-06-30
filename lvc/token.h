@@ -117,6 +117,7 @@ private:
 
     // Str contains the contents of a literal (whether it be a number literal or a string literal), OR,
     // if the token is an identifier, it contains the identifer.
+    // Escape codes are not saved into str. They are handled by the lexer.
     std::string str;
 
 public:

@@ -13,9 +13,6 @@
 #include <iostream>
 #include <boost/optional.hpp>
 #include "binopcode.h"
-#include "primitivetypecode.h"
-
-#warning TODO: refactor _ptr
 
 class INodeVisitor;
 
@@ -69,15 +66,38 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct PrimitiveType : IType {
-        PrimitiveTypeCode code;
-        
-        PrimitiveType(PrimitiveTypeCode code) : code(code) {}
+    struct IntegerType : IType {
+        int numBits;
+        enum Signedness {
+            Signed,
+            Unsigned,
+        } isSigned;
+        IntegerType(int numBits, Signedness isSigned) :
+        numBits(numBits), isSigned(isSigned) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << debugStringForPrimitiveType(code);
+            return o << "IntegerType(" << numBits << ", " << (isSigned == Signed ? "Signed" : "Unsigned") << ")";
         }
+        virtual void accept(INodeVisitor& visitor) override;
+    };
+    
+    struct BoolType : IType {
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "BoolType";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+    };
+    
+    struct FloatingPointType : IType {
+        enum Variation {
+            VariationFloat,
+            VariationDouble,
+        } variation;
         
+        FloatingPointType(Variation variation) : variation(variation) {}
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "FloatingPointType(" << (variation == VariationFloat ? "Float" : "Double") << ")";
+        }
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -89,7 +109,6 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "IntegerLiteralExp" << valueStr;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -101,7 +120,6 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "RealLiteralExp" << valueStr;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -115,7 +133,6 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "VariableDecl(" << *type_ptr << ", " << identifier << ")";
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -127,7 +144,6 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "VariableExp(" << identifier << ")";
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -144,7 +160,6 @@ namespace ast {
             o << ")";
             return o;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -159,16 +174,18 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             o << "FunctionDecl(" << *returnType_ptr << ", " << identifier;
             if (!arguments.empty()) {
-                o << ", Arguments(" ;
+                o << ", Arguments(";
                 for (const ArgumentDecl &decl : arguments) {
                     o << decl;
+                    if (&decl != &arguments[arguments.size() - 1]) {
+                        o << ", ";
+                    }
                 }
                 o << ")";
             }
             o << ")";
             return o;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -186,7 +203,6 @@ namespace ast {
             else
                 return o << "VariableDeclStmt(" << decl << ")";
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -201,7 +217,6 @@ namespace ast {
             else
                 return o << "ReturnStmt";
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -215,7 +230,6 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "BinopExp(" << *lhs << ", " << debugStringForBinop(code) << ", " << *rhs << ")";
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -231,13 +245,15 @@ namespace ast {
                 o << ", Arguments(";
                 for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
                     o << *exp_ptr;
+                    if (exp_ptr != passedArguments[passedArguments.size() - 1]) {
+                        o << ", ";
+                    }
                 }
                 o << ")";
             }
             o << ")";
             return o;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -249,7 +265,6 @@ namespace ast {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "FunctionCallExpStmt(" << functionCallExp << ")";
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -269,7 +284,6 @@ namespace ast {
             o << ")";
             return o;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -289,7 +303,6 @@ namespace ast {
             o << ")";
             return o;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
@@ -303,24 +316,26 @@ namespace ast {
             o << "Function(" << decl << ", " << block;
             return o;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     
     struct Module : public INode {
         std::string moduleName;
         std::vector<Function> functions;
-        Module(std::string moduleName, std::vector<Function> functions) :
-        moduleName(moduleName), functions(std::move(functions)) {}
+        std::vector<VariableDeclStmt> globals;
+        Module(std::string moduleName, std::vector<Function> functions, std::vector<VariableDeclStmt> globals) :
+        moduleName(moduleName), functions(std::move(functions)), globals(std::move(globals)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "Module " << moduleName << std::endl;
+            o << "Module " << moduleName << "\n\n";
+            for (const VariableDeclStmt& global : globals) {
+                o << global << "\n\n";
+            }
             for (const Function& function : functions) {
-                o << function << std::endl;
+                o << function << "\n\n";
             }
             return o;
         }
-        
         virtual void accept(INodeVisitor& visitor) override;
     };
     

@@ -11,7 +11,19 @@
 
 using namespace ast;
 
-void Function::accept(INodeVisitor& visitor) {
+void VoidType::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void IntegerType::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void BoolType::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void FloatingPointType::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
@@ -59,14 +71,6 @@ void VariableDeclStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void PrimitiveType::accept(INodeVisitor& visitor) {
-    visitor.visit(*this);
-}
-
-void Module::accept(INodeVisitor& visitor) {
-    visitor.visit(*this);
-}
-
 void IfStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
@@ -75,6 +79,10 @@ void BlockStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void VoidType::accept(INodeVisitor& visitor) {
+void Function::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void Module::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }

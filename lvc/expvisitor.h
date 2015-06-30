@@ -26,29 +26,20 @@ public:
         assert(returnThis != nullptr);
         return returnThis;
     }
-    virtual void visit(ast::BinopExp &binopExp) {
-        binopExp.lhs->accept(*this);
-        llvm::Value* lhs = returnValue();
+    virtual void visit(ast::BinopExp& binOpExp) {
         
-        binopExp.rhs->accept(*this);
-        llvm::Value* rhs = returnValue();
+    }
+    virtual void visit(ast::FunctionCallExp& functionCallExp) {
         
-        BinopCode code;
-        switch (binopExp.code) {
-            case BinopCodeAdd:
-                returnThis = builder.CreateAdd(lhs, rhs); return;
-            case BinopCodeSubtract:
-                returnThis = builder.CreateSub(lhs, rhs); return;
-            case BinopCodeMultiply:
-                returnThis = builder.CreateMul(lhs, rhs); return;
-            case BinopCodeDivide:
-#warning TODO: THIS.
-                assert(false);
-        }
-        assert(false);
     }
     virtual void visit(ast::IntegerLiteralExp &integerLiteralExp) {
-#warning TODO: THIS.
-        returnThis = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), integerLiteralExp.value.data(), 10);
+        returnThis = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), integerLiteralExp.valueStr.data(), 10);
     }
+    virtual void visit(ast::RealLiteralExp& realLiteralExp) {
+        
+    }
+    virtual void visit(ast::VariableExp& variableExp) {
+        
+    }
+
 };

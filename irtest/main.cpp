@@ -9,7 +9,7 @@
 #include <iostream>
 #include "parser.h"
 #include "testutil.h"
-#include "irgenvisitor.h"
+#include "irgenerator.h"
 
 int main(int argc, const char * argv[]) {
     std::string path = getPathForVFile("verysimple.v");
@@ -19,7 +19,7 @@ int main(int argc, const char * argv[]) {
     ast::Module m = p.parse("verysimple");
     IRGenConfig config;
     config.bitsUsedByBooleanType = 8;
-    config.bitsUsedByIntsWithUnspecifiedBitWidth = 32;
+    config.preserveNamesInIR = true;
     llvm::Module llvmm("helloworld", llvm::getGlobalContext());
     IRGenVisitor v(&llvmm, config);
     m.accept(v);

@@ -113,7 +113,7 @@ namespace ast {
         identifier(identifier) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(VariableDecl: " << *type_ptr << ", " << identifier << ")";
+            return o << "VariableDecl(" << *type_ptr << ", " << identifier << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -125,7 +125,7 @@ namespace ast {
         identifier(identifier) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(VariableExp: " << identifier << ")";
+            return o << "VariableExp(" << identifier << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -138,7 +138,7 @@ namespace ast {
         variableDecl(std::move(variableDecl)), defaultValue_ptr(std::move(defaultValue_ptr)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(ArgumentDecl: " << variableDecl;
+            o << "ArgumentDecl(" << variableDecl;
             if (defaultValue_ptr)
                 o << ", " << **defaultValue_ptr;
             o << ")";
@@ -157,11 +157,15 @@ namespace ast {
         identifier(identifier), arguments(std::move(arguments)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(FunctionDecl: " << *returnType_ptr << ", " << identifier << ", (Arguments: " ;
-            for (const ArgumentDecl &decl : arguments) {
-                o << decl;
+            o << "FunctionDecl(" << *returnType_ptr << ", " << identifier;
+            if (!arguments.empty()) {
+                o << ", Arguments(" ;
+                for (const ArgumentDecl &decl : arguments) {
+                    o << decl;
+                }
+                o << ")";
             }
-            o << "))";
+            o << ")";
             return o;
         }
         
@@ -178,9 +182,9 @@ namespace ast {
         
         virtual std::ostream& dump(std::ostream& o) const override {
             if (initialValue_ptr)
-                return o << "(VariableDeclStmt: " << decl << ", " << **initialValue_ptr << ")";
+                return o << "VariableDeclStmt(" << decl << ", " << **initialValue_ptr << ")";
             else
-                return o << "(VariableDeclStmt: " << decl << ")";
+                return o << "VariableDeclStmt(" << decl << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -193,9 +197,9 @@ namespace ast {
         
         virtual std::ostream& dump(std::ostream& o) const override {
             if (returnedExpression_ptr)
-                return o << "(ReturnStmt: " << **returnedExpression_ptr << ")";
+                return o << "ReturnStmt(" << **returnedExpression_ptr << ")";
             else
-                return o << "(ReturnStmt)";
+                return o << "ReturnStmt";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -209,7 +213,7 @@ namespace ast {
         lhs(std::move(lhs)), code(code), rhs(std::move(rhs)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(BinopExp: " << *lhs << ", " << debugStringForBinop(code) << ", " << *rhs << ")";
+            return o << "BinopExp(" << *lhs << ", " << debugStringForBinop(code) << ", " << *rhs << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -222,9 +226,9 @@ namespace ast {
         calleeIdentifier(calleeIdentifier), passedArguments(std::move(passedArguments)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(FunctionCallExp: " << calleeIdentifier;
+            o << "FunctionCallExp(" << calleeIdentifier;
             if (!passedArguments.empty()) {
-                o << ", (Arguments: ";
+                o << ", Arguments(";
                 for (const std::unique_ptr<IExp>& exp_ptr : passedArguments) {
                     o << *exp_ptr;
                 }
@@ -243,7 +247,7 @@ namespace ast {
         functionCallExp(std::move(functionCallExp)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "(FunctionCallExpStmt: " << functionCallExp << ")";
+            return o << "FunctionCallExpStmt(" << functionCallExp << ")";
         }
         
         virtual void accept(INodeVisitor& visitor) override;
@@ -255,7 +259,7 @@ namespace ast {
         statements(std::move(statements)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(Block: ";
+            o << "Block(";
             for (const std::unique_ptr<IStmt>& statement_ptr : statements) {
                 o << *statement_ptr;
                 if (statement_ptr != statements[statements.size() - 1]) {
@@ -277,7 +281,7 @@ namespace ast {
         condition(std::move(condition)), thenBlock(std::move(thenBlock)), elseBlock(std::move(elseBlock)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(IfStmt: " << *condition << ", ";
+            o << "IfStmt(" << *condition << ", ";
             o << thenBlock;
             if (elseBlock) {
                 o << ", " << *elseBlock;
@@ -296,7 +300,7 @@ namespace ast {
         decl(std::move(decl)), block(std::move(block)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "(Function: " << decl << ", " << block;
+            o << "Function(" << decl << ", " << block;
             return o;
         }
         
@@ -310,7 +314,7 @@ namespace ast {
         moduleName(moduleName), functions(std::move(functions)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "Module: " << moduleName << std::endl;
+            o << "Module " << moduleName << std::endl;
             for (const Function& function : functions) {
                 o << function << std::endl;
             }

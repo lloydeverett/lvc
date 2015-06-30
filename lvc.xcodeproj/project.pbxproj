@@ -142,7 +142,6 @@
 		578EFB741B20583700A3968C /* lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lexer.cpp; sourceTree = "<group>"; };
 		578EFB751B20583700A3968C /* lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexer.h; sourceTree = "<group>"; };
 		578EFB7A1B2239F200A3968C /* lexerbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerbuffer.h; sourceTree = "<group>"; };
-		57A0D0FA1B3F4C4000E0A968 /* indentast.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = indentast.py; path = lvc/indentast.py; sourceTree = "<group>"; };
 		57ADD1161B1B67A50031EB0F /* asttest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = asttest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57ADD1181B1B67A50031EB0F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		57ADD1291B1B68CF0031EB0F /* llvmplayground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = llvmplayground; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -249,7 +248,6 @@
 				57D8FFF11B0B923100630274 /* libLLVMSupport.a */,
 				57D8FFED1B0B91E400630274 /* libLLVMCore.a */,
 				577A42BB1B3AEF020094C7CD /* tostringliterals.py */,
-				57A0D0FA1B3F4C4000E0A968 /* indentast.py */,
 				57ADD12A1B1B68CF0031EB0F /* llvmplayground */,
 				571AB4E81B1A0E0C00B866E2 /* vfiles */,
 				57D8FFDF1B0893B000630274 /* tests */,

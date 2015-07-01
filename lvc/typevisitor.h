@@ -18,11 +18,11 @@
 class TypeVisitor : public INodeVisitor {
 private:
     llvm::LLVMContext &context;
-    IRGenConfig &config;
+    IRGenConfig config;
     llvm::Type* returnThis;
     
 public:
-    TypeVisitor(llvm::LLVMContext &context, IRGenConfig &config) : context(context), config(config), returnThis(nullptr) {}
+    TypeVisitor(llvm::LLVMContext &context, IRGenConfig config) : context(context), config(config), returnThis(nullptr) {}
     llvm::Type* returnValue() {
         assert(returnThis != nullptr);
         return returnThis;

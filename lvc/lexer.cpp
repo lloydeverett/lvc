@@ -171,7 +171,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
             return getTokenFromQueuedDedent(q);
         }
     }
-
+    
     skipCommentsAndNonIndentWhitespace(issueReporter);
 
     if (reader.eof()) {
@@ -202,7 +202,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
     colnumber rowOfC = reader.getRow();
     colnumber colOfC = reader.getCol();
     char c = reader.readChar();
-
+    
     Token t;
     t.setRow(rowOfC);
     t.setStartCol(colOfC);

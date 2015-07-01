@@ -9,13 +9,27 @@
 #pragma once
 #include <unordered_map>
 #include <stack>
+#include <cassert>
 
 class Locals {
 private:
     std::unordered_map<std::string, std::stack<ast::VariableDecl*>> locals;
-    int scope;
     
+    unsigned int scope;
     
+public:
+    void openScope() {
+        scope++;
+    }
     
+    void add() {
+        
+    }
     
+    void closeScope() {
+        assert(scope > 0);
+    }
+    
+    void clear() {
+    }
 };

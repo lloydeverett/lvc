@@ -14,7 +14,8 @@
 int main(int argc, const char * argv[]) {
     std::string path = getPathForVFile("verysimple.v");
     CerrIssueReporter cr(path);
-    StringReader s(getFileContents(path.c_str()));
+    std::string contents = getFileContents(path.c_str());
+    StringReader s(contents);
     Parser p(s, cr);
     ast::Module m = p.parse("verysimple");
     IRGenConfig config;

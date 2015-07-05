@@ -10,14 +10,14 @@
 #include <queue>
 #include "lexer.h"
 #include "iissuereporter.h"
+#include "ilexerbuffer.h"
 
-class LexerBuffer {
+class LexerBuffer : public ILexerBuffer {
 private:
     Token next;
     Token nextNext;
     unsigned int aheadBy; // aheadBy can be from 0 (next is not filled) to 2 (nextNext is filled)
     Lexer lexer;
-    IIssueReporter &issueReporter;
     
     Token popNext() {
         assert(aheadBy > 0);
@@ -27,11 +27,11 @@ private:
         return t;
     }
 public:
-    LexerBuffer(IIssueReporter &issueReporter, IReader &reader) : issueReporter(issueReporter), lexer(reader), aheadBy(0) {}
+    LexerBuffer(IReader& reader, IIssueReporter& issueReporter) : lexer(reader, issueReporter), aheadBy(0) {}
     
     Token readToken() {
         if (aheadBy == 0) {
-            return lexer.lexToken(issueReporter);
+            return lexer.lexToken();
         }
         else {
             return popNext();
@@ -41,7 +41,7 @@ public:
     Token peekNext() {
         if (aheadBy >= 1) return next;
         else {
-            next = lexer.lexToken(issueReporter);
+            next = lexer.lexToken();
             aheadBy++;
             return next;
         }
@@ -51,16 +51,16 @@ public:
         if (aheadBy >= 2) return nextNext;
         else {
             if (aheadBy == 0) {
-                next = lexer.lexToken(issueReporter);
+                next = lexer.lexToken();
                 aheadBy++;
             }
-            nextNext = lexer.lexToken(issueReporter);
+            nextNext = lexer.lexToken();
             aheadBy++;
             return nextNext;
         }
     }
     
     bool isFinished(IIssueReporter &issueReporter) {
-        return aheadBy == 0 && lexer.isFinished(issueReporter);
+        return aheadBy == 0 && lexer.isFinished();
     }
 };

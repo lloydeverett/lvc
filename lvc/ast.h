@@ -101,24 +101,13 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct IntegerLiteralExp : public IExp {
-        std::string valueStr;
-        IntegerLiteralExp(std::string valueStr) :
-        valueStr(valueStr) {}
+    struct NumberLiteralExp : public IExp {
+        std::string value;
+        NumberLiteralExp(std::string value) :
+        value(value) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "IntegerLiteralExp" << valueStr;
-        }
-        virtual void accept(INodeVisitor& visitor) override;
-    };
-    
-    struct RealLiteralExp : public IExp {
-        std::string valueStr;
-        RealLiteralExp(std::string valueStr) :
-        valueStr(valueStr) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "RealLiteralExp" << valueStr;
+            return o << "NumberLiteral(" << value << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
     };

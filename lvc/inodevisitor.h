@@ -23,8 +23,7 @@ public:
     virtual void visit(ast::VariableDecl& variableDecl) {assert(false);}
     virtual void visit(ast::BinopExp& binOpExp) {assert(false);}
     virtual void visit(ast::FunctionCallExp& functionCallExp) {assert(false);}
-    virtual void visit(ast::IntegerLiteralExp& integerLiteralExp) {assert(false);}
-    virtual void visit(ast::RealLiteralExp& realLiteralExp) {assert(false);}
+    virtual void visit(ast::NumberLiteralExp& numberLiteralExp) {assert(false);}
     virtual void visit(ast::VariableExp& variableExp) {assert(false);}
     virtual void visit(ast::FunctionCalExplStmt& functionCallExpStmt) {assert(false);}
     virtual void visit(ast::ReturnStmt& returnStmt) {assert(false);}

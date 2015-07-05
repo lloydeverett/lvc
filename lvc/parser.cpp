@@ -49,7 +49,7 @@ Module Parser::parse(std::string nameOfModule) {
                 boost::optional<std::unique_ptr<IType>> optType(tryParseTypename());
                 if (!optType) {
                     reportOnCurrentToken("Did not expect token at beginning of line when parsing at module level.");
-                    throw ParserErrorException(ParserErrorUnknownLineBeginningAtModuleLevel);
+                    throw ParserErrorExceptionUnknownLineBeginningAtModuleLevel();
                 }
                 variableDecls.push_back(parseVariableDeclStmt(std::move(*optType)));
             }
@@ -80,7 +80,7 @@ FunctionDecl Parser::parseFunctionDecl() {
 
     if (currentToken.isNot(OpenParenthesis)) {
         reportOnCurrentToken("Expected '(' after identifier in function declaration.");
-        throw ParserErrorException(ParserErrorExpectedOpenParenthesis);
+        throw ParserErrorExceptionExpectedOpenParenthesis();
     }
     readTokenIntoCurrent();
 
@@ -106,7 +106,7 @@ FunctionDecl Parser::parseFunctionDecl() {
             }
 
             reportOnCurrentToken("Badly formed function declaration. Expected comma or ')'.");
-            throw ParserErrorException(ParserErrorExpectedCommaOrCloseParenthesis);
+            throw ParserErrorExceptionExpectedCommaOrCloseParenthesis();
         }
     }
     readTokenIntoCurrent(); // read token after the close parenthesis into currentToken
@@ -150,7 +150,7 @@ std::unique_ptr<IType> Parser::parseTypename() {
     boost::optional<std::unique_ptr<IType>> opt = tryParseTypename();
     if (!opt) {
         reportOnCurrentToken("Expected typename.");
-        throw ParserErrorException(ParserErrorExpectedType);
+        throw ParserErrorExceptionExpectedType();
     }
     return std::move(*opt);
 }
@@ -166,7 +166,7 @@ BlockStmt Parser::parseBlock() {
         
         if (currentToken.isNot(Indent)) {
             reportOnCurrentToken("Expected indent after newline when parsing block.");
-            throw ParserErrorException(ParserErrorExpectedIndent);
+            throw ParserErrorExceptionExpectedIndent();
         }
         readTokenIntoCurrent();
         
@@ -211,13 +211,13 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
         }
         else {
             reportOnCurrentToken("Could not parse statement begginning with this token.");
-            throw ParserErrorException(ParserErrorUnknownStatementBeginning);
+            throw ParserErrorExceptionUnknownStatementBeginning();
         }
     }
     
     if (currentToken.isNot(Newline)) {
         reportOnCurrentToken("Expected newline after statement.");
-        throw ParserErrorException(ParserErrorExpectedNewline);
+        throw ParserErrorExceptionExpectedNewline();
     }
     readTokenIntoCurrent();
     return std::move(stmt);
@@ -237,7 +237,7 @@ VariableDeclStmt Parser::parseVariableDeclStmt(std::unique_ptr<IType> type) {
 std::unique_ptr<IExp> Parser::parseParenExpression() {
     if (currentToken.isNot(OpenParenthesis)) {
         reportOnCurrentToken("Expected '('");
-        throw ParserErrorException(ParserErrorExpectedOpenParenthesis);
+        throw ParserErrorExceptionExpectedOpenParenthesis();
     }
     readTokenIntoCurrent();
 
@@ -245,7 +245,7 @@ std::unique_ptr<IExp> Parser::parseParenExpression() {
 
     if (currentToken.isNot(CloseParenthesis)) {
         reportOnCurrentToken("Expected ')'");
-        throw ParserErrorException(ParserErrorExpectedCloseParenthesis);
+        throw ParserErrorExceptionExpectedCloseParenthesis();
     }
     readTokenIntoCurrent();
 
@@ -327,7 +327,7 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
                     }
 
                     reportOnCurrentToken("Expected comma or ')' in argument list.");
-                    throw ParserErrorException(ParserErrorExpectedCommaOrCloseParenthesis);
+                    throw ParserErrorExceptionExpectedCommaOrCloseParenthesis();
                 }
             }
             readTokenIntoCurrent(); // read token after close parenthesis into currentToken
@@ -341,26 +341,25 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
     else if (currentToken.is(IntegerLiteral)) {
         std::string val = currentToken.getStr();
         readTokenIntoCurrent();
-        return std::make_unique<IntegerLiteralExp>(val);
+        return std::make_unique<NumberLiteralExp>(val);
     }
     else if (currentToken.is(RealLiteral)) {
         std::string val = currentToken.getStr();
         readTokenIntoCurrent();
-        return std::make_unique<RealLiteralExp>(val);
+        return std::make_unique<NumberLiteralExp>(val);
     }
     else if (currentToken.is(OpenParenthesis)) {
         return parseParenExpression();
     }
-    else {
-        reportOnCurrentToken("Cannot parse expression beginning with this token.");
-        throw ParserErrorException(ParserErrorUnknownExpressionBeginning);
-    }
+    
+    reportOnCurrentToken("Cannot parse expression beginning with this token.");
+    throw ParserErrorExceptionUnknownExpressionBeginning();
 }
 
 std::string Parser::parseIdentifier() {
     if (currentToken.isNot(Identifier)) {
         reportOnCurrentToken("Expected identifier.");
-        throw ParserErrorException(ParserErrorExpectedIdentifier);
+        throw ParserErrorExceptionExpectedIdentifier();
     }
     std::string s = currentToken.getStr();
     readTokenIntoCurrent();

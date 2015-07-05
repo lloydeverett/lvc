@@ -32,11 +32,9 @@ public:
     virtual void visit(ast::FunctionCallExp& functionCallExp) {
         
     }
-    virtual void visit(ast::IntegerLiteralExp &integerLiteralExp) {
-        returnThis = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), integerLiteralExp.valueStr.data(), 10);
-    }
-    virtual void visit(ast::RealLiteralExp& realLiteralExp) {
-        
+    virtual void visit(ast::NumberLiteralExp& numberLiteralExp) {
+#warning TODO: floats.
+        returnThis = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), numberLiteralExp.value, 10);
     }
     virtual void visit(ast::VariableExp& variableExp) {
         

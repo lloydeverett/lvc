@@ -14,27 +14,18 @@ protected:
     ParserException() {}
 };
 
-enum ParserError {
-    ParserErrorExpectedNewline,
-    ParserErrorExpectedIndent,
-    ParserErrorExpectedIdentifier,
-    ParserErrorExpectedOpenParenthesis,
-    ParserErrorExpectedCloseParenthesis,
-    ParserErrorExpectedType,
-    ParserErrorExpectedCommaOrCloseParenthesis,
-    ParserErrorUnknownStatementBeginning,
-    ParserErrorUnknownLineBeginningAtModuleLevel,
-    ParserErrorUnknownExpressionBeginning,
-};
-
-#warning TODO: REFACTOR.
-
 class ParserErrorException : public ParserException {
-private:
-    ParserError error;
-public:
-    ParserErrorException(ParserError error) : error(error) {}
-    ParserError getError() {
-        return error;
-    }
+protected:
+    ParserErrorException() {}
 };
+
+class ParserErrorExceptionExpectedNewline : public ParserErrorException {};
+class ParserErrorExceptionExpectedIndent : public ParserErrorException {};
+class ParserErrorExceptionExpectedIdentifier : public ParserErrorException {};
+class ParserErrorExceptionExpectedOpenParenthesis : public ParserErrorException {};
+class ParserErrorExceptionExpectedCloseParenthesis : public ParserErrorException {};
+class ParserErrorExceptionExpectedType : public ParserErrorException {};
+class ParserErrorExceptionExpectedCommaOrCloseParenthesis : public ParserErrorException {};
+class ParserErrorExceptionUnknownStatementBeginning : public ParserErrorException {};
+class ParserErrorExceptionUnknownLineBeginningAtModuleLevel : public ParserErrorException {};
+class ParserErrorExceptionUnknownExpressionBeginning : public ParserErrorException {};

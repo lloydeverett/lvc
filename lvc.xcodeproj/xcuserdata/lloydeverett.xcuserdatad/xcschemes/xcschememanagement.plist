@@ -7,7 +7,7 @@
 		<key>asttest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
 		<key>irgentest.xcscheme</key>
 		<dict>
@@ -17,22 +17,22 @@
 		<key>irtest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>9</integer>
+			<integer>6</integer>
 		</dict>
 		<key>lexerbuffertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>7</integer>
+			<integer>5</integer>
 		</dict>
 		<key>lexertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<key>llvmplayground.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>5</integer>
+			<integer>3</integer>
 		</dict>
 		<key>lvc.xcscheme</key>
 		<dict>
@@ -42,12 +42,12 @@
 		<key>parsertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>6</integer>
+			<integer>4</integer>
 		</dict>
 		<key>symbolstest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>10</integer>
+			<integer>7</integer>
 		</dict>
 		<key>testaggregate.xcscheme</key>
 		<dict>
@@ -58,6 +58,11 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
+		</dict>
+		<key>typecheckertest.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>8</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
@@ -88,6 +93,11 @@
 			<true/>
 		</dict>
 		<key>5752E2D11B2487930087DD1E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>579607481B49A58B00BEF684</key>
 		<dict>
 			<key>primary</key>
 			<true/>

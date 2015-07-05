@@ -20,7 +20,7 @@ bool isDigit(char c) {
     return c >= '0' && c <= '9';
 }
 
-Lexer::Lexer(IReader &reader) : reader(reader) {
+Lexer::Lexer(IReader &reader, IIssueReporter& issueReporter) : reader(reader), issueReporter(issueReporter) {
     indentStack.push(0);
     hasProducedEof = false;
 }
@@ -68,7 +68,7 @@ Token Lexer::makeIndentToken(colnumber col) {
     return t;
 }
 
-bool Lexer::tryToSkipComment(IIssueReporter &issueReporter) {
+bool Lexer::tryToSkipComment() {
     if (reader.peekChar(0) == '/' && reader.peekChar(1) == '/') {
         reader.consumeUntilPositionAtNewlineOrEof();
         return true;
@@ -96,11 +96,11 @@ bool Lexer::tryToSkipComment(IIssueReporter &issueReporter) {
     }
 }
 
-void Lexer::skipCommentsAndNonIndentWhitespace(IIssueReporter &issueReporter) {
+void Lexer::skipCommentsAndNonIndentWhitespace() {
     bool didSkipComment;
     bool didConsumeWhitespace;
     do {
-        didSkipComment = tryToSkipComment(issueReporter);
+        didSkipComment = tryToSkipComment();
 
         didConsumeWhitespace = false;
         if (reader.atWhitespace() && !reader.atStartOfRow()) {
@@ -110,7 +110,7 @@ void Lexer::skipCommentsAndNonIndentWhitespace(IIssueReporter &issueReporter) {
     } while (didSkipComment || didConsumeWhitespace);
 }
 
-bool Lexer::isFinished(IIssueReporter &issueReporter) {
+bool Lexer::isFinished() {
     return hasProducedEof;
 }
 
@@ -141,7 +141,7 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     return t;
 }
 
-Token Lexer::lexToken(IIssueReporter &issueReporter) {
+Token Lexer::lexToken() {
 
     // Return a queued dedent if there are any.
     // This should always get priority over other tokens
@@ -172,7 +172,7 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
         }
     }
     
-    skipCommentsAndNonIndentWhitespace(issueReporter);
+    skipCommentsAndNonIndentWhitespace();
 
     if (reader.eof()) {
         if (indentStack.top() > 0) {
@@ -293,13 +293,4 @@ Token Lexer::lexToken(IIssueReporter &issueReporter) {
 
     issueReporter.report(reader.getSourcePosition(), "Did not expect character.", SubsystemLexer);
     throw LexerErrorException(LexerErrorUnexpectedCharacter);
-}
-
-bool Lexer::attemptToRecoverBySkippingLine() {
-#warning TODO: implement
-    return (assert(false), true);
-}
-
-bool Lexer::attemptToRecoverBySkippingLinesUntilValidIndentation() {
-    return (assert(false), true);
 }

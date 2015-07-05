@@ -23,20 +23,19 @@ private:
         QueuedDedent(colnumber startCol, charcount length) : startCol(startCol), length(length) {}
     };
     
-    IReader &reader;
+    IIssueReporter& issueReporter;
+    IReader& reader;
     std::stack<colnumber> indentStack;
     std::queue<QueuedDedent> queuedDedents;
     
     bool addDedentsToQueueUntilColnumberIsReached(colnumber col);
     Token makeIndentToken(colnumber col);
     Token getTokenFromQueuedDedent(QueuedDedent q);
-    bool tryToSkipComment(IIssueReporter &issueReporter);
-    void skipCommentsAndNonIndentWhitespace(IIssueReporter &issueReporter);
+    bool tryToSkipComment();
+    void skipCommentsAndNonIndentWhitespace();
     bool hasProducedEof;
 public:
-    Lexer(IReader &reader);
-    virtual bool isFinished(IIssueReporter &issueReporter) override;
-    virtual Token lexToken(IIssueReporter &issueReporter) override;
-    virtual bool attemptToRecoverBySkippingLine() override;
-    virtual bool attemptToRecoverBySkippingLinesUntilValidIndentation() override;
+    Lexer(IReader& reader, IIssueReporter& issueReporter);
+    virtual bool isFinished() override;
+    virtual Token lexToken() override;
 };

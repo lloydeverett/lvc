@@ -39,7 +39,7 @@ void VariableDecl::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void RealLiteralExp::accept(INodeVisitor& visitor) {
+void NumberLiteralExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
@@ -48,10 +48,6 @@ void BinopExp::accept(INodeVisitor& visitor) {
 }
 
 void FunctionCallExp::accept(INodeVisitor& visitor) {
-    visitor.visit(*this);
-}
-
-void IntegerLiteralExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 

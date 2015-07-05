@@ -13,7 +13,6 @@
 #include "iissuereporter.h"
 #include "lexerbuffer.h"
 #include "parserexceptions.h"
-#include "locals.h"
 
 class Parser {
 private:

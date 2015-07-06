@@ -1,3 +1,7 @@
+//
+// Reads a file into a std::string
+// Taken from http://insanecoding.blogspot.com/2011/11/how-to-read-in-file-in-c.html
+//
 
 #pragma once
 #include <string>

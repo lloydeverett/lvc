@@ -16,14 +16,14 @@ int main(int argc, const char * argv[]) {
     
     StringReader reader(fileStr);
     CerrIssueReporter issueReporter(filePath);
-    Lexer lexer(reader);
+    Lexer lexer(reader, issueReporter);
     
     charcount indent = 0;
     while (true) {
         Token t;
         
         try {
-            t = lexer.lexToken(issueReporter);
+            t = lexer.lexToken();
         }
         catch (LexerErrorException &e) {
             assert(false);

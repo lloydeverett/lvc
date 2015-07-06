@@ -144,6 +144,7 @@
 		577B99BA1B30371E00FCF79F /* typevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typevisitor.h; sourceTree = "<group>"; };
 		577B99BB1B303B9000FCF79F /* expvisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = expvisitor.h; sourceTree = "<group>"; };
 		577EB46F1B30BCD3001F23DF /* sourceposition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sourceposition.h; sourceTree = "<group>"; };
+		578485A81B4ADA860099F638 /* visitorutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = visitorutil.h; sourceTree = "<group>"; };
 		578EFB741B20583700A3968C /* lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lexer.cpp; sourceTree = "<group>"; };
 		578EFB751B20583700A3968C /* lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexer.h; sourceTree = "<group>"; };
 		578EFB7A1B2239F200A3968C /* lexerbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerbuffer.h; sourceTree = "<group>"; };
@@ -304,9 +305,9 @@
 		57334CE01B1076E300085754 /* util */ = {
 			isa = PBXGroup;
 			children = (
-				577EB46F1B30BCD3001F23DF /* sourceposition.h */,
-				571AB4EA1B1A0EC400B866E2 /* getfilecontents.h */,
 				571AB4E71B18BC8200B866E2 /* integertypedefs.h */,
+				571AB4EA1B1A0EC400B866E2 /* getfilecontents.h */,
+				578485A81B4ADA860099F638 /* visitorutil.h */,
 			);
 			name = util;
 			sourceTree = "<group>";
@@ -446,6 +447,7 @@
 				57D8FFEA1B08A19400630274 /* token.h */,
 				57334CF71B10D23500085754 /* ireader.h */,
 				57334CFC1B10EBD700085754 /* stringreader.h */,
+				577EB46F1B30BCD3001F23DF /* sourceposition.h */,
 				578EFB741B20583700A3968C /* lexer.cpp */,
 				578EFB751B20583700A3968C /* lexer.h */,
 				57DE87451B1F2A9300143D74 /* ilexer.h */,

@@ -37,10 +37,12 @@ public:
     }
     virtual void visit(ast::FunctionCallExp& functionCallExp) {
         for (std::unique_ptr<ast::IExp> arg : functionCallExp.passedArguments) {
-            
+            arg->accept(*this);
         }
         
+        
     }
+    
     virtual void visit(ast::NumberLiteralExp& numberLiteralExp) {assert(false);}
     virtual void visit(ast::VariableExp& variableExp) {assert(false);}
     virtual void visit(ast::FunctionCalExplStmt& functionCallExpStmt) {assert(false);}

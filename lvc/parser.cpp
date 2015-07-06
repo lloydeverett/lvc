@@ -10,8 +10,6 @@
 #include "lexerexceptions.h"
 #include <memory>
 
-#warning TODO: make using this class more convenient
-
 using namespace ast;
 
 Parser::Parser(ILexerBuffer &lexerBuffer, IIssueReporter &issueReporter) :

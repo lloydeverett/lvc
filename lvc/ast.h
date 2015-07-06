@@ -59,14 +59,14 @@ namespace ast {
     
     ///////////////////////////////
     
-    struct VoidType : IType {
+    struct VoidType : public IType {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "VoidType";
         }
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct IntegerType : IType {
+    struct IntegerType : public IType {
         int numBits;
         enum Signedness {
             Signed,
@@ -81,14 +81,14 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct BoolType : IType {
+    struct BoolType : public IType {
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "BoolType";
         }
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct FloatingPointType : IType {
+    struct FloatingPointType : public IType {
         enum Variation {
             VariationFloat,
             VariationDouble,

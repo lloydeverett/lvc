@@ -56,29 +56,3 @@ public:
         visitor.visit(static_cast<Visitable &>(*this));
     }
 };
-
-/** example of use */
-template <typename Annotation>
-class Visitable1 : public BaseVisitable<Visitable1<Annotation>>
-{
-    Annotation annotation;
-};
-
-class Visitable2 : public BaseVisitable<Visitable2>
-{
-};
-
-class VisitorDerived : public BaseVisitor,
-public Visitor<Visitable1<int>>,
-public Visitor<Visitable2>
-{
-public:
-    void visit(Visitable1<int>& c)
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
-    void visit(Visitable2 & c)
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
-};

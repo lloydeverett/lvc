@@ -292,5 +292,5 @@ Token Lexer::lexToken() {
     }
 
     issueReporter.report(reader.getSourcePosition(), "Did not expect character.", SubsystemLexer);
-    throw LexerErrorExceptionUnexpectedCharacter();
+    throw LexerErrorExceptionUnknownCharacter();
 }

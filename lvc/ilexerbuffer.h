@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include "token.h"
 
 class ILexerBuffer {
 public:
@@ -14,5 +15,5 @@ public:
     virtual Token peekNext() = 0;
     virtual Token peekNextNext() = 0;
     virtual bool isFinished() = 0;
-    virtual ~ILexer() {}
+    virtual ~ILexerBuffer() {}
 };

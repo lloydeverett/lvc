@@ -9,6 +9,7 @@
 #include <iostream>
 #include "parser.h"
 #include "testutil.h"
+#include "lexerbuffer.h"
 
 int main(int argc, const char * argv[]) {
     std::string filePath = getPathForVFile("verysimple.v");
@@ -16,9 +17,10 @@ int main(int argc, const char * argv[]) {
     
     StringReader s(fileStr);
     CerrIssueReporter c(filePath);
-    Parser parser(s, c);
+    LexerBuffer l(s, c);
+    Parser parser(l, c);
     
-    ast::Module m = parser.parse("eh");
+    ast::Module m = parser.parseModule("eh");
     
     std::cout << m;
     

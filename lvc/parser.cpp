@@ -7,6 +7,7 @@
 //
 
 #include "parser.h"
+#include "lexerexceptions.h"
 #include <memory>
 
 #warning TODO: make using this class more convenient
@@ -26,7 +27,7 @@ void Parser::reportOnCurrentToken(const std::string& message) {
     issueReporter.report(currentToken.getRow(), currentToken.getStartCol(), message, SubsystemParser);
 }
 
-Module Parser::parse(std::string nameOfModule) {
+Module Parser::parseModule(std::string name) {
     std::vector<Function> functions;
     std::vector<VariableDeclStmt> variableDecls;
     
@@ -62,8 +63,7 @@ Module Parser::parse(std::string nameOfModule) {
         }
     }
 
-    return Module(nameOfModule, std::move(functions), std::move(variableDecls));
-
+    return Module(name, std::move(functions), std::move(variableDecls));
 }
 
 Function Parser::parseFunction() {

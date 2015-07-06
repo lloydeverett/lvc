@@ -21,8 +21,8 @@ protected:
 
 class LexerErrorExceptionInvalidDedent : public LexerErrorException {};
 class LexerErrorExceptionUnterminatedBlockComment : public LexerErrorException {};
-class LexerErrorInvalidNumberLiteral : public LexerErrorException {};
-class LexerErrorUnknownCharacter : public LexerErrorException {};
+class LexerErrorExceptionInvalidNumberLiteral : public LexerErrorException {};
+class LexerErrorExceptionUnknownCharacter : public LexerErrorException {};
 
 class LexerFinishedException : public LexerException {
     

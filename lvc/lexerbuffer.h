@@ -29,7 +29,7 @@ private:
 public:
     LexerBuffer(IReader& reader, IIssueReporter& issueReporter) : lexer(reader, issueReporter), aheadBy(0) {}
     
-    Token readToken() {
+    Token readToken() override {
         if (aheadBy == 0) {
             return lexer.lexToken();
         }
@@ -38,7 +38,7 @@ public:
         }
     }
     
-    Token peekNext() {
+    Token peekNext() override {
         if (aheadBy >= 1) return next;
         else {
             next = lexer.lexToken();
@@ -47,7 +47,7 @@ public:
         }
     }
     
-    Token peekNextNext() {
+    Token peekNextNext() override {
         if (aheadBy >= 2) return nextNext;
         else {
             if (aheadBy == 0) {
@@ -60,7 +60,7 @@ public:
         }
     }
     
-    bool isFinished(IIssueReporter &issueReporter) {
+    bool isFinished() override {
         return aheadBy == 0 && lexer.isFinished();
     }
 };

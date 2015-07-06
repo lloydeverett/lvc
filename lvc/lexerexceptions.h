@@ -14,22 +14,15 @@ protected:
     LexerException() {}
 };
 
-enum LexerError {
-    LexerErrorInvalidDedent,
-    LexerErrorUnterminatedBlockComment,
-    LexerErrorInvalidNumberLiteral,
-    LexerErrorUnexpectedCharacter,
+class LexerErrorException : public LexerException {
+protected:
+    LexerErrorException() {}
 };
 
-class LexerErrorException : public LexerException {
-private:
-    LexerError error;
-public:
-    LexerErrorException(LexerError error) : error(error) {}
-    LexerError getError() {
-        return error;
-    }
-};
+class LexerErrorExceptionInvalidDedent : public LexerErrorException {};
+class LexerErrorExceptionUnterminatedBlockComment : public LexerErrorException {};
+class LexerErrorInvalidNumberLiteral : public LexerErrorException {};
+class LexerErrorUnknownCharacter : public LexerErrorException {};
 
 class LexerFinishedException : public LexerException {
     

@@ -13,14 +13,13 @@
 
 using namespace ast;
 
-Parser::Parser(IReader &reader, IIssueReporter &issueReporter) :
-issueReporter(issueReporter), lexerBuffer(issueReporter, reader) {
+Parser::Parser(ILexerBuffer &lexerBuffer, IIssueReporter &issueReporter) :
+issueReporter(issueReporter), lexerBuffer(lexerBuffer) {
     
 }
 
-Token& Parser::readTokenIntoCurrent() {
+void Parser::readTokenIntoCurrent() {
     currentToken = lexerBuffer.readToken();
-    return currentToken;
 }
 
 void Parser::reportOnCurrentToken(const std::string& message) {

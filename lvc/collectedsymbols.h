@@ -7,6 +7,8 @@
 //
 
 #pragma once
+#include <unordered_map>
+#include "ast.h"
 
 class CollectedSymbols {
     // Collected symbols are decls that we collect
@@ -17,7 +19,7 @@ class CollectedSymbols {
     
     std::unordered_map<std::string, ast::IDecl*> collected;
     
-    void collectIfCollectable(std::unique_ptr<IDecl>& collectableUniquePtr) {
+    void collectIfCollectable(std::unique_ptr<ast::IDecl>& collectableUniquePtr) {
         
     }
 };

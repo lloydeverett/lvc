@@ -31,7 +31,7 @@ public:
     
     virtual void visit(ast::ReturnStmt& returnStmt) {
         if (returnStmt.optReturnedExpression) {
-            auto& returnedExpression = *returnStmt.optReturnedExpression;
+            std::unique_ptr<ast::IExp>& returnedExpression = *returnStmt.optReturnedExpression;
             returnedExpression->accept(expVisitor);
             builder.CreateRet(expVisitor.returnValue());
         }

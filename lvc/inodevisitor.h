@@ -11,6 +11,9 @@
 #include <cassert>
 
 class INodeVisitor {
+protected:
+    INodeVisitor() {}
+    
 public:
     // If an assert in this file fails, the visitor
     // does not implement a visit function for the ast class you're trying to visit.
@@ -32,4 +35,5 @@ public:
     virtual void visit(ast::BlockStmt& blockStmt) {assert(false);}
     virtual void visit(ast::Function& function) {assert(false);}
     virtual void visit(ast::Module& module) {assert(false);}
+    virtual ~INodeVisitor() {}
 };

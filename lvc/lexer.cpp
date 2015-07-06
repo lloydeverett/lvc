@@ -87,7 +87,7 @@ bool Lexer::tryToSkipComment() {
             }
             if (reader.eof()) {
                 issueReporter.report(startRow, startCol, "Block comment that starts here was never terminated.", SubsystemLexer);
-                throw LexerErrorException(LexerErrorUnterminatedBlockComment);
+                throw LexerErrorExceptionUnterminatedBlockComment();
             }
         }
     }
@@ -163,7 +163,7 @@ Token Lexer::lexToken() {
             bool success = addDedentsToQueueUntilColnumberIsReached(whitespaceCount);
             if (!success) {
                 issueReporter.report(reader.getSourcePosition(), "Unindent does not match any indent level.", SubsystemLexer);
-                throw LexerErrorException(LexerErrorInvalidDedent);
+                throw LexerErrorExceptionInvalidDedent();
             }
             // Pop one off the queue
             QueuedDedent q = queuedDedents.front();
@@ -283,7 +283,7 @@ Token Lexer::lexToken() {
         }
         if (isAlpha(reader.peekChar())) {
             issueReporter.report(reader.getSourcePosition(), "Did not expect alphabet character in number literal.", SubsystemLexer);
-            throw LexerErrorException(LexerErrorInvalidNumberLiteral);
+            throw LexerErrorExceptionInvalidNumberLiteral();
         }
         t.setKind(IntegerLiteral);
         t.setLength(str.length());
@@ -292,5 +292,5 @@ Token Lexer::lexToken() {
     }
 
     issueReporter.report(reader.getSourcePosition(), "Did not expect character.", SubsystemLexer);
-    throw LexerErrorException(LexerErrorUnexpectedCharacter);
+    throw LexerErrorExceptionUnexpectedCharacter();
 }

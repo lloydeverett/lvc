@@ -11,32 +11,33 @@
 #include "ast.h"
 #include "ireader.h"
 #include "iissuereporter.h"
-#include "lexerbuffer.h"
+#include "ilexerbuffer.h"
+#include "token.h"
 #include "parserexceptions.h"
 
 class Parser {
 private:
-    IIssueReporter &issueReporter;
-    LexerBuffer lexerBuffer;
+    IIssueReporter& issueReporter;
+    ILexerBuffer& lexerBuffer;
     Token currentToken;
     
-    Token& readTokenIntoCurrent();
-    ast::FunctionDecl parseFunctionDecl();
+    void readTokenIntoCurrent();
     void reportOnCurrentToken(const std::string& message);
+public:
+    Parser(ILexerBuffer &lexerBuffer, IIssueReporter &issueReporter);
+    ast::FunctionDecl parseFunctionDecl();
     ast::Function parseFunction();
     ast::BlockStmt parseBlock();
-    std::unique_ptr<ast::IStmt> parseStatement();
     ast::VariableDeclStmt parseVariableDeclStmt(std::unique_ptr<ast::IType> type);
+    std::string parseIdentifier();
+    std::unique_ptr<ast::IStmt> parseStatement();
     std::unique_ptr<ast::IExp> parseParenExpression();
     std::unique_ptr<ast::IExp> parseExpression();
     std::unique_ptr<ast::IExp> parseBinopRhs(std::unique_ptr<ast::IExp> lhs, BinopCode afterLhsCode, int minPrecedence);
     std::unique_ptr<ast::IExp> parsePrimaryExpression();
-    std::string parseIdentifier();
     boost::optional<std::unique_ptr<ast::IType>> tryParseTypename();
     std::unique_ptr<ast::IType> parseTypename();
     boost::optional<BinopCode> tryParseBinopCode();
-    int getBinopCodePrecedence(BinopCode code);
-public:
-    Parser(IReader &reader, IIssueReporter &issueReporter);
-    ast::Module parse(std::string nameOfModule);
+    ast::Module parseModule(std::string name);
+    static int getBinopCodePrecedence(BinopCode code);
 };

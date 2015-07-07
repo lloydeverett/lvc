@@ -7,7 +7,7 @@
 		<key>asttest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<key>irgentest.xcscheme</key>
 		<dict>
@@ -22,17 +22,17 @@
 		<key>lexerbuffertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>5</integer>
+			<integer>3</integer>
 		</dict>
 		<key>lexertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 		<key>llvmplayground.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>4</integer>
 		</dict>
 		<key>lvc.xcscheme</key>
 		<dict>
@@ -42,7 +42,7 @@
 		<key>parsertest.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>4</integer>
+			<integer>5</integer>
 		</dict>
 		<key>symbolstest.xcscheme</key>
 		<dict>

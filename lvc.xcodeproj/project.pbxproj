@@ -10,9 +10,7 @@
 		5727F1AA1B07EBA500A6966F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5727F1A91B07EBA500A6966F /* main.cpp */; };
 		57334D081B12382B00085754 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57334D071B12382B00085754 /* main.cpp */; };
 		573AAA0B1B2C3CA100E84844 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 573AAA0A1B2C3CA100E84844 /* main.cpp */; };
-		573AAA0F1B2C3CB700E84844 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57CD4CAB1B2C27E700EF9490 /* ast.cpp */; };
 		573AAA131B2C419B00E84844 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57ADD13A1B1E06E50031EB0F /* parser.cpp */; };
-		573AAA141B2C41FE00E84844 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57CD4CAB1B2C27E700EF9490 /* ast.cpp */; };
 		573AAA151B2C426000E84844 /* lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 578EFB741B20583700A3968C /* lexer.cpp */; };
 		573AAA161B2C435E00E84844 /* libLLVMSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFF11B0B923100630274 /* libLLVMSupport.a */; };
 		573AAA171B2C435F00E84844 /* libLLVMCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFED1B0B91E400630274 /* libLLVMCore.a */; };
@@ -21,6 +19,12 @@
 		5752E2CB1B2334890087DD1E /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57ADD13A1B1E06E50031EB0F /* parser.cpp */; };
 		5752E2D51B2487930087DD1E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5752E2D41B2487930087DD1E /* main.cpp */; };
 		5752E2D91B2488F50087DD1E /* lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 578EFB741B20583700A3968C /* lexer.cpp */; };
+		5788F5031B4C27C600C6F865 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5788F5021B4C27C600C6F865 /* ast.cpp */; };
+		5788F5041B4C27DC00C6F865 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5788F5021B4C27C600C6F865 /* ast.cpp */; };
+		5788F5051B4C27DD00C6F865 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5788F5021B4C27C600C6F865 /* ast.cpp */; };
+		5788F5061B4C27DE00C6F865 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5788F5021B4C27C600C6F865 /* ast.cpp */; };
+		5788F5071B4C27E100C6F865 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5788F5021B4C27C600C6F865 /* ast.cpp */; };
+		5788F5081B4C27E500C6F865 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5788F5021B4C27C600C6F865 /* ast.cpp */; };
 		578EFB761B20583700A3968C /* lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 578EFB741B20583700A3968C /* lexer.cpp */; };
 		578EFB781B21E3A400A3968C /* lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 578EFB741B20583700A3968C /* lexer.cpp */; };
 		5796074C1B49A58B00BEF684 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5796074B1B49A58B00BEF684 /* main.cpp */; };
@@ -29,12 +33,9 @@
 		57ADD13C1B1E06E50031EB0F /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57ADD13A1B1E06E50031EB0F /* parser.cpp */; };
 		57ADD13D1B1E0CB80031EB0F /* libLLVMSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFF11B0B923100630274 /* libLLVMSupport.a */; };
 		57ADD13E1B1E0CBA0031EB0F /* libLLVMCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFED1B0B91E400630274 /* libLLVMCore.a */; };
-		57CD4CAC1B2C27E700EF9490 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57CD4CAB1B2C27E700EF9490 /* ast.cpp */; };
-		57CD4CAD1B2C27E700EF9490 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57CD4CAB1B2C27E700EF9490 /* ast.cpp */; };
 		57D8FFEE1B0B91E400630274 /* libLLVMCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFED1B0B91E400630274 /* libLLVMCore.a */; };
 		57D8FFF21B0B923100630274 /* libLLVMSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 57D8FFF11B0B923100630274 /* libLLVMSupport.a */; };
 		57F9CC721B35A19A0084A086 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57F9CC711B35A19A0084A086 /* main.cpp */; };
-		57F9CC761B35A4880084A086 /* ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 57CD4CAB1B2C27E700EF9490 /* ast.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -144,7 +145,8 @@
 		577B99BA1B30371E00FCF79F /* typevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typevisitor.h; sourceTree = "<group>"; };
 		577B99BB1B303B9000FCF79F /* expvisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = expvisitor.h; sourceTree = "<group>"; };
 		577EB46F1B30BCD3001F23DF /* sourceposition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sourceposition.h; sourceTree = "<group>"; };
-		578485A81B4ADA860099F638 /* visitorutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = visitorutil.h; sourceTree = "<group>"; };
+		5788F5011B4C278B00C6F865 /* inodevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = inodevisitor.h; sourceTree = "<group>"; };
+		5788F5021B4C27C600C6F865 /* ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ast.cpp; sourceTree = "<group>"; };
 		578EFB741B20583700A3968C /* lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lexer.cpp; sourceTree = "<group>"; };
 		578EFB751B20583700A3968C /* lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lexer.h; sourceTree = "<group>"; };
 		578EFB7A1B2239F200A3968C /* lexerbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lexerbuffer.h; sourceTree = "<group>"; };
@@ -161,8 +163,6 @@
 		57ADD13B1B1E06E50031EB0F /* parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
 		57AF4E421B4330D3009CB872 /* semanticanalyzer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = semanticanalyzer.h; sourceTree = "<group>"; };
 		57B7D8381B39ABD90037A24C /* binopcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binopcode.h; sourceTree = "<group>"; };
-		57CD4CAB1B2C27E700EF9490 /* ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ast.cpp; sourceTree = "<group>"; };
-		57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = inodevisitor.h; sourceTree = "<group>"; };
 		57D019241B42B97500031198 /* stmtvisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stmtvisitor.h; sourceTree = "<group>"; };
 		57D019261B42BBDE00031198 /* irgenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = irgenerator.h; sourceTree = "<group>"; };
 		57D426BB1B231DE0005B5D61 /* testutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testutil.h; sourceTree = "<group>"; };
@@ -307,7 +307,6 @@
 			children = (
 				571AB4E71B18BC8200B866E2 /* integertypedefs.h */,
 				571AB4EA1B1A0EC400B866E2 /* getfilecontents.h */,
-				578485A81B4ADA860099F638 /* visitorutil.h */,
 			);
 			name = util;
 			sourceTree = "<group>";
@@ -418,9 +417,9 @@
 			isa = PBXGroup;
 			children = (
 				57B7D8381B39ABD90037A24C /* binopcode.h */,
-				57CD4CAF1B2C280A00EF9490 /* inodevisitor.h */,
-				57CD4CAB1B2C27E700EF9490 /* ast.cpp */,
 				57D8FFE61B089E8300630274 /* ast.h */,
+				5788F5011B4C278B00C6F865 /* inodevisitor.h */,
+				5788F5021B4C27C600C6F865 /* ast.cpp */,
 			);
 			name = ast;
 			sourceTree = "<group>";
@@ -691,8 +690,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5788F5031B4C27C600C6F865 /* ast.cpp in Sources */,
 				57ADD13C1B1E06E50031EB0F /* parser.cpp in Sources */,
-				57CD4CAC1B2C27E700EF9490 /* ast.cpp in Sources */,
 				5727F1AA1B07EBA500A6966F /* main.cpp in Sources */,
 				578EFB761B20583700A3968C /* lexer.cpp in Sources */,
 			);
@@ -711,7 +710,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				573AAA141B2C41FE00E84844 /* ast.cpp in Sources */,
+				5788F5061B4C27DE00C6F865 /* ast.cpp in Sources */,
 				573AAA131B2C419B00E84844 /* parser.cpp in Sources */,
 				573AAA151B2C426000E84844 /* lexer.cpp in Sources */,
 				573AAA0B1B2C3CA100E84844 /* main.cpp in Sources */,
@@ -722,7 +721,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				573AAA0F1B2C3CB700E84844 /* ast.cpp in Sources */,
+				5788F5051B4C27DD00C6F865 /* ast.cpp in Sources */,
 				5752E2CA1B2334810087DD1E /* lexer.cpp in Sources */,
 				5752E2CB1B2334890087DD1E /* parser.cpp in Sources */,
 				5752E2C61B2320A70087DD1E /* main.cpp in Sources */,
@@ -733,6 +732,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5788F5071B4C27E100C6F865 /* ast.cpp in Sources */,
 				5752E2D91B2488F50087DD1E /* lexer.cpp in Sources */,
 				5752E2D51B2487930087DD1E /* main.cpp in Sources */,
 			);
@@ -742,6 +742,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5788F5081B4C27E500C6F865 /* ast.cpp in Sources */,
 				5796074C1B49A58B00BEF684 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -750,7 +751,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57CD4CAD1B2C27E700EF9490 /* ast.cpp in Sources */,
+				5788F5041B4C27DC00C6F865 /* ast.cpp in Sources */,
 				57ADD1191B1B67A50031EB0F /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -767,7 +768,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57F9CC761B35A4880084A086 /* ast.cpp in Sources */,
 				57F9CC721B35A19A0084A086 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -37,19 +37,22 @@ namespace ast {
     
     ///////////////////////////////
     
+    class IType : public INode {
+    protected:
+        IType() {};
+    };
+    
     class IDecl : public INode {
     protected:
         IDecl() {};
+    public:
+        virtual const std::string& getIdentifier() const = 0;
+        virtual const IType& getType() const = 0;
     };
     
     class IStmt : public INode {
     protected:
         IStmt() {};
-    };
-    
-    class IType : public INode {
-    protected:
-        IType() {};
     };
     
     class IExp : public INode {
@@ -123,6 +126,12 @@ namespace ast {
             return o << "VariableDecl(" << *type << ", " << identifier << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
+        virtual const std::string& getIdentifier() const override {
+            return identifier;
+        }
+        virtual const IType& getType() const override {
+            return *type;
+        }
     };
     
     struct VariableExp : public IExp {
@@ -150,6 +159,12 @@ namespace ast {
             return o;
         }
         virtual void accept(INodeVisitor& visitor) override;
+        virtual const std::string& getIdentifier() const override {
+            return variableDecl.identifier;
+        }
+        virtual const IType& getType() const override {
+            return variableDecl.getType();
+        }
     };
     
     struct FunctionDecl : public IDecl {
@@ -165,7 +180,7 @@ namespace ast {
             if (!arguments.empty()) {
                 o << ", Arguments(";
                 for (const ArgumentDecl &decl : arguments) {
-                    o << decl;
+                    o << &decl;
                     if (&decl != &arguments[arguments.size() - 1]) {
                         o << ", ";
                     }
@@ -176,6 +191,12 @@ namespace ast {
             return o;
         }
         virtual void accept(INodeVisitor& visitor) override;
+        virtual const std::string& getIdentifier() const override {
+            return identifier;
+        }
+        virtual const IType& getType() const override {
+            return *returnType;
+        }
     };
     
     struct VariableDeclStmt : public IStmt {

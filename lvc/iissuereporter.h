@@ -7,7 +7,6 @@
 //
 
 #pragma once
-#include "integertypedefs.h"
 #include <string>
 #include <cassert>
 #include "sourceposition.h"

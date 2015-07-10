@@ -7,7 +7,6 @@
 //
 
 #include "lexer.h"
-#include "integertypedefs.h"
 #include <cassert>
 
 #warning TODO: make lexer ignore empty lines

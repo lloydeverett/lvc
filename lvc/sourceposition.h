@@ -7,12 +7,16 @@
 //
 
 #pragma once
-#include "integertypedefs.h"
+#include <cstdint>
+
+typedef uint64_t rownumber;
+typedef uint64_t colnumber;
+typedef uint64_t charcount;
 
 class SourcePosition {
 public:
-    rownumber row;
-    colnumber col;
+    const rownumber row;
+    const colnumber col;
     
     SourcePosition(rownumber row, colnumber col) : row(row), col(col) {}
 };

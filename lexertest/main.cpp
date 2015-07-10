@@ -10,6 +10,9 @@
 #include "testutil.h"
 #include "lexer.h"
 
+#include "semanticanalyzer.h"
+#warning TODO: remove
+
 int main(int argc, const char * argv[]) {
     std::string filePath = getPathForVFile("verysimple.v");
     std::string fileStr = getFileContents(filePath.c_str());

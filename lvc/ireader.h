@@ -7,7 +7,6 @@
 //
 
 #pragma once
-#include "integertypedefs.h"
 #include "sourceposition.h"
 
 class IReader {

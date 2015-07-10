@@ -9,7 +9,6 @@
 #pragma once
 #include <iostream>
 #include <cassert>
-#include "integertypedefs.h"
 #include <boost/optional.hpp>
 
 enum TokenKind {

@@ -11,7 +11,6 @@
 #include "ireader.h"
 #include <stack>
 #include <queue>
-#include "integertypedefs.h"
 
 class Lexer : public ILexer {
 private:

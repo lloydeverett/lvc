@@ -46,13 +46,13 @@ namespace ast {
     
     class IType : public INode {
     private:
-        Constantness isConstantVal;
+        Constantness constantness;
     protected:
-        IType(Constantness isConstantVal) : isConstantVal(isConstantVal) {};
+        IType(Constantness constantness) : constantness(constantness) {};
     public:
         virtual std::type_index typeIndex() = 0;
         bool isConstant() {
-            return isConstantVal;
+            return constantness;
         }
     };
     
@@ -77,6 +77,7 @@ namespace ast {
     ///////////////////////////////
     
     struct VoidType : public IType {
+        VoidType(Constantness constantness) : IType(constantness) {}
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "VoidType";
         }
@@ -92,8 +93,8 @@ namespace ast {
             Signed,
             Unsigned,
         } isSigned;
-        IntegerType(int numBits, Signedness isSigned, Constantness isConstant) :
-        numBits(numBits), isSigned(isSigned), IType(isConstant) {}
+        IntegerType(int numBits, Signedness isSigned, Constantness constantness) :
+        numBits(numBits), isSigned(isSigned), IType(constantness) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "IntegerType(" << numBits << ", " << (isSigned == Signed ? "Signed" : "Unsigned") << ")";
@@ -105,6 +106,7 @@ namespace ast {
     };
     
     struct BoolType : public IType {
+        BoolType(Constantness constantness) : IType(constantness) {}
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "BoolType";
         }
@@ -120,8 +122,8 @@ namespace ast {
             VariationDouble,
         } variation;
         
-        FloatingPointType(Variation variation, Constantness isConstant) :
-        variation(variation), IType(isConstant) {}
+        FloatingPointType(Variation variation, Constantness constantness) :
+        variation(variation), IType(constantness) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "FloatingPointType(" << (variation == VariationFloat ? "Float" : "Double") << ")";

@@ -381,25 +381,8 @@ std::string Parser::parseIdentifier() {
 }
 
 boost::optional<BinopCode> Parser::tryParseBinopCode() {
-    BinopCode code;
-    switch (currentToken.getKind()) {
-        case Plus:     code = BinopCodeAdd; break;
-        case Minus:    code = BinopCodeSubtract; break;
-        case Asterisk: code = BinopCodeMultiply; break;
-        case Slash:    code = BinopCodeDivide; break;
-        default:
-            return boost::none;
-    }
-    readTokenIntoCurrent();
-    return code;
-}
-
-int Parser::getBinopCodePrecedence(BinopCode code) {
-    switch (code) {
-        case BinopCodeAdd:      return 10;
-        case BinopCodeSubtract: return 10;
-        case BinopCodeMultiply: return 20;
-        case BinopCodeDivide:   return 20;
-    }
-    assert(false);
+    boost::optional<BinopCode> optBinopCode = tryGetBinopCodeFromToken(currentToken);
+    if (optBinopCode)
+        readTokenIntoCurrent();
+    return optBinopCode;
 }

@@ -10,6 +10,7 @@
 #include "parser.h"
 #include "testutil.h"
 #include "directtokeninputstream.h"
+#include "lexer.h"
 
 int main(int argc, const char * argv[]) {
     std::string filePath = getPathForVFile("verysimple.v");
@@ -17,8 +18,9 @@ int main(int argc, const char * argv[]) {
     
     StringReader s(fileStr);
     OstreamIssueReporter c(filePath, std::cerr);
-    DirectTokenInputStream l(s, c);
-    Parser parser(l, c);
+    Lexer l(s, c);
+    DirectTokenInputStream i(l);
+    Parser parser(i, c);
     
     ast::Module m = parser.parseModule("eh");
     

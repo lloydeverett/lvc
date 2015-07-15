@@ -121,7 +121,7 @@
 		57334D071B12382B00085754 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		573AAA081B2C3CA100E84844 /* irtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = irtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		573AAA0A1B2C3CA100E84844 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		573ACD741B564E0C00FDB61D /* typechecker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typechecker.h; sourceTree = "<group>"; };
+		573ACD741B564E0C00FDB61D /* typevalidation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typevalidation.h; sourceTree = "<group>"; };
 		573ACD751B564FF300FDB61D /* llvmincludes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = llvmincludes.h; sourceTree = "<group>"; };
 		573ACD761B56506E00FDB61D /* llvmirgenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = llvmirgenerator.h; sourceTree = "<group>"; };
 		573ACD791B566F5200FDB61D /* nullgen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nullgen.h; sourceTree = "<group>"; };
@@ -353,7 +353,7 @@
 			isa = PBXGroup;
 			children = (
 				579EEDE41B517AAB00D0150A /* symboltable.h */,
-				573ACD741B564E0C00FDB61D /* typechecker.h */,
+				573ACD741B564E0C00FDB61D /* typevalidation.h */,
 				579EEDEA1B54BFBE00D0150A /* astcompiler.h */,
 			);
 			name = astcompilation;

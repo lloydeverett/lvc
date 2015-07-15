@@ -40,5 +40,4 @@ public:
     std::unique_ptr<ast::IType> parseType();
     boost::optional<BinopCode> tryParseBinopCode();
     ast::Module parseModule(std::string name);
-    static int getBinopCodePrecedence(BinopCode code);
 };

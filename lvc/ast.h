@@ -12,9 +12,16 @@
 #include <string>
 #include <iostream>
 #include <boost/optional.hpp>
+#include <typeinfo>
+#include <typeindex>
 #include "binopcode.h"
 
 class INodeVisitor;
+
+enum Constantness {
+    Constant = true,
+    NotConstant = false,
+};
 
 namespace ast {
     
@@ -38,8 +45,15 @@ namespace ast {
     ///////////////////////////////
     
     class IType : public INode {
+    private:
+        Constantness isConstantVal;
     protected:
-        IType() {};
+        IType(Constantness isConstantVal) : isConstantVal(isConstantVal) {};
+    public:
+        virtual std::type_index typeIndex() = 0;
+        bool isConstant() {
+            return isConstantVal;
+        }
     };
     
     class IDecl : public INode {
@@ -67,6 +81,9 @@ namespace ast {
             return o << "VoidType";
         }
         virtual void accept(INodeVisitor& visitor) override;
+        std::type_index typeIndex() override {
+            return typeid(*this);
+        }
     };
     
     struct IntegerType : public IType {
@@ -75,13 +92,16 @@ namespace ast {
             Signed,
             Unsigned,
         } isSigned;
-        IntegerType(int numBits, Signedness isSigned) :
-        numBits(numBits), isSigned(isSigned) {}
+        IntegerType(int numBits, Signedness isSigned, Constantness isConstant) :
+        numBits(numBits), isSigned(isSigned), IType(isConstant) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "IntegerType(" << numBits << ", " << (isSigned == Signed ? "Signed" : "Unsigned") << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
+        std::type_index typeIndex() override {
+            return typeid(*this);
+        }
     };
     
     struct BoolType : public IType {
@@ -89,6 +109,9 @@ namespace ast {
             return o << "BoolType";
         }
         virtual void accept(INodeVisitor& visitor) override;
+        std::type_index typeIndex() override {
+            return typeid(*this);
+        }
     };
     
     struct FloatingPointType : public IType {
@@ -97,11 +120,16 @@ namespace ast {
             VariationDouble,
         } variation;
         
-        FloatingPointType(Variation variation) : variation(variation) {}
+        FloatingPointType(Variation variation, Constantness isConstant) :
+        variation(variation), IType(isConstant) {}
+        
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "FloatingPointType(" << (variation == VariationFloat ? "Float" : "Double") << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
+        std::type_index typeIndex() override {
+            return typeid(*this);
+        }
     };
     
     struct NumberLiteralExp : public IExp {
@@ -243,14 +271,14 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct FunctionCallExp : public IExp {
+    struct CallExp : public IExp {
         std::string calleeIdentifier;
         std::vector<std::unique_ptr<IExp>> passedArguments;
-        FunctionCallExp(std::string calleeIdentifier, std::vector<std::unique_ptr<IExp>> passedArguments) :
+        CallExp(std::string calleeIdentifier, std::vector<std::unique_ptr<IExp>> passedArguments) :
         calleeIdentifier(calleeIdentifier), passedArguments(std::move(passedArguments)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            o << "FunctionCallExp(" << calleeIdentifier;
+            o << "CallExp(" << calleeIdentifier;
             if (!passedArguments.empty()) {
                 o << ", Arguments(";
                 for (const std::unique_ptr<IExp>& exp : passedArguments) {
@@ -267,13 +295,13 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct FunctionCalExplStmt : public IStmt {
-        FunctionCallExp functionCallExp;
-        FunctionCalExplStmt(FunctionCallExp functionCallExp) :
-        functionCallExp(std::move(functionCallExp)) {}
+    struct CallExpStmt : public IStmt {
+        CallExp callExp;
+        CallExpStmt(CallExp callExp) :
+        callExp(std::move(callExp)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "FunctionCallExpStmt(" << functionCallExp << ")";
+            return o << "CallExpStmt(" << callExp << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
     };

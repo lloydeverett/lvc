@@ -9,16 +9,14 @@
 #include <iostream>
 #include "testutil.h"
 #include "lexer.h"
-
-#include "semanticanalyzer.h"
-#warning TODO: remove
+#include "lexerexceptions.h"
 
 int main(int argc, const char * argv[]) {
     std::string filePath = getPathForVFile("verysimple.v");
     std::string fileStr = getFileContents(filePath.c_str());
     
     StringReader reader(fileStr);
-    CerrIssueReporter issueReporter(filePath);
+    OstreamIssueReporter issueReporter(filePath, std::cerr);
     Lexer lexer(reader, issueReporter);
     
     charcount indent = 0;

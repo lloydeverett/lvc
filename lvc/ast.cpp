@@ -47,7 +47,7 @@ void BinopExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void FunctionCallExp::accept(INodeVisitor& visitor) {
+void CallExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
@@ -55,7 +55,7 @@ void VariableExp::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void FunctionCalExplStmt::accept(INodeVisitor& visitor) {
+void CallExpStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 

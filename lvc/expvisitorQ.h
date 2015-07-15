@@ -7,21 +7,19 @@
 //
 
 #pragma once
-#include "inodevisitor.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include <cassert>
+#include "irgendecls.h"
+
+#include <vector>
 
 class ExpVisitor : public INodeVisitor {
 private:
     llvm::IRBuilder<>& builder;
     llvm::LLVMContext& context;
     llvm::Value* returnThis;
+    LLVMSemanticAnalyzer& semanticAnalyzer;
 public:
-    ExpVisitor(llvm::IRBuilder<>& builder) : builder(builder), context(builder.getContext()), returnThis(nullptr) {}
+    ExpVisitor(llvm::IRBuilder<>& builder, LLVMSemanticAnalyzer& semanticAnalyzer) :
+    builder(builder), context(builder.getContext()), semanticAnalyzer(semanticAnalyzer), returnThis(nullptr) {}
     llvm::Value* returnValue() {
         assert(returnThis != nullptr);
         return returnThis;
@@ -29,8 +27,14 @@ public:
     virtual void visit(ast::BinopExp& binOpExp) {
         
     }
-    virtual void visit(ast::FunctionCallExp& functionCallExp) {
-        
+    virtual void visit(ast::CallExp& callExp) {
+        for (std::unique_ptr<ast::IExp>& argExp : callExp.passedArguments) {
+            #warning TODO: implement
+            assert(false);
+        }
+        std::vector<SemanticAnalyzer<llvm::Value*>::ExpAnalysis*> expAnalyses;
+        auto analysis = semanticAnalyzer.analyzeCallExp(callExp, expAnalyses);
+        builder.CreateCall(<#llvm::Value *Callee#>, <#ArrayRef<llvm::Value *> Args#>)
     }
     virtual void visit(ast::NumberLiteralExp& numberLiteralExp) {
 #warning TODO: floats.

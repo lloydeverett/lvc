@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cassert>
 #include <boost/optional.hpp>
+#include "sourceposition.h"
 
 enum TokenKind {
     Newline,
@@ -17,6 +18,7 @@ enum TokenKind {
     OpenParenthesis,
     CloseParenthesis,
     Return,
+    Const,
     If,
     Else,
     Struct,
@@ -52,6 +54,8 @@ enum TokenKind {
     Exclamation,
     Comma,
     Extern,
+    PlusPlus,
+    MinusMinus,
     Eof,
 
     INVALID_TOKEN_KIND_VALUE,
@@ -64,6 +68,7 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "OpenParenthesis",
         "CloseParenthesis",
         "Return",
+        "Const",
         "If",
         "Else",
         "Struct",
@@ -99,6 +104,8 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "Exclamation",
         "Comma",
         "Extern",
+        "PlusPlus",
+        "MinusMinus",
         "Eof",
     };
 
@@ -124,9 +131,9 @@ public:
 
     void clean() {
         kind = INVALID_TOKEN_KIND_VALUE;
-        row = 99999;
-        startCol = 99999;
-        length = 99999;
+        row = 0;
+        startCol = 0;
+        length = 0;
         str = "";
     }
 

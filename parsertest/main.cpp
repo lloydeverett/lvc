@@ -9,15 +9,15 @@
 #include <iostream>
 #include "parser.h"
 #include "testutil.h"
-#include "lexerbuffer.h"
+#include "directtokeninputstream.h"
 
 int main(int argc, const char * argv[]) {
     std::string filePath = getPathForVFile("verysimple.v");
     std::string fileStr = getFileContents(filePath.c_str());
     
     StringReader s(fileStr);
-    CerrIssueReporter c(filePath);
-    LexerBuffer l(s, c);
+    OstreamIssueReporter c(filePath, std::cerr);
+    DirectTokenInputStream l(s, c);
     Parser parser(l, c);
     
     ast::Module m = parser.parseModule("eh");

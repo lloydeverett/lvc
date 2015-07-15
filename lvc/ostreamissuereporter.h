@@ -1,5 +1,5 @@
 //
-//  cerrerrorreporter.h
+//  ostreamerrorreporter.h
 //  lvc
 //
 //  Created by Lloyd Everett on 2015/06/02.
@@ -10,13 +10,14 @@
 #include <iostream>
 #include "iissuereporter.h"
 
-class CerrIssueReporter : public IIssueReporter {
+class OstreamIssueReporter : public IIssueReporter {
 private:
     std::string path;
+    std::ostream& ostream;
     bool hasErrorOccuredBool;
     
 public:
-    CerrIssueReporter(std::string path) : path(path), hasErrorOccuredBool(false) {}
+    OstreamIssueReporter(std::string path, std::ostream& ostream) : path(path), ostream(ostream), hasErrorOccuredBool(false) {}
     
     virtual void report(SourcePosition pos, std::string message, Subsystem subsystem) override {
         report(pos.row, pos.col, message, subsystem);
@@ -24,8 +25,8 @@ public:
     
     virtual void report(rownumber row, colnumber col, std::string message, Subsystem subsystem) override {
         hasErrorOccuredBool = true;
-        std::cerr << path << ":" << row << ":" << col << ": " << "error: " << message
-                   << " (" << (subsystem == SubsystemLexer ? "lex" : "parse") << " error)" << std::endl;
+        ostream << path << ":" << row << ":" << col << ": " << "error: " << message
+                   << " (" << (subsystem == SubsystemLexer ? "lex" : "parse") << " error)" << '\n';
     }
     
     virtual bool hasAnErrorOccured() override {

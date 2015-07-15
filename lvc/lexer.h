@@ -11,11 +11,11 @@
 #include "ireader.h"
 #include <stack>
 #include <queue>
+#include <boost/optional.hpp>
 
 class Lexer : public ILexer {
 private:
-    class QueuedDedent {
-    public:
+    struct QueuedDedent {
         const colnumber startCol;
         const charcount length;
         
@@ -33,6 +33,7 @@ private:
     bool tryToSkipComment();
     void skipCommentsAndNonIndentWhitespace();
     bool hasProducedEof;
+    boost::optional<Token> tryHandleNewline();
 public:
     Lexer(IReader& reader, IIssueReporter& issueReporter);
     virtual bool isFinished() override;

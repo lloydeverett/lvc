@@ -1,5 +1,5 @@
 //
-//  bufferedlexer.h
+//  directtokeninputstream.h
 //  lvc
 //
 //  Created by Lloyd Everett on 2015/06/05.
@@ -8,16 +8,15 @@
 
 #pragma once
 #include <queue>
-#include "lexer.h"
-#include "iissuereporter.h"
-#include "ilexerbuffer.h"
+#include "ilexer.h"
+#include "itokeninputstream.h"
 
-class LexerBuffer : public ILexerBuffer {
+class DirectTokenInputStream : public ITokenInputStream {
 private:
     Token next;
     Token nextNext;
-    unsigned int aheadBy; // aheadBy can be from 0 (next is not filled) to 2 (nextNext is filled)
-    Lexer lexer;
+    unsigned int aheadBy; // aheadBy can be from 0 (next is not filled) to 2 (next and nextNext are filled)
+    ILexer& lexer;
     
     Token popNext() {
         assert(aheadBy > 0);
@@ -27,7 +26,7 @@ private:
         return t;
     }
 public:
-    LexerBuffer(IReader& reader, IIssueReporter& issueReporter) : lexer(reader, issueReporter), aheadBy(0) {}
+    DirectTokenInputStream(ILexer& lexer) : lexer(lexer), aheadBy(0) {}
     
     Token readToken() override {
         if (aheadBy == 0) {

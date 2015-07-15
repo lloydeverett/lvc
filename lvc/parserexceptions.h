@@ -29,3 +29,4 @@ class ParserErrorExceptionExpectedCommaOrCloseParenthesis : public ParserErrorEx
 class ParserErrorExceptionUnknownStatementBeginning : public ParserErrorException {};
 class ParserErrorExceptionUnknownLineBeginningAtModuleLevel : public ParserErrorException {};
 class ParserErrorExceptionUnknownExpressionBeginning : public ParserErrorException {};
+class ParserErrorExceptionQualifierWithoutTypename : public ParserErrorException {};

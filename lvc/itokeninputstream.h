@@ -1,5 +1,5 @@
 //
-//  ilexerbuffer.h
+//  itokeninputstream.h
 //  lvc
 //
 //  Created by Lloyd Everett on 2015/07/05.
@@ -9,11 +9,11 @@
 #pragma once
 #include "token.h"
 
-class ILexerBuffer {
+class ITokenInputStream {
 public:
     virtual Token readToken() = 0;
     virtual Token peekNext() = 0;
     virtual Token peekNextNext() = 0;
     virtual bool isFinished() = 0;
-    virtual ~ILexerBuffer() {}
+    virtual ~ITokenInputStream() {}
 };

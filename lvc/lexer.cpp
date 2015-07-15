@@ -6,10 +6,9 @@
 //  Copyright (c) 2015 Lloyd Everett. All rights reserved.
 //
 
-#include "lexer.h"
 #include <cassert>
-
-#warning TODO: make lexer ignore empty lines
+#include "lexer.h"
+#include "lexerexceptions.h"
 
 bool isAlpha(char c) {
     return c >= 'A' && c <= 'z';
@@ -120,6 +119,7 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     t.setLength(str.length());
 
     if (str == "return") t.setKind(Return);
+    else if (str == "const") t.setKind(Const);
     else if (str == "if") t.setKind(If);
     else if (str == "else") t.setKind(Else);
     else if (str == "struct") t.setKind(Struct);
@@ -140,20 +140,46 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     return t;
 }
 
-Token Lexer::lexToken() {
+boost::optional<Token> Lexer::tryHandleNewline() {
+    Token t;
+    t.setStartCol(reader.getCol());
+    t.setRow(reader.getRow());
+    t.setKind(Newline);
+    if (reader.peekChar() == '\n') {
+        reader.readChar();
+        t.setLength(1);
+        return t;
+    }
+    else if (reader.peekChar() == '\r') {
+        reader.readChar();
+        if (reader.peekChar() == '\n') {
+            reader.readChar();
+            t.setLength(2);
+        }
+        else {
+            t.setLength(1);
+        }
+        return t;
+    }
+    else {
+        return boost::none;
+    }
+}
 
+Token Lexer::lexToken() {
     // Return a queued dedent if there are any.
-    // This should always get priority over other tokens
-    // (and thus the code is run first).
+    // This should always get priority over other tokens.
     if (queuedDedents.size() > 0) {
         QueuedDedent q = queuedDedents.front();
         queuedDedents.pop();
         return getTokenFromQueuedDedent(q);
     }
-
+    
+start_after_checking_queued_dedents:
+    
     bool wasAtStartOfRowBeforeConsumingWhitespace = reader.atStartOfRow();
     charcount whitespaceCount = reader.consumeWhitespace();
-
+    
     if (wasAtStartOfRowBeforeConsumingWhitespace) {
         if (whitespaceCount > indentStack.top()) {
             return makeIndentToken(whitespaceCount);
@@ -172,7 +198,18 @@ Token Lexer::lexToken() {
     }
     
     skipCommentsAndNonIndentWhitespace();
-
+    
+    boost::optional<Token> optNewlineToken(tryHandleNewline());
+    if (optNewlineToken) {
+        if (wasAtStartOfRowBeforeConsumingWhitespace) {
+            // We found a line with just an indent, meaning we skip it.
+            goto start_after_checking_queued_dedents;
+        }
+        else {
+            return *optNewlineToken;
+        }
+    }
+    
     if (reader.eof()) {
         if (indentStack.top() > 0) {
             bool success = addDedentsToQueueUntilColnumberIsReached(0);
@@ -197,7 +234,7 @@ Token Lexer::lexToken() {
             }
         }
     }
-
+    
     colnumber rowOfC = reader.getRow();
     colnumber colOfC = reader.getCol();
     char c = reader.readChar();
@@ -210,13 +247,29 @@ Token Lexer::lexToken() {
     switch (c) {
         case '(': t.setKind(OpenParenthesis); return t;
         case ')': t.setKind(CloseParenthesis); return t;
-        case '+': t.setKind(Plus); return t;
-        case '-': t.setKind(Minus); return t;
         case '*': t.setKind(Asterisk); return t;
         case '/': t.setKind(Slash); return t;
         case '.': t.setKind(Dot); return t;
         case ',': t.setKind(Comma); return t;
         case '%': t.setKind(Percent); return t;
+        case '+':
+            if (reader.peekChar() == '+') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(PlusPlus);
+            }
+            else
+                t.setKind(Plus);
+            return t;
+        case '-':
+            if (reader.peekChar() == '-') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(MinusMinus);
+            }
+            else
+                t.setKind(Minus);
+            return t;
         case '=':
             if (reader.peekChar() == '=') {
                 reader.readChar();
@@ -244,16 +297,6 @@ Token Lexer::lexToken() {
             else
                 t.setKind(LargerThan);
             return t;
-        case '\n':
-            t.setKind(Newline);
-            return t;
-        case '\r':
-            if (reader.peekChar() == '\n') {
-                reader.readChar();
-                t.setLength(2);
-            }
-            t.setKind(Newline);
-            return t;
         case '!':
             if (reader.peekChar() == '=') {
                 reader.readChar();
@@ -273,7 +316,7 @@ Token Lexer::lexToken() {
 
         return lexStrBegginningWithAlpha(rowOfC, colOfC, str);
     }
-
+    
     if (isDigit(c)) {
         std::string str;
         str += c;
@@ -289,7 +332,7 @@ Token Lexer::lexToken() {
         t.setStr(str);
         return t;
     }
-
+    
     issueReporter.report(reader.getSourcePosition(), "Did not expect character.", SubsystemLexer);
     throw LexerErrorExceptionUnknownCharacter();
 }

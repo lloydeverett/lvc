@@ -8,23 +8,26 @@
 
 #pragma once
 #include <map>
+#include <boost/optional.hpp>
 #include "ast.h"
 #include "ireader.h"
 #include "iissuereporter.h"
-#include "ilexerbuffer.h"
+#include "itokeninputstream.h"
 #include "token.h"
 #include "parserexceptions.h"
 
 class Parser {
 private:
     IIssueReporter& issueReporter;
-    ILexerBuffer& lexerBuffer;
+    ITokenInputStream& inputStream;
     Token currentToken;
     
     void readTokenIntoCurrent();
     void reportOnCurrentToken(const std::string& message);
+    std::unique_ptr<ast::IExp> parseBinopRhs(std::unique_ptr<ast::IExp> lhs, BinopCode afterLhsCode, int minPrecedence);
+    std::unique_ptr<ast::IExp> parsePrimaryExpression();
 public:
-    Parser(ILexerBuffer &lexerBuffer, IIssueReporter &issueReporter);
+    Parser(ITokenInputStream& inputStream, IIssueReporter& issueReporter);
     ast::FunctionDecl parseFunctionDecl();
     ast::Function parseFunction();
     ast::BlockStmt parseBlock();
@@ -33,10 +36,8 @@ public:
     std::unique_ptr<ast::IStmt> parseStatement();
     std::unique_ptr<ast::IExp> parseParenExpression();
     std::unique_ptr<ast::IExp> parseExpression();
-    std::unique_ptr<ast::IExp> parseBinopRhs(std::unique_ptr<ast::IExp> lhs, BinopCode afterLhsCode, int minPrecedence);
-    std::unique_ptr<ast::IExp> parsePrimaryExpression();
-    boost::optional<std::unique_ptr<ast::IType>> tryParseTypename();
-    std::unique_ptr<ast::IType> parseTypename();
+    boost::optional<std::unique_ptr<ast::IType>> tryParseType();
+    std::unique_ptr<ast::IType> parseType();
     boost::optional<BinopCode> tryParseBinopCode();
     ast::Module parseModule(std::string name);
     static int getBinopCodePrecedence(BinopCode code);

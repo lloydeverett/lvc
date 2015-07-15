@@ -8,17 +8,18 @@
 
 #include "parser.h"
 #include "lexerexceptions.h"
+#include "itokeninputstream.h"
 #include <memory>
 
 using namespace ast;
 
-Parser::Parser(ILexerBuffer &lexerBuffer, IIssueReporter &issueReporter) :
-issueReporter(issueReporter), lexerBuffer(lexerBuffer) {
+Parser::Parser(ITokenInputStream& inputStream, IIssueReporter& issueReporter) :
+issueReporter(issueReporter), inputStream(inputStream) {
     
 }
 
 void Parser::readTokenIntoCurrent() {
-    currentToken = lexerBuffer.readToken();
+    currentToken = inputStream.readToken();
 }
 
 void Parser::reportOnCurrentToken(const std::string& message) {
@@ -40,11 +41,11 @@ Module Parser::parseModule(std::string name) {
                 continue;
             }
             
-            if (lexerBuffer.peekNextNext().is(OpenParenthesis)) {
+            if (inputStream.peekNextNext().is(OpenParenthesis)) {
                 functions.push_back(parseFunction());
             }
             else {
-                boost::optional<std::unique_ptr<IType>> optType(tryParseTypename());
+                boost::optional<std::unique_ptr<IType>> optType(tryParseType());
                 if (!optType) {
                     reportOnCurrentToken("Did not expect token at beginning of line when parsing at module level.");
                     throw ParserErrorExceptionUnknownLineBeginningAtModuleLevel();
@@ -72,7 +73,7 @@ Function Parser::parseFunction() {
 }
 
 FunctionDecl Parser::parseFunctionDecl() {
-    std::unique_ptr<IType> returnType(parseTypename());
+    std::unique_ptr<IType> returnType(parseType());
     std::string identifier(parseIdentifier());
 
     if (currentToken.isNot(OpenParenthesis)) {
@@ -84,7 +85,7 @@ FunctionDecl Parser::parseFunctionDecl() {
     std::vector<ArgumentDecl> arguments;
     if (currentToken.isNot(CloseParenthesis)) {
         while (true) {
-            std::unique_ptr<IType> argType(parseTypename());
+            std::unique_ptr<IType> argType(parseType());
             std::string argIdentifier(parseIdentifier());
 
             boost::optional<std::unique_ptr<IExp>> optDefaultValue = boost::none;
@@ -111,40 +112,57 @@ FunctionDecl Parser::parseFunctionDecl() {
     return FunctionDecl(std::move(returnType), identifier, std::move(arguments));
 }
 
-boost::optional<std::unique_ptr<IType>> Parser::tryParseTypename() {
+boost::optional<std::unique_ptr<IType>> Parser::tryParseType() {
+    Constantness isConst;
+    if (currentToken.is(Const)) {
+        isConst = Constant;
+        readTokenIntoCurrent();
+    }
+    else {
+        isConst = NotConstant;
+    }
+    
     boost::optional<std::unique_ptr<IType>> optRet;
     switch (currentToken.getKind()) {
         case Void:
-            optRet = std::make_unique<VoidType>(); break;
+            optRet = std::make_unique<VoidType>(isConst); break;
         case Char:
-            optRet = std::make_unique<IntegerType>(8, ast::IntegerType::Signed); break;
+            optRet = std::make_unique<IntegerType>(8, ast::IntegerType::Signed, isConst); break;
         case Short:
-            optRet = std::make_unique<IntegerType>(16, ast::IntegerType::Signed); break;
+            optRet = std::make_unique<IntegerType>(16, ast::IntegerType::Signed, isConst); break;
         case Int:
-            optRet = std::make_unique<IntegerType>(32, ast::IntegerType::Signed); break;
+            optRet = std::make_unique<IntegerType>(32, ast::IntegerType::Signed, isConst); break;
         case Long:
-            optRet = std::make_unique<IntegerType>(64, ast::IntegerType::Signed); break;
+            optRet = std::make_unique<IntegerType>(64, ast::IntegerType::Signed, isConst); break;
         case Uchar:
-            optRet = std::make_unique<IntegerType>(8, ast::IntegerType::Unsigned); break;
+            optRet = std::make_unique<IntegerType>(8, ast::IntegerType::Unsigned, isConst); break;
         case Ushort:
-            optRet = std::make_unique<IntegerType>(16, ast::IntegerType::Unsigned); break;
+            optRet = std::make_unique<IntegerType>(16, ast::IntegerType::Unsigned, isConst); break;
         case Uint:
-            optRet = std::make_unique<IntegerType>(32, ast::IntegerType::Unsigned); break;
+            optRet = std::make_unique<IntegerType>(32, ast::IntegerType::Unsigned, isConst); break;
         case Ulong:
-            optRet = std::make_unique<IntegerType>(64, ast::IntegerType::Unsigned); break;
+            optRet = std::make_unique<IntegerType>(64, ast::IntegerType::Unsigned, isConst); break;
         case Float:
-            optRet = std::make_unique<FloatingPointType>(ast::FloatingPointType::VariationFloat); break;
+            optRet = std::make_unique<FloatingPointType>(ast::FloatingPointType::VariationFloat, isConst);
+            break;
         case Double:
-            optRet = std::make_unique<FloatingPointType>(ast::FloatingPointType::VariationDouble); break;
+            optRet = std::make_unique<FloatingPointType>(ast::FloatingPointType::VariationDouble, isConst);
+            break;
         default:
-            return boost::none;
+            if (isConst) {
+                reportOnCurrentToken("Const specifier is not followed by a typename.");
+                throw ParserErrorExceptionQualifierWithoutTypename();
+            }
+            else {
+                return boost::none;
+            }
     }
     readTokenIntoCurrent();
     return std::move(optRet);
 }
 
-std::unique_ptr<IType> Parser::parseTypename() {
-    boost::optional<std::unique_ptr<IType>> opt = tryParseTypename();
+std::unique_ptr<IType> Parser::parseType() {
+    boost::optional<std::unique_ptr<IType>> opt = tryParseType();
     if (!opt) {
         reportOnCurrentToken("Expected typename.");
         throw ParserErrorExceptionExpectedType();
@@ -193,7 +211,7 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
         }
         return std::make_unique<IfStmt>(std::move(condition), std::move(thenBlock), std::move(elseBlock));
     }
-    // Single line
+    // Single line (we read the newline afterwards in this case).
     std::unique_ptr<IStmt> stmt;
     if (currentToken.is(Return)) {
         readTokenIntoCurrent();
@@ -201,7 +219,7 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
         stmt = std::make_unique<ReturnStmt>(std::move(exp));
     }
     else {
-        boost::optional<std::unique_ptr<IType>> optType = tryParseTypename();
+        boost::optional<std::unique_ptr<IType>> optType = tryParseType();
         if (optType) {
             VariableDeclStmt vds(parseVariableDeclStmt(std::move(*optType)));
             stmt = std::make_unique<VariableDeclStmt>(std::move(vds));
@@ -211,7 +229,6 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
             throw ParserErrorExceptionUnknownStatementBeginning();
         }
     }
-    
     if (currentToken.isNot(Newline)) {
         reportOnCurrentToken("Expected newline after statement.");
         throw ParserErrorExceptionExpectedNewline();
@@ -309,7 +326,7 @@ std::unique_ptr<IExp> Parser::parseBinopRhs(std::unique_ptr<IExp> lhs, BinopCode
 // This includes parenthesis expressions.
 std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
     if (currentToken.is(Identifier)) {
-        if (lexerBuffer.peekNext().is(OpenParenthesis)) { // function call
+        if (inputStream.peekNext().is(OpenParenthesis)) { // function call
             std::string identifier = parseIdentifier();
             readTokenIntoCurrent(); // read token after open parenthesis into currentToken
             std::vector<std::unique_ptr<IExp>> argExps;
@@ -329,7 +346,7 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
             }
             readTokenIntoCurrent(); // read token after close parenthesis into currentToken
             
-            return std::make_unique<FunctionCallExp>(identifier, std::move(argExps));
+            return std::make_unique<CallExp>(identifier, std::move(argExps));
         }
         else { // variable expression
             return std::make_unique<VariableExp>(parseIdentifier());
@@ -366,10 +383,10 @@ std::string Parser::parseIdentifier() {
 boost::optional<BinopCode> Parser::tryParseBinopCode() {
     BinopCode code;
     switch (currentToken.getKind()) {
-        case Plus: code = BinopCodeAdd; break;
-        case Minus: code = BinopCodeSubtract; break;
+        case Plus:     code = BinopCodeAdd; break;
+        case Minus:    code = BinopCodeSubtract; break;
         case Asterisk: code = BinopCodeMultiply; break;
-        case Slash: code = BinopCodeDivide; break;
+        case Slash:    code = BinopCodeDivide; break;
         default:
             return boost::none;
     }

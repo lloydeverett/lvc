@@ -25,8 +25,8 @@ private:
 public:
     StmtVisitor(llvm::IRBuilder<>& builder, ExpVisitor& expVisitor) : builder(builder), expVisitor(expVisitor) {}
     
-    virtual void visit(ast::FunctionCalExplStmt& functionCallExpStmt) {
-        functionCallExpStmt.functionCallExp.accept(expVisitor);
+    virtual void visit(ast::CallExpStmt& callExpStmt) {
+        callExpStmt.callExp.accept(expVisitor);
     }
     
     virtual void visit(ast::ReturnStmt& returnStmt) {

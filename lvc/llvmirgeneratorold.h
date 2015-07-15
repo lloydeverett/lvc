@@ -1,5 +1,5 @@
 //
-//  irgenerator.h
+//  llvmirgenerator.h
 //  lvc
 //
 //  Created by Lloyd Everett on 2015/06/30.
@@ -17,7 +17,7 @@
 #include "stmtvisitor.h"
 #include <cassert>
 
-class IRGenerator {
+class LLVMIRGenerator {
 private:
     // The order of these members is important.
     llvm::Module* targetModule;
@@ -45,6 +45,7 @@ public:
         llvm::Type* returnType = typeVisitor.returnValue();
         
         std::vector<llvm::Type*> argTypes;
+#warning TODO: refactor below maybe
         for (const auto& arg : function.decl.arguments) {
             arg.variableDecl.type->accept(typeVisitor);
             argTypes.push_back(typeVisitor.returnValue());

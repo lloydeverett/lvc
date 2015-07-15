@@ -13,7 +13,7 @@
 
 int main(int argc, const char * argv[]) {
     std::string path = getPathForVFile("verysimple.v");
-    CerrIssueReporter cr(path);
+    OstreamIssueReporter cr(path, std::ostream);
     std::string contents = getFileContents(path.c_str());
     StringReader s(contents);
     Parser p(s, cr);

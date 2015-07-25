@@ -119,7 +119,10 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     t.setLength(str.length());
 
     if (str == "return") t.setKind(Return);
+    else if (str == "true") t.setKind(True);
+    else if (str == "false") t.setKind(False);
     else if (str == "const") t.setKind(Const);
+    else if (str == "for") t.setKind(For);
     else if (str == "if") t.setKind(If);
     else if (str == "else") t.setKind(Else);
     else if (str == "struct") t.setKind(Struct);
@@ -132,6 +135,9 @@ Token lexStrBegginningWithAlpha(rownumber row, colnumber startCol, const std::st
     else if (str == "ushort") t.setKind(Ushort);
     else if (str == "uint") t.setKind(Uint);
     else if (str == "ulong") t.setKind(Ulong);
+    else if (str == "float") t.setKind(Float);
+    else if (str == "double") t.setKind(Double);
+    else if (str == "bool") t.setKind(Bool);
     else if (str == "extern") t.setKind(Extern);
     else {
         t.setKind(Identifier);
@@ -320,14 +326,22 @@ start_after_checking_queued_dedents:
     if (isDigit(c)) {
         std::string str;
         str += c;
-        while (isDigit(reader.peekChar())) {
+        unsigned int numDecimalPoints = 0;
+        while (isDigit(reader.peekChar()) || reader.peekChar() == '.') {
+            if (reader.peekChar() == '.')
+                numDecimalPoints++;
             str += reader.readChar();
+        }
+        if (numDecimalPoints > 1) {
+            issueReporter.report(reader.getSourcePosition(), "Multiple decimal points in number literal.", SubsystemLexer);
+            throw LexerErrorExceptionInvalidNumberLiteral();
         }
         if (isAlpha(reader.peekChar())) {
             issueReporter.report(reader.getSourcePosition(), "Did not expect alphabet character in number literal.", SubsystemLexer);
             throw LexerErrorExceptionInvalidNumberLiteral();
         }
-        t.setKind(IntegerLiteral);
+        t.setKind(NumberLiteral);
+        t.setNumberLiteralHasDecimalPoint(numDecimalPoints == 1);
         t.setLength(str.length());
         t.setStr(str);
         return t;

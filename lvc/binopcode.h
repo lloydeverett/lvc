@@ -12,22 +12,22 @@
 #include "token.h"
 
 enum BinopCode {
-    START_SAMETYPE_OPS,
+    START_CONST_OPERAND_TYPE_BINOPS,
     BinopCodeAdd,
     BinopCodeSubtract,
     BinopCodeMultiply,
     BinopCodeDivide,
     BinopCodeModulo,
-    END_SAMETYPE_OPS,
+    END_CONST_OPERAND_TYPE_BINOPS,
     
-    START_BOOL_OPS,
+    START_CONST_BOOL_BINOPS,
     BinopCodeEquals, // used for ==, not =
     BinopCodeNotEquals,
     BinopCodeLargerThan,
     BinopCodeSmallerThan,
     BinopCodeLargerThanEquals,
     BinopCodeSmallerThanEquals,
-    END_BOOL_OPS,
+    END_CONST_BOOL_BINOPS,
 };
 
 inline boost::optional<BinopCode> tryGetBinopCodeFromToken(const Token& token) {
@@ -66,21 +66,21 @@ inline int getBinopCodePrecedence(BinopCode c) {
 
 inline const char* debugStringForBinop(BinopCode c) {
     static const char* vals[] = {
-        "START_SAMETYPE_OPS",
+        "START_CONST_OPERAND_TYPE_BINOPS",
         "BinopCodeAdd",
         "BinopCodeSubtract",
         "BinopCodeMultiply",
         "BinopCodeDivide",
-        "END_SAMETYPE_OPS",
+        "END_CONST_OPERAND_TYPE_BINOPS",
         
-        "START_BOOL_OPS",
+        "START_CONST_BOOL_BINOPS",
         "BinopCodeEquals",
         "BinopCodeNotEquals",
         "BinopCodeLargerThan",
         "BinopCodeSmallerThan",
         "BinopCodeLargerThanEquals",
         "BinopCodeSmallerThanEquals",
-        "END_BOOL_OPS",
+        "END_CONST_BOOL_BINOPS",
     };
     
     int numVals = sizeof(vals) / sizeof(vals[0]);
@@ -88,10 +88,10 @@ inline const char* debugStringForBinop(BinopCode c) {
     return vals[c];
 }
 
-inline bool doesBinopEvaluateToOperandType(BinopCode c) {
-    return (c > START_SAMETYPE_OPS && c < END_SAMETYPE_OPS);
+inline bool doesBinopEvaluateToConstOperandType(BinopCode c) {
+    return (c > START_CONST_OPERAND_TYPE_BINOPS && c < END_CONST_OPERAND_TYPE_BINOPS);
 }
 
-inline bool doesBinopEvaluateToBoolean(BinopCode c) {
-    return (c > START_BOOL_OPS && c < END_BOOL_OPS);
+inline bool doesBinopEvaluateToConstBoolean(BinopCode c) {
+    return (c > START_CONST_BOOL_BINOPS && c < END_CONST_BOOL_BINOPS);
 }

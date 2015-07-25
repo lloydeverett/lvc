@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../../../../Desktop/llvmirgenerator.h">
+   </FileRef>
+   <FileRef
       location = "self:lvc.xcodeproj">
    </FileRef>
 </Workspace>

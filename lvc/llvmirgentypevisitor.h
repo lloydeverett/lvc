@@ -15,24 +15,20 @@ class LLVMIRGenTypeVisitor : public INodeVisitor {
 private:
     LLVMIRGenConfig* const config;
     llvm::Type* returnThis;
-    
-public:
-    LLVMIRGenTypeVisitor(LLVMIRGenConfig* const config) : config(config), returnThis(nullptr) {}
     llvm::Type* returnValue() {
         assert(returnThis != nullptr);
         return returnThis;
     }
-    virtual void visit(ast::VoidType &v) {
+public:
+    LLVMIRGenTypeVisitor(LLVMIRGenConfig* const config) : config(config), returnThis(nullptr) {}
+    virtual void visit(ast::VoidType& v) {
         returnThis = llvm::Type::getVoidTy(config->context());
     }
     virtual void visit(ast::IntegerType& integerType) {
-        // We ignore signedness for now even though it forms part of the type information:
-        // the LLVM type system only needs this information when we do
-        // certain operations e.g. divide.
-        returnThis = llvm::Type::getIntNTy(config->context(), integerType.numBits);
+        returnThis = getLLVMIntegerType(integerType);
     }
     virtual void visit(ast::BoolType& boolType) {
-        returnThis = llvm::Type::getIntNTy(config->context(), config->numBitsUsedByBooleans);
+        returnThis = llvm::Type::getIntNTy(config->context(), 1);
     }
     virtual void visit(ast::FloatingPointType& floatingPointType) {
         if (floatingPointType.variation == ast::FloatingPointType::VariationFloat)
@@ -41,5 +37,13 @@ public:
             returnThis = llvm::Type::getDoubleTy(config->context());
         else
             assert(false);
+    }
+    
+    llvm::IntegerType* getLLVMIntegerType(ast::IntegerType& integerType) {
+        return llvm::Type::getIntNTy(config->context(), integerType.numBits);
+    }
+    llvm::Type* getLLVMType(ast::IType& t) {
+        t.accept(*this);
+        return returnValue();
     }
 };

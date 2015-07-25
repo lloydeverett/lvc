@@ -32,6 +32,7 @@ public:
     ast::Function parseFunction();
     ast::BlockStmt parseBlock();
     ast::VariableDeclStmt parseVariableDeclStmt(std::unique_ptr<ast::IType> type);
+    ast::CallExp parseCall();
     std::string parseIdentifier();
     std::unique_ptr<ast::IStmt> parseStatement();
     std::unique_ptr<ast::IExp> parseParenExpression();

@@ -10,9 +10,6 @@
 #include "llvmincludes.h"
 
 struct LLVMIRGenConfig {
-    #warning TODO: use preserveNames
-    int numBitsUsedByBooleans;
-    bool preserveNames;
     llvm::Module* targetModule;
     llvm::LLVMContext& context() {
         return targetModule->getContext();

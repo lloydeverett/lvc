@@ -19,13 +19,15 @@ enum TokenKind {
     CloseParenthesis,
     Return,
     Const,
+    True,
+    False,
+    For,
     If,
     Else,
     Struct,
     Indent,
     Dedent,
-    IntegerLiteral,
-    RealLiteral,
+    NumberLiteral,
     Plus,
     Minus,
     Asterisk,
@@ -69,13 +71,15 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "CloseParenthesis",
         "Return",
         "Const",
+        "True",
+        "False",
+        "For",
         "If",
         "Else",
         "Struct",
         "Indent",
         "Dedent",
-        "IntegerLiteral",
-        "RealLiteral",
+        "NumberLiteral",
         "Plus",
         "Minus",
         "Asterisk",
@@ -123,8 +127,10 @@ private:
 
     // Str contains the contents of a literal (whether it be a number literal or a string literal), OR,
     // if the token is an identifier, it contains the identifer.
-    // Escape codes are not saved into str. They are handled by the lexer.
+    // Escape codes are not saved into str--they're handled by the lexer.
     std::string str;
+    
+    bool numberLiteralHasDecimalPoint; // filled if kind is NumberLiteral
 
 public:
     Token() { clean(); }
@@ -135,6 +141,7 @@ public:
         startCol = 0;
         length = 0;
         str = "";
+        numberLiteralHasDecimalPoint = false;
     }
 
     virtual std::ostream& dump(std::ostream& o) const {
@@ -143,6 +150,9 @@ public:
             o << " str: " << getStr();
         return o;
     }
+    
+    void setNumberLiteralHasDecimalPoint(bool numberLiteralHasDecimalPoint) { this->numberLiteralHasDecimalPoint = numberLiteralHasDecimalPoint; }
+    bool getNumberLiteralHasDecimalPoint() { return this->numberLiteralHasDecimalPoint; }
 
     bool is(TokenKind kind) const { return this->kind == kind; }
     bool isNot(TokenKind kind) const { return this->kind != kind; }

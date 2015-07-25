@@ -60,7 +60,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/lloydeverett/School/lvc3/lvc/lvc/main.v"
+            argument = "/Users/lloydeverett/School/lvc3/lvc/vfiles/verysimple.v"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

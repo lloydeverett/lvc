@@ -18,6 +18,9 @@
 
 class INodeVisitor;
 
+#warning TODO: I'm starting to think serializing this to YAML or something would be better than this printing mechanism. \
+                        (and maybe we can generate the serialization code with a python script or something?)
+
 enum Constantness {
     Constant = true,
     NotConstant = false,
@@ -27,16 +30,10 @@ namespace ast {
     
     class INode {
     protected:
-        // The protected constructor prevents this class from being constructed
-        // (it should only be used as a base class for a derived class).
         INode() {}
-        
     public:
         virtual std::ostream& dump(std::ostream& o) const = 0;
         virtual void accept(INodeVisitor& visitor) = 0;
-        
-        // Making the virtual destructor public allows the derived classes
-        // to be destructed polymorphically (i.e. through their base class).
         virtual ~INode() {}
     };
     
@@ -49,11 +46,15 @@ namespace ast {
         Constantness constantness;
     protected:
         IType(Constantness constantness) : constantness(constantness) {};
-    public:
-        virtual std::type_index typeIndex() = 0;
-        bool isConstant() {
-            return constantness;
+        static bool BaseIsEqual(const IType* a, const IType* b) {
+            return a->isConstant() == b->isConstant();
         }
+    public:
+        bool isConstant() const { return constantness == Constant; }
+        void setConstant(Constantness constantness) { this->constantness = constantness; }
+        void setConstant(bool isConstant) { this->constantness = isConstant ? Constant : NotConstant; }
+        virtual bool isEqual(const IType& type) const = 0;
+        virtual std::unique_ptr<IType> clone() const = 0;
     };
     
     class IDecl : public INode {
@@ -61,7 +62,7 @@ namespace ast {
         IDecl() {};
     public:
         virtual const std::string& getIdentifier() const = 0;
-        virtual const IType& getType() const = 0;
+        virtual IType& getType() = 0;
     };
     
     class IStmt : public INode {
@@ -82,8 +83,11 @@ namespace ast {
             return o << "VoidType";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        std::type_index typeIndex() override {
-            return typeid(*this);
+        virtual bool isEqual(const IType& type) const override {
+            return BaseIsEqual(this, &type) && dynamic_cast<const VoidType*>(&type) != nullptr;
+        }
+        virtual std::unique_ptr<IType> clone() const override {
+            return std::make_unique<VoidType>(*this);
         }
     };
     
@@ -100,8 +104,16 @@ namespace ast {
             return o << "IntegerType(" << numBits << ", " << (isSigned == Signed ? "Signed" : "Unsigned") << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        std::type_index typeIndex() override {
-            return typeid(*this);
+        virtual bool isEqual(const IType& type) const override {
+            if (!BaseIsEqual(this, &type)) return false;
+            const IntegerType* casted = dynamic_cast<const IntegerType*>(&type);
+            if (casted)
+                return numBits == casted->numBits && isSigned == casted->isSigned;
+            else
+                return false;
+        }
+        virtual std::unique_ptr<IType> clone() const override {
+            return std::make_unique<IntegerType>(*this);
         }
     };
     
@@ -111,8 +123,11 @@ namespace ast {
             return o << "BoolType";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        std::type_index typeIndex() override {
-            return typeid(*this);
+        virtual bool isEqual(const IType& type) const override {
+            return BaseIsEqual(this, &type) && dynamic_cast<const BoolType*>(&type) != nullptr;
+        }
+        virtual std::unique_ptr<IType> clone() const override {
+            return std::make_unique<BoolType>(*this);
         }
     };
     
@@ -129,18 +144,27 @@ namespace ast {
             return o << "FloatingPointType(" << (variation == VariationFloat ? "Float" : "Double") << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        std::type_index typeIndex() override {
-            return typeid(*this);
+        virtual bool isEqual(const IType& type) const override {
+            if (!BaseIsEqual(this, &type)) return false;
+            const FloatingPointType* casted = dynamic_cast<const FloatingPointType*>(&type);
+            if (casted)
+                return variation == casted->variation;
+            else
+                return false;
+        }
+        virtual std::unique_ptr<IType> clone() const override {
+            return std::make_unique<FloatingPointType>(*this);
         }
     };
     
     struct NumberLiteralExp : public IExp {
         std::string value;
-        NumberLiteralExp(std::string value) :
-        value(value) {}
+        bool hasDecimalPoint;
+        NumberLiteralExp(std::string value, bool hasDecimalPoint) :
+        value(value), hasDecimalPoint(hasDecimalPoint) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "NumberLiteral(" << value << ")";
+            return o << "NumberLiteral(" << value << ", " << (hasDecimalPoint ? "DecimalPoint" : "NoDecimalPoint") << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
     };
@@ -159,7 +183,7 @@ namespace ast {
         virtual const std::string& getIdentifier() const override {
             return identifier;
         }
-        virtual const IType& getType() const override {
+        virtual IType& getType() override {
             return *type;
         }
     };
@@ -192,7 +216,7 @@ namespace ast {
         virtual const std::string& getIdentifier() const override {
             return variableDecl.identifier;
         }
-        virtual const IType& getType() const override {
+        virtual IType& getType() override {
             return variableDecl.getType();
         }
     };
@@ -224,7 +248,7 @@ namespace ast {
         virtual const std::string& getIdentifier() const override {
             return identifier;
         }
-        virtual const IType& getType() const override {
+        virtual IType& getType() override {
             return *returnType;
         }
     };
@@ -344,6 +368,31 @@ namespace ast {
             return o;
         }
         virtual void accept(INodeVisitor& visitor) override;
+    };
+    
+    struct VarOpModStmt : public IStmt {
+        std::unique_ptr<ast::VariableExp> lvalue;
+        std::unique_ptr<ast::IExp> rvalue;
+        
+    };
+    
+    struct VarAssignStmt : public IStmt {
+        std::vector<ast::VariableExp> lvalues;
+        std::unique_ptr<ast::IExp> rvalue;
+        VarAssignStmt(std::vector<ast::VariableExp> lvalues, std::unique_ptr<ast::IExp> rvalue) :
+        lvalues(std::move(lvalues)), rvalue(std::move(rvalue)) {}
+    };
+    
+    struct VarIncrementStmt : public IStmt {
+        ast::VariableExp exp;
+        VarIncrementStmt(ast::VariableExp exp) :
+        exp(std::move(exp)) {}
+    };
+    
+    struct VarDecrementStmt : public IStmt {
+        ast::VariableExp exp;
+        VarDecrementStmt(ast::VariableExp exp) :
+        exp(std::move(exp)) {}
     };
     
     struct Function : public INode {

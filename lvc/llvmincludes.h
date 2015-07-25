@@ -7,6 +7,7 @@
 //
 
 #pragma once
+#include "llvm/IR/GlobalValue.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/IRBuilder.h"

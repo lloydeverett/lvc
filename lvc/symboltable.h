@@ -16,67 +16,52 @@
 #include "symboltableexceptions.h"
 #include "ast.h"
 
-struct VariableSymbolBase {
-    ast::VariableDecl* declPtr;
-    const std::string& getIdentifier() {
-        return declPtr->getIdentifier();
-    }
-};
-
-struct FunctionSymbolBase {
-    ast::FunctionDecl* declPtr;
-    const std::string& getIdentifier() {
-        return declPtr->getIdentifier();
-    }
-};
-
-template <typename VariableSymbol, typename FunctionSymbol>
 class SymbolTable {
 private:
     unsigned int currentVarScope;
     struct VarSymbolsStackElem {
         unsigned int scope;
-        VariableSymbol symbol;
+        ast::VariableDecl* declPtr;
     };
     std::unordered_map<std::string, std::stack<VarSymbolsStackElem>> varSymbols;
-    std::unordered_map<std::string, FunctionSymbol> fnSymbols;
+    std::unordered_map<std::string, ast::FunctionDecl*> fnSymbols;
     
 public:
     SymbolTable() : currentVarScope(0) {}
     
-    void openVarScope() {
+    void openVariableScope() {
         currentVarScope++;
     }
-    void closeVarScope() {
+    void closeVariableScope() {
         assert(currentVarScope > 0);
         currentVarScope--;
     }
-    void registerVar(VariableSymbol v) {
-        auto& stack = varSymbols[v.getIdentifier()];
+    void registerVariable(ast::VariableDecl* v) {
+        auto& stack = varSymbols[v->identifier];
         assert(stack.empty() || stack.top().scope <= currentVarScope);
-        if (stack.top().scope == currentVarScope) {
+        if (!stack.empty() && stack.top().scope == currentVarScope) {
             throw SymbolTableExceptionVariableAlreadyRegisteredInScope();
         }
         stack.push(VarSymbolsStackElem{currentVarScope, v});
     }
-    void registerFn(FunctionSymbol fn) {
-        auto pair = fnSymbols.insert(std::pair<const std::string, FunctionSymbol>(fn.getIdentifier(), fn));
+    void registerFunction(ast::FunctionDecl* f) {
+        auto pair = fnSymbols.insert(std::unordered_map<std::string, ast::FunctionDecl*>::value_type(f->identifier, f));
         if (!pair.second) {
             throw SymbolTableExceptionFunctionAlreadyRegistered();
         }
     }
-    VariableSymbol lookupVar(const std::string& identifier) {
+    ast::VariableDecl* lookupVariable(const std::string& identifier) {
         auto iterator = varSymbols.find(identifier);
         if (iterator == varSymbols.end()) {
             throw SymbolTableExceptionVariableNotFoundUponLookup();
         }
         auto& stack = iterator->second;
         if (stack.empty()) {
-            throw SymbolTableExceptionVariableNotFoundUponLookup();
+            throw SymbolTableExceptionFunctionNotFoundUponLookup();
         }
-        return stack.top();
+        return stack.top().declPtr;
     }
-    FunctionSymbol lookupFn(const std::string& identifier) {
+    ast::FunctionDecl* lookupFunction(const std::string& identifier) {
         auto iterator = fnSymbols.find(identifier);
         if (iterator == fnSymbols.end()) {
             throw SymbolTableExceptionFunctionNotFoundUponLookup();

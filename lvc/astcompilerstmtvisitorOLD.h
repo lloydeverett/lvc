@@ -73,8 +73,8 @@ public:
         }
     }
     virtual void visit(ast::VariableDeclStmt& variableDeclStmt) {
-        if (variableDeclStmt.optInitialValue) {
-            expVisitor.performVisit(*variableDeclStmt.optInitialValue, variableDeclStmt.decl.type.get());
+        if (variableDeclStmt.optInit) {
+            expVisitor.performVisit(*variableDeclStmt.optInit, variableDeclStmt.decl.type.get());
             symbolTable.registerDecl(&variableDeclStmt.decl, generator.genLocalWithInit(variableDeclStmt.decl, expVisitor.val()));
         }
         else {

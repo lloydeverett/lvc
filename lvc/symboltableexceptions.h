@@ -8,7 +8,11 @@
 
 #pragma once
 
-class SymbolTableException : public std::exception {};
+class SymbolTableException : public std::exception {
+protected:
+    SymbolTableException() {}
+};
+
 class SymbolTableExceptionVariableAlreadyRegisteredInScope : public SymbolTableException {};
 class SymbolTableExceptionFunctionAlreadyRegistered : public  SymbolTableException {};
 class SymbolTableExceptionVariableNotFoundUponLookup : public SymbolTableException {};

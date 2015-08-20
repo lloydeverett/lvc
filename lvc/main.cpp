@@ -2,9 +2,11 @@
 //  main.cpp
 //  lvc
 //
-//  Created by Lloyd Everett on 2015/05/16.
+//  Created by Lloyd Everett on 2015/07/26.
 //  Copyright (c) 2015 Lloyd Everett. All rights reserved.
 //
+
+#warning TODO: USE TOOL TO FIX INCLUDES
 
 #include <iostream>
 #include <stdexcept>
@@ -12,79 +14,86 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/exception/all.hpp>
 #include <boost/exception/diagnostic_information.hpp>
-#include "stringreader.h"
-#include "lexer.h"
 #include "getfilecontents.h"
 #include "ostreamissuereporter.h"
+#include "stringreader.h"
+#include "lexer.h"
 #include "directtokeninputstream.h"
 #include "parser.h"
-#include "astcompiler.h"
+#include "ast.h"
+#include "llvmirgenconfig.h"
+#include "compiler.h"
 #include "llvmirgenerator.h"
-#include "astcompilationconfig.h"
+#include "semanticanalyzer.h"
 
-#warning TODO: make all exceptions have .what()
-#warning TODO: https://caesr.uwaterloo.ca/misc/boost-llvm-clang.html
+namespace fs = boost::filesystem;
 
-int main(int argc, const char * argv[]) {
-    boost::filesystem::path path;
-    
-    if (argc > 1) {
-        path = boost::filesystem::path(argv[1]);
-    }
-    else {
-        std::cout << "No input file specified." << '\n';
-        std::cout << "Trying to compile main.v in working directory..." << '\n' << '\n';
-        path = boost::filesystem::path("main.v");
-    }
-    
+bool compile(fs::path path) {
+    std::string sourceStr;
+    std::string canonicalPathStr;
+    std::string filenameStr;
     try {
-        std::cout << boost::filesystem::canonical(path) << std::endl;
+        canonicalPathStr = fs::canonical(path).string();
+        std::cout << canonicalPathStr << '\n';
+        sourceStr = getFileContents(path.native().c_str());
+        filenameStr = path.filename().string();
     }
     catch (std::exception& e) {
-        std::cerr << e.what();
-        return EXIT_FAILURE;
+        std::cerr << "error: " << e.what() << '\n';
+        return false;
+    }
+    catch (int n) {
+        std::cerr << "error: " << strerror(n) << '\n';
+        return false;
     }
     
-#warning todo: test
-#warning TODO: canonical.
-    
-    std::string fileContents;
-    try {
-        fileContents = getFileContents(path.native().c_str());
-    }
-    catch (std::exception e) {
-        std::cerr << "error:: " << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-    catch (int e) {
-        std::cerr << "error: " << strerror(e) << std::endl;
-        return EXIT_FAILURE;
-    }
-    
-    OstreamIssueReporter issueReporter(path.string(), std::cerr);
-    StringReader sourceReader(fileContents);
-    
-    Lexer lexer(sourceReader, issueReporter);
+    OstreamIssueReporter issueReporter(canonicalPathStr, std::cerr);
+    StringReader stringReader(sourceStr);
+    Lexer lexer(stringReader, issueReporter);
     DirectTokenInputStream tokenInputStream(lexer);
     Parser parser(tokenInputStream, issueReporter);
-    const std::string moduleName = path.filename().string();
-    ast::Module astModule(parser.parseModule(moduleName));
+    ast::Module module = parser.parseModule(filenameStr);
+    module.dump(std::cerr);
+    llvm::Module* lModule = new llvm::Module(filenameStr, llvm::getGlobalContext());
     
-    llvm::Module* lModule = new llvm::Module(moduleName, llvm::getGlobalContext());
-    LLVMIRGenConfig lconfig;
-    lconfig.targetModule = lModule;
+    SemanticAnalysisConfig smConfig;
+    smConfig.allowImplicitIntUpcast = true;
+    smConfig.defaultFloatingPointIsDouble = true;
+    smConfig.defaultIntBitWidth = 32;
+    smConfig.defaultIntIsSigned = true;
+    SemanticAnalyzer sma(smConfig);
     
-    ASTCompilationConfig aconfig;
-    aconfig.allowImplicitIntegerUpcast = true;
-    aconfig.assumedFloatingPointLiteralIsDouble = true;
-    aconfig.assumedIntegerLiteralIsSigned = true;
-    aconfig.assumedIntegerLiteralNumBits = 32;
+    LLVMIRGenConfig genConfig;
+    genConfig.targetModule = lModule;
+    LLVMIRGenerator llvmirg(genConfig);
     
-    ASTCompiler<LLVMIRGenerator<DoPreserveNames>> compiler(aconfig, lconfig);
-    compiler.compileFunctionDecls(&astModule);
-    compiler.compileFunctionDefinitions(&astModule);
+    Compiler<LLVMIRGenerator> compiler(sma, llvmirg);
+    compiler.compileLookaheadSymbols(module);
+    compiler.compileDefinitions(module);
     
     lModule->dump();
     
-    return EXIT_SUCCESS;
+    #warning TODO: output instead of dump
+    #warning TODO: delete? i dunno
+    delete lModule;
+    return true;
+}
+
+int main(int argc, char* argv[]) {
+    fs::path path;
+    if (argc > 1) {
+        path = fs::path(argv[1]);
+    }
+    else {
+        path = fs::path("main.v");
+        if (!fs::exists(path)) {
+            std::cout << "No path specified and main.v cannot be found.\n";
+            return EXIT_FAILURE;
+        }
+        else {
+            std::cout << "No path specified; compiling main.v.\n";
+        }
+    }
+    
+    return compile(path) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

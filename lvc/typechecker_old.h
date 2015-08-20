@@ -104,7 +104,7 @@ public:
         }
     }
     virtual void visit(ast::VariableDeclStmt& variableDeclStmt) {
-        if (variableDeclStmt.optInitialValue) {
+        if (variableDeclStmt.optInit) {
             expVisitor.setTargetType(variableDeclStmt.decl.type.get());
             
         }

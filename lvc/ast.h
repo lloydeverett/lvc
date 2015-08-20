@@ -14,7 +14,9 @@
 #include <boost/optional.hpp>
 #include <typeinfo>
 #include <typeindex>
+#include "llvmincludes.h"
 #include "binopcode.h"
+#include "sminf.h"
 
 class INodeVisitor;
 
@@ -22,9 +24,11 @@ class INodeVisitor;
                         (and maybe we can generate the serialization code with a python script or something?)
 
 enum Constantness {
-    Constant = true,
-    NotConstant = false,
+    Constant,
+    NotConstant,
 };
+
+#warning TODO: qualtype like in Clang
 
 namespace ast {
     
@@ -42,18 +46,23 @@ namespace ast {
     ///////////////////////////////
     
     class IType : public INode {
+    public:
+        /// Discriminator for LLVM-style RTTI (dyn_cast<> et al.)
+        enum TypeKind {
+            TK_VoidType,
+            TK_IntegerType,
+            TK_BoolType,
+            TK_FloatingPointType,
+        };
     private:
         Constantness constantness;
+        TypeKind kind;
     protected:
-        IType(Constantness constantness) : constantness(constantness) {};
-        static bool BaseIsEqual(const IType* a, const IType* b) {
-            return a->isConstant() == b->isConstant();
-        }
+        IType(Constantness constantness, TypeKind kind) : constantness(constantness), kind(kind) {};
     public:
-        bool isConstant() const { return constantness == Constant; }
+        TypeKind getKind() const { return kind; }
+        Constantness getConstant() const { return constantness; }
         void setConstant(Constantness constantness) { this->constantness = constantness; }
-        void setConstant(bool isConstant) { this->constantness = isConstant ? Constant : NotConstant; }
-        virtual bool isEqual(const IType& type) const = 0;
         virtual std::unique_ptr<IType> clone() const = 0;
     };
     
@@ -63,6 +72,7 @@ namespace ast {
     public:
         virtual const std::string& getIdentifier() const = 0;
         virtual IType& getType() = 0;
+        llvm::Value* genVal;
     };
     
     class IStmt : public INode {
@@ -73,21 +83,24 @@ namespace ast {
     class IExp : public INode {
     protected:
         IExp() {};
+    public:
+        SMInf sminf;
+        llvm::Value* genVal;
     };
     
     ///////////////////////////////
     
     struct VoidType : public IType {
-        VoidType(Constantness constantness) : IType(constantness) {}
+        VoidType(Constantness constantness) : IType(constantness, TK_VoidType) {}
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "VoidType";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        virtual bool isEqual(const IType& type) const override {
-            return BaseIsEqual(this, &type) && dynamic_cast<const VoidType*>(&type) != nullptr;
-        }
         virtual std::unique_ptr<IType> clone() const override {
             return std::make_unique<VoidType>(*this);
+        }
+        static bool classof(const IType* t) {
+            return t->getKind() == TK_VoidType;
         }
     };
     
@@ -96,38 +109,36 @@ namespace ast {
         enum Signedness {
             Signed,
             Unsigned,
-        } isSigned;
-        IntegerType(int numBits, Signedness isSigned, Constantness constantness) :
-        numBits(numBits), isSigned(isSigned), IType(constantness) {}
+        } signedness;
+        IntegerType(int numBits, Signedness signedness, Constantness constantness) :
+        numBits(numBits), signedness(signedness), IType(constantness, TK_IntegerType) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "IntegerType(" << numBits << ", " << (isSigned == Signed ? "Signed" : "Unsigned") << ")";
+            return o << "IntegerType(" << numBits << ", " << (signedness == Signed ? "Signed" : "Unsigned") << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        virtual bool isEqual(const IType& type) const override {
-            if (!BaseIsEqual(this, &type)) return false;
-            const IntegerType* casted = dynamic_cast<const IntegerType*>(&type);
-            if (casted)
-                return numBits == casted->numBits && isSigned == casted->isSigned;
-            else
-                return false;
-        }
         virtual std::unique_ptr<IType> clone() const override {
             return std::make_unique<IntegerType>(*this);
+        }
+        bool isSigned() {
+            return signedness == Signed;
+        }
+        static bool classof(const IType* t) {
+            return t->getKind() == TK_IntegerType;
         }
     };
     
     struct BoolType : public IType {
-        BoolType(Constantness constantness) : IType(constantness) {}
+        BoolType(Constantness constantness) : IType(constantness, TK_BoolType) {}
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "BoolType";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        virtual bool isEqual(const IType& type) const override {
-            return BaseIsEqual(this, &type) && dynamic_cast<const BoolType*>(&type) != nullptr;
-        }
         virtual std::unique_ptr<IType> clone() const override {
             return std::make_unique<BoolType>(*this);
+        }
+        static bool classof(const IType* t) {
+            return t->getKind() == TK_BoolType;
         }
     };
     
@@ -138,22 +149,17 @@ namespace ast {
         } variation;
         
         FloatingPointType(Variation variation, Constantness constantness) :
-        variation(variation), IType(constantness) {}
+        variation(variation), IType(constantness, TK_FloatingPointType) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
             return o << "FloatingPointType(" << (variation == VariationFloat ? "Float" : "Double") << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
-        virtual bool isEqual(const IType& type) const override {
-            if (!BaseIsEqual(this, &type)) return false;
-            const FloatingPointType* casted = dynamic_cast<const FloatingPointType*>(&type);
-            if (casted)
-                return variation == casted->variation;
-            else
-                return false;
-        }
         virtual std::unique_ptr<IType> clone() const override {
             return std::make_unique<FloatingPointType>(*this);
+        }
+        static bool classof(const IType* t) {
+            return t->getKind() == TK_FloatingPointType;
         }
     };
     
@@ -188,7 +194,36 @@ namespace ast {
         }
     };
     
+    struct VariableDecl : public IDecl {
+    public:
+        std::unique_ptr<IType> type;
+        std::string identifier;
+    protected:
+        VariableDecl(std::unique_ptr<IType> type, std::string identifier) :
+        type(std::move(type)), identifier(identifier) {}
+    };
+    
+    struct ArgVariableDecl : public VariableDecl {
+    public:
+        boost::optional<std::unique_ptr<IExp>> optInit;
+        
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o < "ArgVariableDecl(" << identifier << ")";
+        }
+    };
+    
+    struct NonArgVariableDecl : public VariableDecl {
+    public:
+        boost::optional<std::unique_ptr<IExp>> optDefault;
+        
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "NonArgVariableDecl(" << identifier << ")";
+        }
+    };
+    
     struct VariableExp : public IExp {
+        ast::VariableDecl* sminfLookup;
+        
         std::string identifier;
         VariableExp(std::string identifier) :
         identifier(identifier) {}
@@ -197,28 +232,6 @@ namespace ast {
             return o << "VariableExp(" << identifier << ")";
         }
         virtual void accept(INodeVisitor& visitor) override;
-    };
-    
-    struct ArgumentDecl : public IDecl {
-        VariableDecl variableDecl;
-        boost::optional<std::unique_ptr<IExp>> optDefaultValue;
-        ArgumentDecl(VariableDecl variableDecl, boost::optional<std::unique_ptr<IExp>> optDefaultValue = boost::none) :
-        variableDecl(std::move(variableDecl)), optDefaultValue(std::move(optDefaultValue)) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const override {
-            o << "ArgumentDecl(" << variableDecl;
-            if (optDefaultValue)
-                o << ", " << **optDefaultValue;
-            o << ")";
-            return o;
-        }
-        virtual void accept(INodeVisitor& visitor) override;
-        virtual const std::string& getIdentifier() const override {
-            return variableDecl.identifier;
-        }
-        virtual IType& getType() override {
-            return variableDecl.getType();
-        }
     };
     
     struct FunctionDecl : public IDecl {
@@ -254,16 +267,16 @@ namespace ast {
     };
     
     struct VariableDeclStmt : public IStmt {
-        boost::optional<std::unique_ptr<IExp>> optInitialValue;
+        boost::optional<std::unique_ptr<IExp>> optInit;
         VariableDecl decl;
         
-        VariableDeclStmt(VariableDecl decl, boost::optional<std::unique_ptr<IExp>> optInitialValue = boost::none) :
-        optInitialValue(std::move(optInitialValue)),
+        VariableDeclStmt(VariableDecl decl, boost::optional<std::unique_ptr<IExp>> optInit = boost::none) :
+        optInit(std::move(optInit)),
         decl(std::move(decl))  {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
-            if (optInitialValue)
-                return o << "VariableDeclStmt(" << decl << ", " << **optInitialValue << ")";
+            if (optInit)
+                return o << "VariableDeclStmt(" << decl << ", " << **optInit << ")";
             else
                 return o << "VariableDeclStmt(" << decl << ")";
         }
@@ -298,6 +311,8 @@ namespace ast {
     };
     
     struct CallExp : public IExp {
+        ast::FunctionDecl* sminfLookup;
+        
         std::string calleeIdentifier;
         std::vector<std::unique_ptr<IExp>> passedArguments;
         CallExp(std::string calleeIdentifier, std::vector<std::unique_ptr<IExp>> passedArguments) :
@@ -354,15 +369,15 @@ namespace ast {
     struct IfStmt : public IStmt {
         std::unique_ptr<IExp> condition;
         BlockStmt thenBlock;
-        boost::optional<BlockStmt> elseBlock;
-        IfStmt(std::unique_ptr<IExp> condition, BlockStmt thenBlock, boost::optional<BlockStmt> elseBlock = boost::none) :
-        condition(std::move(condition)), thenBlock(std::move(thenBlock)), elseBlock(std::move(elseBlock)) {}
+        boost::optional<BlockStmt> optElseBlock;
+        IfStmt(std::unique_ptr<IExp> condition, BlockStmt thenBlock, boost::optional<BlockStmt> optElseBlock = boost::none) :
+        condition(std::move(condition)), thenBlock(std::move(thenBlock)), optElseBlock(std::move(optElseBlock)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
             o << "IfStmt(" << *condition << ", ";
             o << thenBlock;
-            if (elseBlock) {
-                o << ", " << *elseBlock;
+            if (optElseBlock) {
+                o << ", " << *optElseBlock;
             }
             o << ")";
             return o;
@@ -370,30 +385,30 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-    struct VarOpModStmt : public IStmt {
-        std::unique_ptr<ast::VariableExp> lvalue;
-        std::unique_ptr<ast::IExp> rvalue;
-        
-    };
-    
-    struct VarAssignStmt : public IStmt {
-        std::vector<ast::VariableExp> lvalues;
-        std::unique_ptr<ast::IExp> rvalue;
-        VarAssignStmt(std::vector<ast::VariableExp> lvalues, std::unique_ptr<ast::IExp> rvalue) :
-        lvalues(std::move(lvalues)), rvalue(std::move(rvalue)) {}
-    };
-    
-    struct VarIncrementStmt : public IStmt {
-        ast::VariableExp exp;
-        VarIncrementStmt(ast::VariableExp exp) :
-        exp(std::move(exp)) {}
-    };
-    
-    struct VarDecrementStmt : public IStmt {
-        ast::VariableExp exp;
-        VarDecrementStmt(ast::VariableExp exp) :
-        exp(std::move(exp)) {}
-    };
+//    struct VarOpModStmt : public IStmt {
+//        std::unique_ptr<ast::VariableExp> lvalue;
+//        std::unique_ptr<ast::IExp> rvalue;
+//        
+//    };
+//    
+//    struct VarAssignStmt : public IStmt {
+//        std::vector<ast::VariableExp> lvalues;
+//        std::unique_ptr<ast::IExp> rvalue;
+//        VarAssignStmt(std::vector<ast::VariableExp> lvalues, std::unique_ptr<ast::IExp> rvalue) :
+//        lvalues(std::move(lvalues)), rvalue(std::move(rvalue)) {}
+//    };
+//    
+//    struct VarIncrementStmt : public IStmt {
+//        ast::VariableExp exp;
+//        VarIncrementStmt(ast::VariableExp exp) :
+//        exp(std::move(exp)) {}
+//    };
+//    
+//    struct VarDecrementStmt : public IStmt {
+//        ast::VariableExp exp;
+//        VarDecrementStmt(ast::VariableExp exp) :
+//        exp(std::move(exp)) {}
+//    };
     
     struct Function : public INode {
         FunctionDecl decl;

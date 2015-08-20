@@ -242,13 +242,13 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
 
 VariableDeclStmt Parser::parseVariableDeclStmt(std::unique_ptr<IType> type) {
     std::string identifier(parseIdentifier());
-    boost::optional<std::unique_ptr<IExp>> optInitialValue = boost::none;
+    boost::optional<std::unique_ptr<IExp>> optInit = boost::none;
     if (currentToken.is(Equals)) {
         readTokenIntoCurrent();
-        optInitialValue = parseExpression();
+        optInit = parseExpression();
     }
     VariableDecl decl(std::move(type), identifier);
-    return VariableDeclStmt(std::move(decl), std::move(optInitialValue));
+    return VariableDeclStmt(std::move(decl), std::move(optInit));
 }
 
 std::unique_ptr<IExp> Parser::parseParenExpression() {

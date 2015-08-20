@@ -3,7 +3,7 @@ import macro "make_drawable"
 
 class FishGame extends Game, KeyboardEventReceiver
 
-    static int PLAYER_SPEED = 5
+    property PlayerSpeed = 10
 
     private
         RectangleSprite            player   $draw
@@ -32,6 +32,11 @@ class FishGame extends Game, KeyboardEventReceiver
     onKeyPress(Key key)
         if (key.isCursorKey())
             player.position += key.toNormalizedDelta() * PLAYER_SPEED * frameFactor()
+
+void main()
+    Window w = new (fullscreen: true)
+    while (game.isNotDone())
+        game.playFrame(w)
 
 int factorial(int v)
     if (v == 0)

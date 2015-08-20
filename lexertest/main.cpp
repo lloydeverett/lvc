@@ -11,6 +11,8 @@
 #include "lexer.h"
 #include "lexerexceptions.h"
 
+#include "semanticanalyzer.h"
+
 int main(int argc, const char * argv[]) {
     std::string filePath = getPathForVFile("verysimple.v");
     std::string fileStr = getFileContents(filePath.c_str());

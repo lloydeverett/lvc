@@ -27,15 +27,15 @@ void FloatingPointType::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
-void ArgumentDecl::accept(INodeVisitor& visitor) {
+void NonArgVariableDecl::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void ArgVariableDecl::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
 void FunctionDecl::accept(INodeVisitor& visitor) {
-    visitor.visit(*this);
-}
-
-void VariableDecl::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 
@@ -72,6 +72,22 @@ void IfStmt::accept(INodeVisitor& visitor) {
 }
 
 void BlockStmt::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void IncrementStmt::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void DecrementStmt::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void VarBinopStmt::accept(INodeVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void AssignStmt::accept(INodeVisitor& visitor) {
     visitor.visit(*this);
 }
 

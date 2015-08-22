@@ -177,7 +177,6 @@
 		57B563DD1B584FC500C6EA6B /* astcompilationconfigOLD.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = astcompilationconfigOLD.h; sourceTree = "<group>"; };
 		57B7D8381B39ABD90037A24C /* binopcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = binopcode.h; sourceTree = "<group>"; };
 		57C8B37D1B6284A600EBD64C /* demo.v */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = demo.v; sourceTree = "<group>"; };
-		57C8B37E1B63B9F900EBD64C /* varopcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = varopcode.h; sourceTree = "<group>"; };
 		57C8B3801B63C5D900EBD64C /* semanticanalyzer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = semanticanalyzer.h; sourceTree = "<group>"; };
 		57C8B3811B64F31700EBD64C /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		57C8B3841B64FCB400EBD64C /* compiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = compiler.h; sourceTree = "<group>"; };
@@ -475,7 +474,6 @@
 			isa = PBXGroup;
 			children = (
 				57B7D8381B39ABD90037A24C /* binopcode.h */,
-				57C8B37E1B63B9F900EBD64C /* varopcode.h */,
 				575C95D71B6D428200839F0A /* sminf.h */,
 				57D8FFE61B089E8300630274 /* ast.h */,
 				5788F5011B4C278B00C6F865 /* inodevisitor.h */,

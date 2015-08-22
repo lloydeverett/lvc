@@ -24,6 +24,10 @@ public:
     virtual void genVariableDeclStmt(ast::VariableDeclStmt& stmt) = 0;
     virtual void genIfStmt(ast::IfStmt& stmt) = 0;
     virtual void genBlockStmt(ast::BlockStmt& block) = 0;
+    virtual void genIncrementStmt(ast::IncrementStmt& stmt) = 0;
+    virtual void genDecrementStmt(ast::DecrementStmt& stmt) = 0;
+    virtual void genVarBinopStmt(ast::VarBinopStmt& stmt) = 0;
+    virtual void genAssignStmt(ast::AssignStmt& stmt) = 0;
     virtual void genBinopExp(ast::BinopExp& binopExp) = 0;
     virtual void genCallExp(ast::CallExp& callExp) = 0;
     virtual void genNumberLiteralExp(ast::NumberLiteralExp& numExp) = 0;
@@ -54,6 +58,18 @@ public:
     }
     virtual void visit(ast::BlockStmt& blockStmt) {
         parent.genBlockStmt(blockStmt);
+    }
+    virtual void visit(ast::IncrementStmt& incrementStmt) {
+        parent.genIncrementStmt(incrementStmt);
+    }
+    virtual void visit(ast::DecrementStmt& decrementStmt) {
+        parent.genDecrementStmt(decrementStmt);
+    }
+    virtual void visit(ast::VarBinopStmt& VarBinopStmt) {
+        parent.genVarBinopStmt(VarBinopStmt);
+    }
+    virtual void visit(ast::AssignStmt& assignStmt) {
+        parent.genAssignStmt(assignStmt);
     }
     virtual void visit(ast::BinopExp& binopExp) {
         parent.genBinopExp(binopExp);
@@ -186,14 +202,46 @@ private:
             case END_BOOL_BINOPS: assert(false);
         }
     }
-    
+    llvm::Value* createBinop(ast::IType& type, BinopCode code, llvm::Value* lhs, llvm::Value* rhs) {
+        switch (type.getKind()) {
+            case ast::IType::TK_VoidType:
+                assert(false);
+            case ast::IType::TK_IntegerType:
+            {
+                ast::IntegerType& it = cast<ast::IntegerType>(type);
+                return createIntBinop(code, lhs, rhs, it.isSigned());
+            }
+            case ast::IType::TK_BoolType:
+                // Bools are just 1-bit ints.
+                #warning TODO: check signedness
+                return createIntBinop(code, lhs, rhs, /*not signed*/false);
+            case ast::IType::TK_FloatingPointType:
+                return createFPBinop(code, lhs, rhs);
+        }
+    }
+    llvm::Value* createNumberLiteral(ast::IType& type, std::string val) {
+        switch (type.getKind()) {
+            case ast::IType::TK_VoidType:
+                assert(false);
+            case ast::IType::TK_IntegerType:
+            {
+                ast::IntegerType& it = cast<ast::IntegerType>(type);
+                return llvm::ConstantInt::get(getIntLLVMType(it), val, 10);
+            }
+            case ast::IType::TK_BoolType:
+                assert(false);
+            case ast::IType::TK_FloatingPointType:
+            {
+                return llvm::ConstantFP::get(getLLVMType(type), val);
+            }
+        }
+    }
 public:
     LLVMIRGenerator(LLVMIRGenConfig config) : config(config), builder(context()), visitor(*this) {}
-    
     virtual void genLookaheadGlobal(ast::VariableDecl& decl) override {
         #warning TODO: check usage of new
         llvm::Type* t = getLLVMType(*decl.type);
-        bool isConstant = decl.type->getConstant() == Constant;
+        bool isConstant = decl.type->getConstantness() == Constant;
         decl.genVal = new llvm::GlobalVariable(*targetModule(), t, isConstant,
                                                 llvm::GlobalValue::ExternalLinkage,
                                                 /*initializer not set here*/ nullptr,
@@ -202,7 +250,7 @@ public:
     virtual void genLookaheadFunctionDecl(ast::FunctionDecl& decl) override {
         std::vector<llvm::Type*> llvmArgs;
         for (auto& argDecl : decl.arguments) {
-            llvmArgs.push_back(getLLVMType(*argDecl.variableDecl.type));
+            llvmArgs.push_back(getLLVMType(*argDecl.type));
         }
         llvm::Type* llvmReturnType = getLLVMType(*decl.returnType);
         llvm::FunctionType* llvmFTy = llvm::FunctionType::get(llvmReturnType, llvmArgs, /*no varargs*/ false);
@@ -295,33 +343,49 @@ public:
             visitor.doStmtVisit(*p);
         }
     }
+private:
+    virtual void modifyVariableExpWithBinop(ast::IType& type, llvm::Value* lvalueAlloca, llvm::Value* lvalueContent, BinopCode code,
+                                            llvm::Value* rvalue) {
+        llvm::Value* newVal = createBinop(type, code, lvalueContent, rvalue);
+        builder.CreateStore(newVal, lvalueAlloca);
+    }
+public:
+    virtual void genIncrementStmt(ast::IncrementStmt& stmt) override {
+        genVariableExp(*stmt.exp);
+        ast::IType& expTy = *stmt.exp->sminf.to;
+        modifyVariableExpWithBinop(expTy, stmt.exp->sminfLookup->genVal, stmt.exp->genVal, BinopCodeAdd,
+                                   createNumberLiteral(expTy, "1"));
+    }
+    virtual void genDecrementStmt(ast::DecrementStmt& stmt) override {
+        genVariableExp(*stmt.exp);
+        ast::IType& expTy = *stmt.exp->sminf.to;
+        modifyVariableExpWithBinop(expTy, stmt.exp->sminfLookup->genVal, stmt.exp->genVal, BinopCodeSubtract,
+                                   createNumberLiteral(expTy, "1"));
+    }
+    virtual void genVarBinopStmt(ast::VarBinopStmt& stmt) override {
+        genVariableExp(*stmt.lvalue);
+        ast::IType& lvalueTy = *stmt.lvalue->sminf.to;
+        visitor.doExpVisit(*stmt.rvalue);
+        modifyVariableExpWithBinop(lvalueTy, stmt.lvalue->sminfLookup->genVal, stmt.lvalue->genVal, stmt.code,
+                                   stmt.rvalue->genVal);
+    }
+    virtual void genAssignStmt(ast::AssignStmt& stmt) override {
+        visitor.doExpVisit(*stmt.rvalue);
+        for (std::unique_ptr<ast::VariableExp>& e : stmt.lvalues) {
+            // We could do this:
+            //     genVariableExp(*e);
+            // But we never need to access the contents of the
+            // variable so we don't.
+            builder.CreateStore(stmt.rvalue->genVal, e->sminfLookup->genVal);
+        }
+    }
     
     ///////////////////////////////////////
     
     virtual void genBinopExp(ast::BinopExp& binopExp) override {
         visitor.doExpVisit(*binopExp.lhs);
         visitor.doExpVisit(*binopExp.rhs);
-        
-        switch (binopExp.sminf.from->getKind()) {
-            case ast::IType::TK_VoidType:
-                assert(false);
-            case ast::IType::TK_IntegerType:
-            {
-                ast::IntegerType& it = cast<ast::IntegerType>(*binopExp.lhs->sminf.from);
-                binopExp.genVal = createIntBinop(binopExp.code, binopExp.lhs->genVal, binopExp.rhs->genVal,
-                                                 it.isSigned());
-                return;
-            }
-            case ast::IType::TK_BoolType:
-                // Bools are just 1-bit ints.
-                #warning TODO: check signedness
-                binopExp.genVal = createIntBinop(binopExp.code, binopExp.lhs->genVal, binopExp.rhs->genVal,
-                                                 /*not signed*/false);
-                return;
-            case ast::IType::TK_FloatingPointType:
-                binopExp.genVal = createFPBinop(binopExp.code, binopExp.lhs->genVal, binopExp.rhs->genVal);
-                return;
-        }
+        binopExp.genVal = createBinop(*binopExp.lhs->sminf.to, binopExp.code, binopExp.lhs->genVal, binopExp.rhs->genVal);
     }
     virtual void genCallExp(ast::CallExp& callExp) override {
         std::vector<llvm::Value*> llvmArgs;
@@ -333,37 +397,36 @@ public:
         callExp.genVal = builder.CreateCall(callExp.sminfLookup->genVal, llvmArgs);
     }
     virtual void genNumberLiteralExp(ast::NumberLiteralExp& numExp) {
-        switch (numExp.sminf.from->getKind()) {
-            case ast::IType::TK_VoidType:
-                assert(false);
-            case ast::IType::TK_IntegerType:
-            {
-                ast::IntegerType& it = cast<ast::IntegerType>(*numExp.sminf.from);
-                numExp.genVal = llvm::ConstantInt::get(getIntLLVMType(it), numExp.value, 10);
-                return;
-            }
-            case ast::IType::TK_BoolType:
-                assert(false);
-            case ast::IType::TK_FloatingPointType:
-            {
-                numExp.genVal = llvm::ConstantFP::get(getLLVMType(*numExp.sminf.from), numExp.value);
-                return;
-            }
-        }
+        numExp.genVal = createNumberLiteral(*numExp.sminf.to, numExp.value);
     }
     virtual void genVariableExp(ast::VariableExp& varExp) override {
-        varExp.genVal = builder.CreateLoad(varExp.sminfLookup->genVal);
+        if (varExp.sminfLookup->isArg()) {
+            varExp.genVal = varExp.sminfLookup->genVal;
+        }
+        else {
+            varExp.genVal = builder.CreateLoad(varExp.sminfLookup->genVal);
+        }
     }
     
     ///////////////////////////////////////
     
     virtual void genFunctionDefinition(ast::Function& function) override {
         llvm::Function* f = targetModule()->getFunction(function.decl.identifier);
+        
+        // set arg genvals
+        auto& llvmArgList = f->getArgumentList();
+        int argIndex = 0;
+        for (auto it = llvmArgList.begin(); it != llvmArgList.end(); ++it) {
+            ast::ArgVariableDecl& avd = function.decl.arguments[argIndex];
+            avd.genVal = it;
+            
+            argIndex++;
+        }
+        
         llvm::BasicBlock* entryB = llvm::BasicBlock::Create(context(), "entry", f);
         builder.SetInsertPoint(entryB);
         genBlockStmt(function.block);
         
-        // check terminator; auto return from void.
         if (builder.GetInsertBlock()->getTerminator() == nullptr) {
             if (isa<ast::VoidType>(*function.decl.returnType)) {
                 builder.CreateRetVoid();

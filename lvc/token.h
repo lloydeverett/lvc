@@ -58,6 +58,11 @@ enum TokenKind {
     Extern,
     PlusPlus,
     MinusMinus,
+    PlusEquals,
+    MinusEquals,
+    AsteriskEquals,
+    SlashEquals,
+    PercentEquals,
     Eof,
 
     INVALID_TOKEN_KIND_VALUE,
@@ -110,6 +115,11 @@ inline const char* debugStringForTokenKind(TokenKind kind) {
         "Extern",
         "PlusPlus",
         "MinusMinus",
+        "PlusEquals",
+        "MinusEquals",
+        "AsteriskEquals",
+        "SlashEquals",
+        "PercentEquals",
         "Eof",
     };
 

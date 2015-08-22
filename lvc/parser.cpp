@@ -79,10 +79,13 @@ FunctionDecl Parser::parseFunctionDecl() {
     }
     readTokenIntoCurrent();
 
-    std::vector<ArgumentDecl> arguments;
+    std::vector<ArgVariableDecl> arguments;
     if (currentToken.isNot(CloseParenthesis)) {
         while (true) {
             std::unique_ptr<IType> argType(parseType());
+            if (argType->getConstantness() == Constant) {
+                reportOnCurrentToken("Const specifier is redundant on types of arguments.");
+            }
             std::string argIdentifier(parseIdentifier());
 
             boost::optional<std::unique_ptr<IExp>> optDefaultValue = boost::none;
@@ -90,9 +93,8 @@ FunctionDecl Parser::parseFunctionDecl() {
                 readTokenIntoCurrent();
                 optDefaultValue = parseExpression();
             }
-
-            VariableDecl varDecl = VariableDecl(std::move(argType), argIdentifier);
-            arguments.emplace_back(std::move(varDecl), std::move(optDefaultValue));
+            
+            arguments.emplace_back(std::move(argType), argIdentifier, std::move(optDefaultValue));
 
             if (currentToken.is(CloseParenthesis)) break;
             if (currentToken.is(Comma)) {
@@ -110,43 +112,43 @@ FunctionDecl Parser::parseFunctionDecl() {
 }
 
 boost::optional<std::unique_ptr<IType>> Parser::tryParseType() {
-    Constantness isConst;
+    Constantness constantness;
     if (currentToken.is(Const)) {
-        isConst = Constant;
+        constantness = Constant;
         readTokenIntoCurrent();
     }
     else {
-        isConst = NotConstant;
+         constantness = NotConstant;
     }
     
     boost::optional<std::unique_ptr<IType>> optRet;
     switch (currentToken.getKind()) {
         case Void:
-            optRet = std::make_unique<VoidType>(isConst); break;
+            optRet = std::make_unique<VoidType>(constantness); break;
         case Char:
-            optRet = std::make_unique<IntegerType>(8, IntegerType::Signed, isConst); break;
+            optRet = std::make_unique<IntegerType>(8, IntegerType::Signed, constantness); break;
         case Short:
-            optRet = std::make_unique<IntegerType>(16, IntegerType::Signed, isConst); break;
+            optRet = std::make_unique<IntegerType>(16, IntegerType::Signed, constantness); break;
         case Int:
-            optRet = std::make_unique<IntegerType>(32, IntegerType::Signed, isConst); break;
+            optRet = std::make_unique<IntegerType>(32, IntegerType::Signed, constantness); break;
         case Long:
-            optRet = std::make_unique<IntegerType>(64, IntegerType::Signed, isConst); break;
+            optRet = std::make_unique<IntegerType>(64, IntegerType::Signed, constantness); break;
         case Uchar:
-            optRet = std::make_unique<IntegerType>(8, IntegerType::Unsigned, isConst); break;
+            optRet = std::make_unique<IntegerType>(8, IntegerType::Unsigned, constantness); break;
         case Ushort:
-            optRet = std::make_unique<IntegerType>(16, IntegerType::Unsigned, isConst); break;
+            optRet = std::make_unique<IntegerType>(16, IntegerType::Unsigned, constantness); break;
         case Uint:
-            optRet = std::make_unique<IntegerType>(32, IntegerType::Unsigned, isConst); break;
+            optRet = std::make_unique<IntegerType>(32, IntegerType::Unsigned, constantness); break;
         case Ulong:
-            optRet = std::make_unique<IntegerType>(64, IntegerType::Unsigned, isConst); break;
+            optRet = std::make_unique<IntegerType>(64, IntegerType::Unsigned, constantness); break;
         case Float:
-            optRet = std::make_unique<FloatingPointType>(FloatingPointType::VariationFloat, isConst); break;
+            optRet = std::make_unique<FloatingPointType>(FloatingPointType::VariationFloat, constantness); break;
         case Double:
-            optRet = std::make_unique<FloatingPointType>(FloatingPointType::VariationDouble, isConst); break;
+            optRet = std::make_unique<FloatingPointType>(FloatingPointType::VariationDouble, constantness); break;
         case Bool:
-            optRet = std::make_unique<BoolType>(isConst); break;
+            optRet = std::make_unique<BoolType>(constantness); break;
         default:
-            if (isConst) {
+            if (constantness == Constant) {
                 reportOnCurrentToken("Const specifier is not followed by a typename.");
                 throw ParserErrorExceptionQualifierWithoutTypename();
             }
@@ -194,9 +196,110 @@ BlockStmt Parser::parseBlock() {
     return BlockStmt(std::move(statements));
 }
 
+// This function should be called for statements that don't involve blocks (i.e. if statements and such are not
+// handled by this function). These are statements are terminated by a newline. This function will not consume the newline
+// --or, if the statement is badly formed, it won't consume the token that we expected to terminate the statement.
+std::unique_ptr<IStmt> Parser::parsePartOfNonBlockStatementPrecedingNewline() {
+    if (currentToken.is(Return)) {
+        readTokenIntoCurrent();
+        boost::optional<std::unique_ptr<IExp>> optExp;
+        if (currentToken.isNot(Newline)) {
+            optExp = parseExpression();
+        }
+        return std::make_unique<ReturnStmt>(std::move(optExp));
+    }
+    else if (currentToken.is(Identifier)) {
+        if (inputStream.peekNext().is(OpenParenthesis)) {
+            return std::make_unique<CallExpStmt>(parseCall());
+        }
+        else {
+            std::unique_ptr<IExp> leftmostExp(parseExpression());
+            IExp* raw_leftmostExp = leftmostExp.release();
+            VariableExp* raw_variableLeftmostExp = dynamic_cast<VariableExp*>(raw_leftmostExp);
+            if (raw_variableLeftmostExp == nullptr) {
+                throw ParserErrorExceptionLHSIsNotAnLvalue();
+            }
+            std::unique_ptr<VariableExp> variableLeftmostExp(raw_variableLeftmostExp);
+            
+            if (currentToken.is(PlusPlus)) {
+                readTokenIntoCurrent();
+                return std::make_unique<IncrementStmt>(std::move(variableLeftmostExp));
+            }
+            else if (currentToken.is(MinusMinus)) {
+                readTokenIntoCurrent();
+                return std::make_unique<DecrementStmt>(std::move(variableLeftmostExp));
+            }
+            else if (currentToken.is(Equals)) {
+                readTokenIntoCurrent();
+                std::vector<std::unique_ptr<VariableExp>> lvalues;
+                lvalues.push_back(std::move(variableLeftmostExp));
+                std::unique_ptr<IExp> rvalue;
+                
+                while (true) {
+                    std::unique_ptr<IExp> exp(parseExpression());
+                    if (currentToken.is(Equals)) {
+                        IExp* raw_exp = exp.release();
+                        VariableExp* raw_variableExp = dynamic_cast<VariableExp*>(raw_exp);
+                        if (raw_variableExp == nullptr) {
+                            throw ParserErrorExceptionLHSIsNotAnLvalue();
+                        }
+                        std::unique_ptr<VariableExp> variableExp(raw_variableExp);
+                        lvalues.push_back(std::move(variableExp));
+                    }
+                    else {
+                        rvalue = std::move(exp);
+                        break;
+                    }
+                }
+                
+                return std::make_unique<AssignStmt>(std::move(lvalues), std::move(rvalue));
+            }
+            else if (currentToken.is(PlusEquals)) {
+                readTokenIntoCurrent();
+                std::unique_ptr<IExp> exp(parseExpression());
+                return std::make_unique<VarBinopStmt>(BinopCodeAdd, std::move(variableLeftmostExp), std::move(exp));
+            }
+            else if (currentToken.is(MinusEquals)) {
+                readTokenIntoCurrent();
+                std::unique_ptr<IExp> exp(parseExpression());
+                return std::make_unique<VarBinopStmt>(BinopCodeSubtract, std::move(variableLeftmostExp), std::move(exp));
+            }
+            else if (currentToken.is(AsteriskEquals)) {
+                readTokenIntoCurrent();
+                std::unique_ptr<IExp> exp(parseExpression());
+                return std::make_unique<VarBinopStmt>(BinopCodeMultiply, std::move(variableLeftmostExp), std::move(exp));
+            }
+            else if (currentToken.is(SlashEquals)) {
+                readTokenIntoCurrent();
+                std::unique_ptr<IExp> exp(parseExpression());
+                return std::make_unique<VarBinopStmt>(BinopCodeDivide, std::move(variableLeftmostExp), std::move(exp));
+            }
+            else if (currentToken.is(PercentEquals)) {
+                readTokenIntoCurrent();
+                std::unique_ptr<IExp> exp(parseExpression());
+                return std::make_unique<VarBinopStmt>(BinopCodeModulo, std::move(variableLeftmostExp), std::move(exp));
+            }
+            else {
+                throw ParserErrorExceptionExpectedOperationOnLvalue();
+            }
+        }
+    }
+    else {
+        boost::optional<std::unique_ptr<IType>> optType = tryParseType();
+        if (optType) {
+            VariableDeclStmt vds(parseVariableDeclStmt(std::move(*optType)));
+            return std::make_unique<VariableDeclStmt>(std::move(vds));
+        }
+        else {
+            reportOnCurrentToken("Could not parse statement begginning with this token.");
+            throw ParserErrorExceptionUnknownStatementBeginning();
+        }
+    }
+}
+
 // After this function is called, currentToken will be the token after the newline that terminates the statement.
 std::unique_ptr<IStmt> Parser::parseStatement() {
-    // Block statements
+    // We check for statements that involve blocks.
     if (currentToken.is(If)) {
         readTokenIntoCurrent();
         std::unique_ptr<IExp> condition(parseParenExpression());
@@ -208,36 +311,15 @@ std::unique_ptr<IStmt> Parser::parseStatement() {
         }
         return std::make_unique<IfStmt>(std::move(condition), std::move(thenBlock), std::move(elseBlock));
     }
-    // Single line (we read the newline afterwards in this case).
-    std::unique_ptr<IStmt> stmt;
-    if (currentToken.is(Return)) {
-        readTokenIntoCurrent();
-        boost::optional<std::unique_ptr<IExp>> optExp;
-        if (currentToken.isNot(Newline)) {
-            optExp = parseExpression();
-        }
-        stmt = std::make_unique<ReturnStmt>(std::move(optExp));
-    }
-    else if (currentToken.is(Identifier) && inputStream.peekNext().is(OpenParenthesis)) {
-        stmt =  std::make_unique<CallExpStmt>(parseCall());
-    }
-    else {
-        boost::optional<std::unique_ptr<IType>> optType = tryParseType();
-        if (optType) {
-            VariableDeclStmt vds(parseVariableDeclStmt(std::move(*optType)));
-            stmt = std::make_unique<VariableDeclStmt>(std::move(vds));
-        }
-        else {
-            reportOnCurrentToken("Could not parse statement begginning with this token.");
-            throw ParserErrorExceptionUnknownStatementBeginning();
-        }
-    }
+    
+    // We expect that it's a single-line statement.
+    std::unique_ptr<IStmt> s(parsePartOfNonBlockStatementPrecedingNewline());
     if (currentToken.isNot(Newline)) {
-        reportOnCurrentToken("Expected newline at end of statement.");
+        reportOnCurrentToken("Expected newline -- statement was parsed.");
         throw ParserErrorExceptionExpectedNewline();
     }
     readTokenIntoCurrent();
-    return std::move(stmt);
+    return std::move(s);
 }
 
 VariableDeclStmt Parser::parseVariableDeclStmt(std::unique_ptr<IType> type) {
@@ -247,8 +329,11 @@ VariableDeclStmt Parser::parseVariableDeclStmt(std::unique_ptr<IType> type) {
         readTokenIntoCurrent();
         optInit = parseExpression();
     }
-    VariableDecl decl(std::move(type), identifier);
-    return VariableDeclStmt(std::move(decl), std::move(optInit));
+    return VariableDeclStmt(NonArgVariableDecl(std::move(type), identifier), std::move(optInit));
+}
+
+std::unique_ptr<VariableExp> Parser::parseVariableExp() {
+    return std::make_unique<VariableExp>(parseIdentifier());
 }
 
 std::unique_ptr<IExp> Parser::parseParenExpression() {
@@ -257,7 +342,7 @@ std::unique_ptr<IExp> Parser::parseParenExpression() {
         throw ParserErrorExceptionExpectedOpenParenthesis();
     }
     readTokenIntoCurrent();
-
+    
     std::unique_ptr<IExp> exp(parseExpression());
 
     if (currentToken.isNot(CloseParenthesis)) {
@@ -333,7 +418,7 @@ std::unique_ptr<IExp> Parser::parsePrimaryExpression() {
             return std::make_unique<CallExp>(parseCall());
         }
         else { // variable expression
-            return std::make_unique<VariableExp>(parseIdentifier());
+            return parseVariableExp();
         }
     }
     else if (currentToken.is(NumberLiteral)) {

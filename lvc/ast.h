@@ -47,13 +47,13 @@ namespace ast {
     
     class IType : public INode {
     public:
-        /// Discriminator for LLVM-style RTTI (dyn_cast<> et al.)
         enum TypeKind {
             TK_VoidType,
             TK_IntegerType,
             TK_BoolType,
             TK_FloatingPointType,
         };
+        virtual bool isNumeralType() const = 0;
     private:
         Constantness constantness;
         TypeKind kind;
@@ -61,8 +61,8 @@ namespace ast {
         IType(Constantness constantness, TypeKind kind) : constantness(constantness), kind(kind) {};
     public:
         TypeKind getKind() const { return kind; }
-        Constantness getConstant() const { return constantness; }
-        void setConstant(Constantness constantness) { this->constantness = constantness; }
+        Constantness getConstantness() const { return constantness; }
+        void setConstantness(Constantness constantness) { this->constantness = constantness; }
         virtual std::unique_ptr<IType> clone() const = 0;
     };
     
@@ -102,6 +102,9 @@ namespace ast {
         static bool classof(const IType* t) {
             return t->getKind() == TK_VoidType;
         }
+        virtual bool isNumeralType() const {
+            return false;
+        }
     };
     
     struct IntegerType : public IType {
@@ -126,6 +129,9 @@ namespace ast {
         static bool classof(const IType* t) {
             return t->getKind() == TK_IntegerType;
         }
+        virtual bool isNumeralType() const {
+            return true;
+        }
     };
     
     struct BoolType : public IType {
@@ -139,6 +145,9 @@ namespace ast {
         }
         static bool classof(const IType* t) {
             return t->getKind() == TK_BoolType;
+        }
+        virtual bool isNumeralType() const {
+            return false;
         }
     };
     
@@ -161,6 +170,9 @@ namespace ast {
         static bool classof(const IType* t) {
             return t->getKind() == TK_FloatingPointType;
         }
+        virtual bool isNumeralType() const {
+            return true;
+        }
     };
     
     struct NumberLiteralExp : public IExp {
@@ -178,46 +190,48 @@ namespace ast {
     struct VariableDecl : public IDecl {
         std::unique_ptr<IType> type;
         std::string identifier;
-        VariableDecl(std::unique_ptr<IType> type, std::string identifier) :
-        type(std::move(type)),
-        identifier(identifier) {}
-        
-        virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "VariableDecl(" << *type << ", " << identifier << ")";
-        }
-        virtual void accept(INodeVisitor& visitor) override;
         virtual const std::string& getIdentifier() const override {
             return identifier;
         }
         virtual IType& getType() override {
             return *type;
         }
-    };
-    
-    struct VariableDecl : public IDecl {
-    public:
-        std::unique_ptr<IType> type;
-        std::string identifier;
+        
+        virtual bool isArg() = 0;
     protected:
         VariableDecl(std::unique_ptr<IType> type, std::string identifier) :
         type(std::move(type)), identifier(identifier) {}
     };
     
     struct ArgVariableDecl : public VariableDecl {
-    public:
-        boost::optional<std::unique_ptr<IExp>> optInit;
+        boost::optional<std::unique_ptr<IExp>> optDefault;
         
+        ArgVariableDecl(std::unique_ptr<IType> type, std::string identifier, boost::optional<std::unique_ptr<IExp>> optDefault) :
+        VariableDecl(std::move(type), identifier), optDefault(std::move(optDefault)) {}
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o < "ArgVariableDecl(" << identifier << ")";
+            o << "ArgVariableDecl(" << *type << ", " << identifier;
+            if (optDefault) {
+                o << ", " << **optDefault;
+            }
+            return o << ")";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+        
+        virtual bool isArg() override {
+            return true;
         }
     };
     
     struct NonArgVariableDecl : public VariableDecl {
-    public:
-        boost::optional<std::unique_ptr<IExp>> optDefault;
-        
+        NonArgVariableDecl(std::unique_ptr<IType> type, std::string identifier) :
+        VariableDecl(std::move(type), identifier) {}
         virtual std::ostream& dump(std::ostream& o) const override {
-            return o << "NonArgVariableDecl(" << identifier << ")";
+            return o << "NonArgVariableDecl(" << *type << ", " << identifier << ")";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+        
+        virtual bool isArg() override {
+            return false;
         }
     };
     
@@ -237,8 +251,8 @@ namespace ast {
     struct FunctionDecl : public IDecl {
         std::unique_ptr<IType> returnType;
         std::string identifier;
-        std::vector<ArgumentDecl> arguments;
-        FunctionDecl(std::unique_ptr<IType> returnType, std::string identifier, std::vector<ArgumentDecl> arguments) :
+        std::vector<ArgVariableDecl> arguments;
+        FunctionDecl(std::unique_ptr<IType> returnType, std::string identifier, std::vector<ArgVariableDecl> arguments) :
         returnType(std::move(returnType)),
         identifier(identifier), arguments(std::move(arguments)) {}
         
@@ -246,8 +260,8 @@ namespace ast {
             o << "FunctionDecl(" << *returnType << ", " << identifier;
             if (!arguments.empty()) {
                 o << ", Arguments(";
-                for (const ArgumentDecl &decl : arguments) {
-                    o << &decl;
+                for (const ArgVariableDecl &decl : arguments) {
+                    o << decl;
                     if (&decl != &arguments[arguments.size() - 1]) {
                         o << ", ";
                     }
@@ -268,11 +282,11 @@ namespace ast {
     
     struct VariableDeclStmt : public IStmt {
         boost::optional<std::unique_ptr<IExp>> optInit;
-        VariableDecl decl;
+        NonArgVariableDecl decl;
         
-        VariableDeclStmt(VariableDecl decl, boost::optional<std::unique_ptr<IExp>> optInit = boost::none) :
-        optInit(std::move(optInit)),
-        decl(std::move(decl))  {}
+        VariableDeclStmt(NonArgVariableDecl decl, boost::optional<std::unique_ptr<IExp>> optInit = boost::none) :
+        decl(std::move(decl)),
+        optInit(std::move(optInit)) {}
         
         virtual std::ostream& dump(std::ostream& o) const override {
             if (optInit)
@@ -385,30 +399,54 @@ namespace ast {
         virtual void accept(INodeVisitor& visitor) override;
     };
     
-//    struct VarOpModStmt : public IStmt {
-//        std::unique_ptr<ast::VariableExp> lvalue;
-//        std::unique_ptr<ast::IExp> rvalue;
-//        
-//    };
-//    
-//    struct VarAssignStmt : public IStmt {
-//        std::vector<ast::VariableExp> lvalues;
-//        std::unique_ptr<ast::IExp> rvalue;
-//        VarAssignStmt(std::vector<ast::VariableExp> lvalues, std::unique_ptr<ast::IExp> rvalue) :
-//        lvalues(std::move(lvalues)), rvalue(std::move(rvalue)) {}
-//    };
-//    
-//    struct VarIncrementStmt : public IStmt {
-//        ast::VariableExp exp;
-//        VarIncrementStmt(ast::VariableExp exp) :
-//        exp(std::move(exp)) {}
-//    };
-//    
-//    struct VarDecrementStmt : public IStmt {
-//        ast::VariableExp exp;
-//        VarDecrementStmt(ast::VariableExp exp) :
-//        exp(std::move(exp)) {}
-//    };
+    struct IncrementStmt : public IStmt {
+        std::unique_ptr<VariableExp> exp;
+        
+        IncrementStmt(std::unique_ptr<VariableExp> exp) :
+        exp(std::move(exp)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "TODO";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+    };
+    
+    struct DecrementStmt : public IStmt {
+        std::unique_ptr<VariableExp> exp;
+        
+        DecrementStmt(std::unique_ptr<VariableExp> exp) :
+        exp(std::move(exp)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "TODO";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+    };
+    
+    struct VarBinopStmt : public IStmt {
+        BinopCode code; // only OPERAND_TYPE binops are valid
+        std::unique_ptr<VariableExp> lvalue;
+        std::unique_ptr<IExp> rvalue;
+        VarBinopStmt(BinopCode code, std::unique_ptr<VariableExp> lvalue, std::unique_ptr<IExp> rvalue) :
+        code(code), lvalue(std::move(lvalue)), rvalue(std::move(rvalue)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "TODO";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+    };
+    
+    struct AssignStmt : public IStmt {
+        std::vector<std::unique_ptr<VariableExp>> lvalues;
+        std::unique_ptr<IExp> rvalue;
+        AssignStmt(std::vector<std::unique_ptr<VariableExp>> lvalues, std::unique_ptr<IExp> rvalue) :
+        lvalues(std::move(lvalues)), rvalue(std::move(rvalue)) {}
+        
+        virtual std::ostream& dump(std::ostream& o) const override {
+            return o << "TODO";
+        }
+        virtual void accept(INodeVisitor& visitor) override;
+    };
     
     struct Function : public INode {
         FunctionDecl decl;

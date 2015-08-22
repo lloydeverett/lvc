@@ -17,3 +17,6 @@ protected:
 class SemanticAnalyzerExceptionCouldNotMatchTypes : public SemanticAnalyzerException {};
 class SemanticAnalyzerExceptionVariableOfVoidType : public SemanticAnalyzerException {};
 class SemanticAnalyzerExceptionIncorrectArguments : public SemanticAnalyzerException {};
+class SemanticAnalyzerExceptionInvalidOperandTypesForBinop : public SemanticAnalyzerException {};
+class SemanticAnalyzerExceptionLvalueCannotBeModified : public SemanticAnalyzerException {};
+class SemanticAnalyzerExceptionInvalidOperandTypeForVariableModification : public SemanticAnalyzerException {};

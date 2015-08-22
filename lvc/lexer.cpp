@@ -253,16 +253,45 @@ start_after_checking_queued_dedents:
     switch (c) {
         case '(': t.setKind(OpenParenthesis); return t;
         case ')': t.setKind(CloseParenthesis); return t;
-        case '*': t.setKind(Asterisk); return t;
-        case '/': t.setKind(Slash); return t;
+        case '*':
+            if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(AsteriskEquals);
+            }
+            else
+                t.setKind(Asterisk);
+            return t;
+        case '/':
+            if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(SlashEquals);
+            }
+            else
+                t.setKind(Slash);
+            return t;
         case '.': t.setKind(Dot); return t;
         case ',': t.setKind(Comma); return t;
-        case '%': t.setKind(Percent); return t;
+        case '%':
+            if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(PercentEquals);
+            }
+            else
+                t.setKind(Percent);
+            return t;
         case '+':
             if (reader.peekChar() == '+') {
                 reader.readChar();
                 t.setLength(2);
                 t.setKind(PlusPlus);
+            }
+            else if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(PlusEquals);
             }
             else
                 t.setKind(Plus);
@@ -272,6 +301,11 @@ start_after_checking_queued_dedents:
                 reader.readChar();
                 t.setLength(2);
                 t.setKind(MinusMinus);
+            }
+            else if (reader.peekChar() == '=') {
+                reader.readChar();
+                t.setLength(2);
+                t.setKind(MinusEquals);
             }
             else
                 t.setKind(Minus);

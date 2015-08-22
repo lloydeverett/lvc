@@ -18,6 +18,9 @@
 #include "inodevisitor.h"
 #include "semanticanalyzerexceptions.h"
 
+#warning TODO: casts w/o sminf
+#warning TODO: default args passing
+
 class ISemanticAnalyzer {
 public:
     virtual void addLookaheadGlobalDecl(ast::VariableDecl& decl) = 0;
@@ -27,6 +30,10 @@ public:
     virtual void analyzeVariableDeclStmt(ast::VariableDeclStmt& stmt) = 0;
     virtual void analyzeIfStmt(ast::IfStmt& stmt) = 0;
     virtual void analyzeBlockStmt(ast::BlockStmt& block) = 0;
+    virtual void analyzeIncrementStmt(ast::IncrementStmt& stmt) = 0;
+    virtual void analyzeDecrementStmt(ast::DecrementStmt& stmt) = 0;
+    virtual void analyzeVarBinopStmt(ast::VarBinopStmt& stmt) = 0;
+    virtual void analyzeAssignStmt(ast::AssignStmt& stmt) = 0;
     virtual void analyzeBinopExp(ast::BinopExp& exp, boost::optional<ast::IType&> optDesiredType) = 0;
     virtual void analyzeCallExp(ast::CallExp& exp, boost::optional<ast::IType&> optDesiredType) = 0;
     virtual void analyzeNumberLiteralExp(ast::NumberLiteralExp& exp, boost::optional<ast::IType&> optDesiredType) = 0;
@@ -58,6 +65,18 @@ public:
     }
     virtual void visit(ast::BlockStmt& blockStmt) {
         parent.analyzeBlockStmt(blockStmt);
+    }
+    virtual void visit(ast::IncrementStmt& incrementStmt) {
+        parent.analyzeIncrementStmt(incrementStmt);
+    }
+    virtual void visit(ast::DecrementStmt& decrementStmt) {
+        parent.analyzeDecrementStmt(decrementStmt);
+    }
+    virtual void visit(ast::VarBinopStmt& VarBinopStmt) {
+        parent.analyzeVarBinopStmt(VarBinopStmt);
+    }
+    virtual void visit(ast::AssignStmt& assignStmt) {
+        parent.analyzeAssignStmt(assignStmt);
     }
     virtual void visit(ast::BinopExp& binopExp) {
         parent.analyzeBinopExp(binopExp, optDesiredType);
@@ -149,6 +168,45 @@ public:
         }
         symbolTable.closeVariableScope();
     }
+private:
+    void checkThatAnalyzedLvalueCanBeModified(ast::VariableExp& exp) {
+        if (exp.sminf.to->getConstantness() != NotConstant || exp.sminfLookup->isArg()) {
+            throw SemanticAnalyzerExceptionLvalueCannotBeModified();
+        }
+    }
+public:
+    virtual void analyzeIncrementStmt(ast::IncrementStmt& stmt) {
+        analyzeVariableExp(*stmt.exp, boost::none);
+        if (!isOperandTypeValidForIncrement(*stmt.exp->sminf.to)) {
+            throw SemanticAnalyzerExceptionInvalidOperandTypeForVariableModification();
+        }
+        checkThatAnalyzedLvalueCanBeModified(*stmt.exp);
+    }
+    virtual void analyzeDecrementStmt(ast::DecrementStmt& stmt) {
+        analyzeVariableExp(*stmt.exp, boost::none);
+        if (!isOperandTypeValidForDecrement(*stmt.exp->sminf.to)) {
+            throw SemanticAnalyzerExceptionInvalidOperandTypeForVariableModification();
+        }
+        checkThatAnalyzedLvalueCanBeModified(*stmt.exp);
+    }
+    virtual void analyzeVarBinopStmt(ast::VarBinopStmt& stmt) {
+        analyzeVariableExp(*stmt.lvalue, boost::none);
+        if (!isOperandTypeValidForOperandBinopCode(stmt.code, *stmt.lvalue->sminf.to)) {
+            throw SemanticAnalyzerExceptionInvalidOperandTypeForVariableModification();
+        }
+        checkThatAnalyzedLvalueCanBeModified(*stmt.lvalue);
+        visitor.doExpVisit(*stmt.rvalue, *stmt.lvalue->sminf.to);
+    }
+    virtual void analyzeAssignStmt(ast::AssignStmt& stmt) {
+        assert(stmt.lvalues.size() > 0);
+        analyzeVariableExp(*stmt.lvalues[0], boost::none);
+        checkThatAnalyzedLvalueCanBeModified(*stmt.lvalues[0]);
+        for (int i = 1; i < stmt.lvalues.size(); i++) {
+            analyzeVariableExp(*stmt.lvalues[i], *stmt.lvalues[0]->sminf.to);
+            checkThatAnalyzedLvalueCanBeModified(*stmt.lvalues[i]);
+        }
+        visitor.doExpVisit(*stmt.rvalue, *stmt.lvalues[0]->sminf.to);
+    }
     
     ///////////////////////////////////////
     
@@ -157,7 +215,9 @@ public:
         // Match rhs to the type of lhs
         visitor.doExpVisit(*exp.rhs, *exp.lhs->sminf.to);
         
-#warning TODO: Check that operands are correct for operation
+        if (!isOperandTypeValidForBinopCode(exp.code, *exp.lhs->sminf.to)) {
+            throw SemanticAnalyzerExceptionInvalidOperandTypesForBinop();
+        }
         
         if (doesBinopEvaluateToBoolean(exp.code)) {
             exp.sminf = matchTypes(&conditionType, optDesiredType);
@@ -165,9 +225,7 @@ public:
         else if (doesBinopEvaluateToOperandType(exp.code)) {
             exp.sminf = matchTypes(exp.lhs->sminf.to, optDesiredType);
         }
-        else {
-            assert(false);
-        }
+        else assert(false);
     }
     virtual void analyzeCallExp(ast::CallExp& exp, boost::optional<ast::IType&> optDesiredType) {
         ast::FunctionDecl* decl = symbolTable.lookupFunction(exp.calleeIdentifier);
@@ -180,8 +238,8 @@ public:
         
         for (decltype(nArgs) i = 0; i < nArgs; i++) {
             std::unique_ptr<ast::IExp>& pa = exp.passedArguments[i];
-            ast::ArgumentDecl& d = decl->arguments[i];
-            visitor.doExpVisit(*pa, *d.variableDecl.type);
+            ast::ArgVariableDecl& d = decl->arguments[i];
+            visitor.doExpVisit(*pa, *d.type);
         }
         
         exp.sminf = matchTypes(decl->returnType.get(), optDesiredType);
@@ -237,9 +295,14 @@ public:
     virtual void analyzeFunctionDefinition(ast::Function& function) override {
         currentFunction = &function;
         symbolTable.openVariableScope();
-        for (ast::ArgumentDecl& decl : function.decl.arguments) {
-            symbolTable.registerVariable(&decl.variableDecl);
-            #warning TODO: check default val
+        for (ast::ArgVariableDecl& decl : function.decl.arguments) {
+            symbolTable.registerVariable(&decl);
+            if (isa<ast::VoidType>(*decl.type)) {
+                throw SemanticAnalyzerExceptionVariableOfVoidType();
+            }
+            if (decl.optDefault) {
+                visitor.doExpVisit(**decl.optDefault, *decl.type);
+            }
         }
         
         visitor.doStmtVisit(function.block);
@@ -291,5 +354,26 @@ private:
                 return af->variation == bf->variation;
             }
         }
+    }
+    bool isOperandTypeValidForBinopCode(BinopCode code, ast::IType& type) {
+        if (isa<ast::VoidType>(type))
+            return false;
+        if (type.isNumeralType())
+            return true;
+        if (code == BinopCodeEquals || code == BinopCodeNotEquals)
+            return true;
+        return false;
+    }
+    bool isOperandTypeValidForOperandBinopCode(BinopCode code, ast::IType& type) {
+        assert(code > START_OPERAND_TYPE_BINOPS && code < END_OPERAND_TYPE_BINOPS);
+        if (type.isNumeralType())
+            return true;
+        return false;
+    }
+    bool isOperandTypeValidForIncrement(ast::IType& type) {
+        return type.isNumeralType();
+    }
+    bool isOperandTypeValidForDecrement(ast::IType& type) {
+        return type.isNumeralType();
     }
 };

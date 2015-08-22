@@ -30,3 +30,5 @@ class ParserErrorExceptionUnknownStatementBeginning : public ParserErrorExceptio
 class ParserErrorExceptionUnknownLineBeginningAtModuleLevel : public ParserErrorException {};
 class ParserErrorExceptionUnknownExpressionBeginning : public ParserErrorException {};
 class ParserErrorExceptionQualifierWithoutTypename : public ParserErrorException {};
+class ParserErrorExceptionLHSIsNotAnLvalue : public ParserErrorException {};
+class ParserErrorExceptionExpectedOperationOnLvalue : public ParserErrorException {};

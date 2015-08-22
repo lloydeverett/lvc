@@ -34,7 +34,9 @@ public:
     ast::VariableDeclStmt parseVariableDeclStmt(std::unique_ptr<ast::IType> type);
     ast::CallExp parseCall();
     std::string parseIdentifier();
+    std::unique_ptr<ast::IStmt> parsePartOfNonBlockStatementPrecedingNewline();
     std::unique_ptr<ast::IStmt> parseStatement();
+    std::unique_ptr<ast::VariableExp> parseVariableExp();
     std::unique_ptr<ast::IExp> parseParenExpression();
     std::unique_ptr<ast::IExp> parseExpression();
     boost::optional<std::unique_ptr<ast::IType>> tryParseType();

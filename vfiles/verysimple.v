@@ -3,10 +3,10 @@
 // In fact, it was the first V source file ever compiled!
 
 void main()
-    int x = 3
+    float x
     x = 3
     x--
-    p(x)
+    p(3)
 
 int p(int z)
     return z
